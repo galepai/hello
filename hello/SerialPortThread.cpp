@@ -1,6 +1,6 @@
 #include "SerialPortThread.h"
 #include <QtSerialBus\qmodbusrtuserialmaster.h>
-
+#include <Windows.h>  //可以使用Sleep函数
 
 //这个函数用来设置波特率,打开串口的时候用到
 static QSerialPort::BaudRate getBaudRate(int baudRate)
@@ -27,7 +27,7 @@ static QSerialPort::BaudRate getBaudRate(int baudRate)
 		return QSerialPort::UnknownBaud;
 	}
 }
-MyObject::MyObject()
+SerialPort::SerialPort()
 {
 	qDebug() << "Worker Thread : " << QThread::currentThreadId();
 
@@ -40,23 +40,23 @@ MyObject::MyObject()
 }
 
 //window 下用"com1"   linux下用"/dev/ttyS0"
-void MyObject::setPortName(const QString &name)
+void SerialPort::setPortName(const QString &name)
 {
 	m_portName = name;
 }
 //用来获取串口的名字
-QString MyObject::portName() const
+QString SerialPort::portName() const
 {
 	return m_portName;
 }
 //设置波特率 9600  19200  38400
-void MyObject::setBaudRate(int baudRate)
+void SerialPort::setBaudRate(int baudRate)
 {
 	m_baudRate = baudRate;
 }
 //用来打开串口，调用前，先设置串口名字和波特率
 
-bool MyObject::open()
+bool SerialPort::open()
 {
 	if (m_serialPort->isOpen())
 	{
@@ -72,7 +72,7 @@ bool MyObject::open()
 	return m_serialPort->open(QSerialPort::ReadWrite);
 }
 //用来关闭串口
-void MyObject::close()
+void SerialPort::close()
 {
 	if (m_serialPort->isOpen())
 	{
@@ -80,7 +80,7 @@ void MyObject::close()
 	}
 }
 //重启串口,清除数据
-bool MyObject::clear()
+bool SerialPort::clear()
 {
 	if (m_serialPort->isOpen())
 	{
@@ -91,7 +91,7 @@ bool MyObject::clear()
 	return false;
 }
 //用来接收串口发来的数据
-int MyObject::readData(char *buffer, int count, int timeout)
+int SerialPort::readData(char *buffer, int count, int timeout)
 {
 	int len = 0;
 	forever
@@ -116,7 +116,7 @@ int MyObject::readData(char *buffer, int count, int timeout)
 	return len;
 }
 //发送数据到串口  比如发送协议 
-int MyObject::writeData(char *data, int size)
+int SerialPort::writeData(char *data, int size)
 {
 	int len = 0;
 	forever
@@ -136,7 +136,7 @@ int MyObject::writeData(char *data, int size)
 	return len;
 }
 
-void MyObject::recivedata()
+void SerialPort::recivedata()
 {
 	QByteArray requestData;
  	char temp[8] = "";
@@ -152,18 +152,18 @@ void MyObject::recivedata()
 
 	if (!requestData.isEmpty())
 	{
-		//pHello->statusBar()->showMessage(requestData.toHex());
 		emit emitdata(requestData);
 		qDebug() << "recivedata Thread : " << QThread::currentThreadId();
 		qDebug() << "recivedata : " << requestData.toHex();
 	}
 	requestData.clear();
 	Sleep(20);	
+
 }
 
 
 //析构的时候  删除 数据
-MyObject::~MyObject()
+SerialPort::~SerialPort()
 {
 	delete m_serialPort;
 }

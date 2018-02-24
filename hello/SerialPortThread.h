@@ -3,15 +3,13 @@
 
 #include <QObject>  
 #include <QtSerialPort/QtSerialPort>
-#include "hello.h"
- 
 
-class MyObject : public QObject 
+class SerialPort : public QObject 
 {
 	Q_OBJECT
 public:
-	MyObject();
-	~MyObject();
+	SerialPort();
+	~SerialPort();
 
 
 	bool isOpen() const{ return m_serialPort->isOpen(); };
@@ -29,8 +27,6 @@ public:
 	int readData(char *buffer, int count, int timeout = 1000);
 	int writeData(char *data, int size);
 	int write(char ch);
-
-	hello* pHello;
 
 protected:
 	QString m_portName;

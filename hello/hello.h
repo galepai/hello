@@ -20,7 +20,7 @@ public:
 
 	bool getIsBadStatu(){ return m_bIsBad; };
 
-	QObject* pobject;
+	//QObject* pobject;
 
 public slots:
 	void click();

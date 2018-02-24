@@ -4,6 +4,7 @@
 #include <qfiledialog.h>
 #include <qdirmodel.h>
 #include <qfilesystemmodel.h>
+#include <QMessageBox>
 #include <qthread.h>
 #include "Func.h"
 #include "CommThread.h"
@@ -87,24 +88,33 @@ void hello::handleResults(bool is_bad)
 void hello::OnLineRun()
 {
 	QThread *thread = new QThread;
-	MyObject* my = new MyObject;
-	pobject = (MyObject*)my;
-	
-	((MyObject*)pobject)->pHello = this;
-	((MyObject*)pobject)->setPortName("com3");
-	((MyObject*)pobject)->setBaudRate(9600);
+	SerialPort* pSeralPort = new SerialPort;
+	/*pobject = (SerialPort*)pSeralPort;	
+	((SerialPort*)pobject)->pHello = this;
+	((SerialPort*)pobject)->setPortName("com3");
+	((SerialPort*)pobject)->setBaudRate(9600);*/
+	pSeralPort->setPortName("com3");
+	pSeralPort->setBaudRate(9600);
 
-	((MyObject*)pobject)->moveToThread(thread);
+	pSeralPort->moveToThread(thread);
 	thread->start();
 	//connect(thread, SIGNAL(started()), my, SLOT(first()));
 	
-	if (((MyObject*)pobject)->open())
+	if (pSeralPort->open())
 	{
 		//connect(pCommThread, SIGNAL(resultReady(bool)), this, SLOT(handleResults(bool)));
-		QObject::connect(((MyObject*)pobject)->GetSerialPort(), SIGNAL(readyRead()), ((MyObject*)pobject), SLOT(recivedata()));  //串口读取到数据信号，响应槽函数
-		QObject::connect(((MyObject*)pobject), SIGNAL(emitdata(QByteArray)), this, SLOT(readyDataSlot1(QByteArray)));  //串口读取到数据信号，响应槽函数
+		QObject::connect(pSeralPort->GetSerialPort(), SIGNAL(readyRead()), pSeralPort, SLOT(recivedata()));  //串口读取到数据信号，响应槽函数
+		QObject::connect(pSeralPort, SIGNAL(emitdata(QByteArray)), this, SLOT(readyDataSlot1(QByteArray)));  //串口读取到数据信号，响应槽函数
 	}
+	else
+	{
 
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::warning(this, G2U("打开串口错误"), pSeralPort->GetSerialPort()->errorString());
+
+		delete pSeralPort;
+		pSeralPort = nullptr;
+	}
 
 	////////////////
 	//CommThread* pCommThread = new CommThread(nullptr);
