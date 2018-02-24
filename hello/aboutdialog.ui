@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AboutDialog</class>
+ <widget class="QDialog" name="AboutDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>关于</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="hello.qrc">
+    <normaloff>:/logo/Resources/fivision.ico</normaloff>:/logo/Resources/fivision.ico</iconset>
+  </property>
+ </widget>
+ <resources>
+  <include location="hello.qrc"/>
+ </resources>
+ <connections/>
+</ui>
