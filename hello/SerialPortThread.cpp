@@ -36,6 +36,7 @@ SerialPort::SerialPort()
 	m_portName = "com1";
 	StopThread = false;
 	m_bIsPauseThread = false;
+	m_reciveLen = 8;
 	
 }
 
@@ -54,8 +55,14 @@ void SerialPort::setBaudRate(int baudRate)
 {
 	m_baudRate = baudRate;
 }
-//用来打开串口，调用前，先设置串口名字和波特率
 
+//设置波特率 9600  19200  38400
+void SerialPort::setReciveLen(int Len)
+{
+	m_reciveLen = Len;
+}
+
+//用来打开串口，调用前，先设置串口名字和波特率
 bool SerialPort::open()
 {
 	if (m_serialPort->isOpen())
@@ -90,31 +97,31 @@ bool SerialPort::clear()
 	}
 	return false;
 }
-//用来接收串口发来的数据
-int SerialPort::readData(char *buffer, int count, int timeout)
-{
-	int len = 0;
-	forever
-	{
-		int n = m_serialPort->read(&buffer[len], count - len);
-
-		if (n == -1)
-		{
-			return -1;
-		}
-		else if (n == 0 && !m_serialPort->waitForReadyRead(timeout))
-		{
-			return -2;
-		}
-		else
-		{
-			len += n;
-			if (count == len)
-				break;
-		}
-	}
-	return len;
-}
+////用来接收串口发来的数据
+//int SerialPort::readData(char *buffer, int count, int timeout)
+//{
+//	int len = 0;
+//	forever
+//	{
+//		int n = m_serialPort->read(&buffer[len], count - len);
+//
+//		if (n == -1)
+//		{
+//			return -1;
+//		}
+//		else if (n == 0 && !m_serialPort->waitForReadyRead(timeout))
+//		{
+//			return -2;
+//		}
+//		else
+//		{
+//			len += n;
+//			if (count == len)
+//				break;
+//		}
+//	}
+//	return len;
+//}
 //发送数据到串口  比如发送协议 
 int SerialPort::writeData(char *data, int size)
 {
@@ -136,31 +143,49 @@ int SerialPort::writeData(char *data, int size)
 	return len;
 }
 
+//void SerialPort::recivedata()
+//{
+//	QByteArray requestData;
+// 	char temp[8] = "";
+//	//char* temp = new char[8];
+//	memset(temp, 0, 8);
+//	int q = readData(temp, 8);
+//	requestData.resize(8);
+//	
+//	for (int i = 0; i<8; i++)
+//	{
+//		requestData[i] = temp[i];
+//	}
+//
+//	if (!requestData.isEmpty())
+//	{
+//		emit emitdata(requestData);
+//		qDebug() << "recivedata Thread : " << QThread::currentThreadId();
+//		qDebug() << "recivedata : " << requestData.toHex();
+//	}
+//	requestData.clear();
+//	Sleep(20);	
+//
+//}
+
 void SerialPort::recivedata()
 {
 	QByteArray requestData;
- 	char temp[8] = "";
-	//char* temp = new char[8];
-	memset(temp, 0, 8);
-	int q = readData(temp, 8);
-	requestData.resize(8);
-	
-	for (int i = 0; i<8; i++)
+	if (m_serialPort->bytesAvailable() == m_reciveLen)
 	{
-		requestData[i] = temp[i];
+		requestData = m_serialPort->readAll();
 	}
 
 	if (!requestData.isEmpty())
 	{
 		emit emitdata(requestData);
-		qDebug() << "recivedata Thread : " << QThread::currentThreadId();
-		qDebug() << "recivedata : " << requestData.toHex();
+		qDebug() << "children Thread : " << QThread::currentThreadId()
+				<< "    recivedata : " << requestData.toHex();
 	}
-	requestData.clear();
-	Sleep(20);	
+	//requestData.clear();
+//	Sleep(20);
 
 }
-
 
 //析构的时候  删除 数据
 SerialPort::~SerialPort()

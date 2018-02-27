@@ -92,6 +92,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_SerialPortThread.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_configuredlg.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_configuredlg.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="configuredlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="hello.h">
@@ -118,6 +127,12 @@
     <CustomBuild Include="SerialPortThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="configuredlg.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="configuredlg.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_hello.h">
@@ -131,6 +146,9 @@
     </ClInclude>
     <ClInclude Include="Func.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_configuredlg.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

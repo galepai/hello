@@ -183,6 +183,8 @@
    <addaction name="OnRun"/>
    <addaction name="separator"/>
    <addaction name="Configure"/>
+   <addaction name="Configure2"/>
+   <addaction name="ShutDown"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="enabled">
@@ -232,6 +234,30 @@
    </property>
    <property name="toolTip">
     <string>关于……</string>
+   </property>
+  </action>
+  <action name="Configure2">
+   <property name="icon">
+    <iconset resource="hello.qrc">
+     <normaloff>:/icon/Resources/icon/01.ico</normaloff>:/icon/Resources/icon/01.ico</iconset>
+   </property>
+   <property name="text">
+    <string>配置2</string>
+   </property>
+   <property name="toolTip">
+    <string>配置2</string>
+   </property>
+  </action>
+  <action name="ShutDown">
+   <property name="icon">
+    <iconset resource="hello.qrc">
+     <normaloff>:/icon/Resources/icon/09.ico</normaloff>:/icon/Resources/icon/09.ico</iconset>
+   </property>
+   <property name="text">
+    <string>关闭系统</string>
+   </property>
+   <property name="toolTip">
+    <string>关闭系统</string>
    </property>
   </action>
  </widget>

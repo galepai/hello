@@ -27,9 +27,10 @@ public slots:
 	void Open();
 	void About();
 	void OnLineRun();
+	void OnConfigure2();
+	void OnShutDown();
 	void handleResults(bool is_bad);
-	void readyDataSlot();
-	void readyDataSlot1(QByteArray str);
+	void readyDataSlot(QByteArray str);
 	
 
 private:

@@ -20,6 +20,7 @@ public:
 	void setPortName(const QString &name);
 	QString portName() const;
 	void setBaudRate(int baudRate);
+	void setReciveLen(int ByteLen);
 	int baudRate() const;
 	virtual bool open();
 	virtual void close();
@@ -34,6 +35,7 @@ protected:
 	QSerialPort *m_serialPort;
 	bool m_bIsPauseThread;
 	bool StopThread;
+	int m_reciveLen;
 
 public slots:
 	void recivedata();

@@ -1,6 +1,7 @@
 #include "hello.h"
 #include "CHH.h"
 #include "aboutdialog.h"
+#include "configuredlg.h"
 #include <qfiledialog.h>
 #include <qdirmodel.h>
 #include <qfilesystemmodel.h>
@@ -22,24 +23,11 @@ hello::hello(QWidget *parent)
 	QObject::connect(ui.Open, &QAction::triggered, this, &hello::Open);
 	QObject::connect(ui.OnRun, &QAction::triggered, this, &hello::click);
 	QObject::connect(ui.Configure, &QAction::triggered, this, &hello::OnLineRun);
-	
+	QObject::connect(ui.Configure2, SIGNAL(triggered()), this, SLOT(OnConfigure2()));
+	QObject::connect(ui.ShutDown, SIGNAL(triggered()), this, SLOT(OnShutDown()));
 	qDebug() << "Hello Thread : " << QThread::currentThreadId();
 
-
-	//QSettings setting("config.ini", QSettings::IniFormat);//生成配置文件
-	//setting.beginGroup("config");//beginGroup与下面endGroup 相对应，“config”是标记
-	//setting.setValue("page", QVariant(12345));
-	//setting.setValue("site", QVariant("http://www.cppblog.com/gaimor/"));
-	//setting.setValue("maker", QVariant("Gaimor"));
-	//setting.endGroup();
-	//setting.beginGroup("config2");//beginGroup与下面endGroup 相对应，“config”是标记
-	//setting.setValue("page", QVariant(6789));
-	//setting.setValue("site", QVariant("http://www.cppblog.com/gaimor/"));
-	//setting.setValue("maker", QVariant("tester"));
-	//setting.endGroup();
-
-
-	WriteCurrenDateTime("config.ini", "Config", "Time");  //好像不支持中文写入配置文件
+	WriteCurrenDateTime("config.ini", "Config", "OpenProgramTime");  //好像不支持中文写入配置文件
 
 	qDebug() << "hello";
 
@@ -71,49 +59,59 @@ void hello::click()
 	connect(m_pHandlePicThread, SIGNAL(finished()), m_pHandlePicThread, SLOT(deleteLater()));
 	m_pHandlePicThread->start();
 
-	//pCommThread->SetPauseThread(true);
+}
 
+void hello::OnShutDown()
+{
+	close();
+}
 
+void hello::OnConfigure2()
+{
+	ConfigureDlg Dlg(this);
+	Dlg.exec();
 }
 
 //得到线程的信号
 void hello::handleResults(bool is_bad)
 {
 	if (m_WindowHandle != 0)
-		m_bIsBad = is_bad;
-		
+		m_bIsBad = is_bad;	
 }
 
 //创建线程
 void hello::OnLineRun()
-{
-	QThread *thread = new QThread;
-	SerialPort* pSeralPort = new SerialPort;
-	/*pobject = (SerialPort*)pSeralPort;	
-	((SerialPort*)pobject)->pHello = this;
-	((SerialPort*)pobject)->setPortName("com3");
-	((SerialPort*)pobject)->setBaudRate(9600);*/
-	pSeralPort->setPortName("com3");
-	pSeralPort->setBaudRate(9600);
+{//串口多线程接收数据
+	QVariant Value;
+	ReadConfigure("config.ini", "Port", "Port", Value);
+	QString port = Value.toString();
+	ReadConfigure("config.ini", "Port", "Baud", Value);
+	int baud = Value.toInt();
 
-	pSeralPort->moveToThread(thread);
+	statusBar()->showMessage(port + "," + Value.toString());
+
+	QThread *thread = new QThread;
+	SerialPort* pSerialPort = new SerialPort;
+
+	pSerialPort->setPortName(port);
+	pSerialPort->setBaudRate(baud);
+	pSerialPort->setReciveLen(8);
+
+	pSerialPort->moveToThread(thread);
 	thread->start();
-	//connect(thread, SIGNAL(started()), my, SLOT(first()));
 	
-	if (pSeralPort->open())
+	if (pSerialPort->open())
 	{
-		//connect(pCommThread, SIGNAL(resultReady(bool)), this, SLOT(handleResults(bool)));
-		QObject::connect(pSeralPort->GetSerialPort(), SIGNAL(readyRead()), pSeralPort, SLOT(recivedata()));  //串口读取到数据信号，响应槽函数
-		QObject::connect(pSeralPort, SIGNAL(emitdata(QByteArray)), this, SLOT(readyDataSlot1(QByteArray)));  //串口读取到数据信号，响应槽函数
+		QObject::connect(pSerialPort->GetSerialPort(), SIGNAL(readyRead()), pSerialPort, SLOT(recivedata()));  //串口读取到数据信号，响应槽函数，多线程
+		QObject::connect(pSerialPort, SIGNAL(emitdata(QByteArray)), this, SLOT(readyDataSlot(QByteArray)));  //接收数据主界面类
 	}
 	else
 	{
-
 		QMessageBox::StandardButton reply;
-		reply = QMessageBox::warning(this, G2U("打开串口错误"), pSeralPort->GetSerialPort()->errorString());
+		reply = QMessageBox::warning(this, G2U("打开串口错误"), pSerialPort->GetSerialPort()->errorString());
 
-		delete pSeralPort;
-		pSeralPort = nullptr;
+		delete pSerialPort;
+		pSerialPort = nullptr;
 	}
 
 	////////////////
@@ -139,48 +137,12 @@ void hello::OnLineRun()
 }
 
 
-void hello::readyDataSlot1(QByteArray str)  //对应串口的读取槽函数
+void hello::readyDataSlot(QByteArray str)  //对应串口的读取槽函数
 {
-	//QByteArray requestData;
-	//char temp[8] = "";
-	////char* temp = new char[8];
-	//memset(temp, 0, 8);
-	////requestData = pCommThread->GetSerialPort()->readAll();
-	////requestData = pCommThread->GetSerialPort()->read(8);
-	//pCommThread->readData(temp, 8);
-	//requestData.resize(8);
-
-	//for (int i = 0; i<8; i++) {
-	//	requestData[i] = temp[i];
-	//}
-	////if (!requestData.isEmpty())
-	////{
-	qDebug() << "readyDataSlot1 Thread : " << QThread::currentThreadId();
+	qDebug() << "MainSlot Thread : " << QThread::currentThreadId();
 	statusBar()->showMessage(str.toHex());
-	////}
-	//requestData.clear();
 }
 
-void hello::readyDataSlot()  //对应串口的读取槽函数
-{
-	//QByteArray requestData;
-	//char temp[8] = "";
-	////char* temp = new char[8];
-	//memset(temp, 0, 8);
-	////requestData = pCommThread->GetSerialPort()->readAll();
-	////requestData = pCommThread->GetSerialPort()->read(8);
-	//pCommThread->readData(temp, 8);
-	//requestData.resize(8);
-
-	//for (int i = 0; i<8; i++) {
-	//	requestData[i] = temp[i];
-	//}
-	////if (!requestData.isEmpty())
-	////{
-	//statusBar()->showMessage(requestData.toHex());
-	////}
-	//requestData.clear();
-}
 
 void hello::Open()
 {
@@ -197,8 +159,6 @@ void hello::Open()
 
 void hello::DispPic(HImage& Image)
 {
-
-
 	int width = Image.Width();
 	int height = Image.Height();
 
@@ -217,7 +177,6 @@ void hello::DispPic(HImage& Image)
 		{
 			HSCROLL_HEIGHT_RightPic(500);
 		}
-
 	}
 	else
 	{
@@ -236,7 +195,6 @@ void hello::DispPic(HImage& Image)
 		{
 			HSCROLL_HEIGHT_RightPic(500);
 		}
-		
 	}
 
 }
