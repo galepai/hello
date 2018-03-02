@@ -25,7 +25,6 @@ void HandlePicThread::run()
 		
 		HObject Region;
 		Threshold(m_Image, &Region, 128, 255);
-		//DispObj(m_Image, m_WindowHandle);
 		SetDraw(m_WindowHandle, "margin");
 		SetColor(m_WindowHandle, "red");
 		DispObj(Region, m_WindowHandle);

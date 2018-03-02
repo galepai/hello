@@ -74,15 +74,6 @@
     <ClCompile Include="HandlePicThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CommThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_CommThread.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_CommThread.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="SerialPortThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -119,9 +110,6 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="HandlePicThread.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="CommThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="SerialPortThread.h">

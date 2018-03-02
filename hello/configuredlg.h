@@ -17,6 +17,8 @@ public:
 
 public slots:
 	void SavePortToIni();
+	void SelectRawPath();
+	void SaveRawPath();
 
 private:
     Ui::ConfigureDlg *ui;

@@ -3,12 +3,8 @@
 #include "aboutdialog.h"
 #include "configuredlg.h"
 #include <qfiledialog.h>
-#include <qdirmodel.h>
-#include <qfilesystemmodel.h>
 #include <QMessageBox>
 #include <qthread.h>
-#include "Func.h"
-#include "CommThread.h"
 #include "SerialPortThread.h"
 
 hello::hello(QWidget *parent)
@@ -16,8 +12,7 @@ hello::hello(QWidget *parent)
 {
 	ui.setupUi(this);
 
-	m_Title = windowTitle();
-	m_WindowHandle = 0;
+	m_LeftWindowHandle = m_MiddleWindowHandle = m_RightWindowHandle = 0;
 	
 	QObject::connect(ui.About, &QAction::triggered, this, &hello::About);
 	QObject::connect(ui.Open, &QAction::triggered, this, &hello::Open);
@@ -25,12 +20,8 @@ hello::hello(QWidget *parent)
 	QObject::connect(ui.Configure, &QAction::triggered, this, &hello::OnLineRun);
 	QObject::connect(ui.Configure2, SIGNAL(triggered()), this, SLOT(OnConfigure2()));
 	QObject::connect(ui.ShutDown, SIGNAL(triggered()), this, SLOT(OnShutDown()));
-	qDebug() << "Hello Thread : " << QThread::currentThreadId();
 
-	WriteCurrenDateTime("config.ini", "Config", "OpenProgramTime");  //好像不支持中文写入配置文件
-
-	qDebug() << "hello";
-
+	WriteCurrenDateTime("config.ini", "Config", "OpenProgramTime");  //不支持中文写入配置文件
 
 }
 
@@ -52,7 +43,7 @@ void hello::click()
 {
 	HandlePicThread* m_pHandlePicThread = new HandlePicThread(this);
 	m_pHandlePicThread->m_Image = m_Image;
-	m_pHandlePicThread->m_WindowHandle = m_WindowHandle;
+	m_pHandlePicThread->m_WindowHandle = GetViewWindowHandle(LeftView);
 
 	connect(m_pHandlePicThread, SIGNAL(resultReady(bool)), this, SLOT(handleResults(bool)));
 	// 线程结束后，自动销毁
@@ -75,13 +66,13 @@ void hello::OnConfigure2()
 //得到线程的信号
 void hello::handleResults(bool is_bad)
 {
-	if (m_WindowHandle != 0)
+	if (m_RightWindowHandle != 0)
 		m_bIsBad = is_bad;	
 }
 
-//创建线程
+//创建线程，串口多线程接收数据
 void hello::OnLineRun()
-{//串口多线程接收数据
+{
 	QVariant Value;
 	ReadConfigure("config.ini", "Port", "Port", Value);
 	QString port = Value.toString();
@@ -113,32 +104,11 @@ void hello::OnLineRun()
 		delete pSerialPort;
 		pSerialPort = nullptr;
 	}
-
-	////////////////
-	//CommThread* pCommThread = new CommThread(nullptr);
-	//pCommThread->pHello = this;
-	//pCommThread->setPortName("com3");
-	//pCommThread->setBaudRate(9600);
-	//
-	//if (pCommThread->open())
-	//{
-	//	//connect(pCommThread, SIGNAL(resultReady(bool)), this, SLOT(handleResults(bool)));
-	//	//QObject::connect(pCommThread->GetSerialPort(), SIGNAL(readyRead()), pCommThread, SLOT(recivedata()));  //串口读取到数据信号，响应槽函数
-	//	// 线程结束后，自动销毁
-	//	//connect(pCommThread, SIGNAL(finished()), pCommThread, SLOT(deleteLater()));
-	//	pCommThread->start();
-	//}	
-	/*else
-	{
-		QString error = pCommThread->GetSerialPort()->errorString();
-		delete pCommThread;
-		pCommThread = nullptr;
-	}*/
 }
 
-
-void hello::readyDataSlot(QByteArray str)  //对应串口的读取槽函数
-{
+//对应串口的读取槽函数
+void hello::readyDataSlot(QByteArray str)  
+{	
 	qDebug() << "MainSlot Thread : " << QThread::currentThreadId();
 	statusBar()->showMessage(str.toHex());
 }
@@ -152,21 +122,59 @@ void hello::Open()
 		(path.contains(".bmp") || path.contains(".jpg"))) 
 	{
 		ReadImage(&m_Image, path.toLocal8Bit().constData());
-		DispPic(m_Image);	
+		DispPic(m_Image,LeftView);
+		WriteConfigure("0001.all", "Pic_Path", "GB_Pic", path);
 	}
 }
 
+//void hello::Open()
+//{
+//	QString path = QFileDialog::getOpenFileName(this, tr("Open ALL"), "", tr("Image Files(*.gll)"));
+//
+//	//ReadConfigure("")
+//	if (path.length() != 0 &&
+//		(path.contains(".bmp") || path.contains(".jpg")))
+//	{
+//		ReadImage(&m_Image, path.toLocal8Bit().constData());
+//		DispPic(m_Image,LeftView);
+//	}
+//}
 
-void hello::DispPic(HImage& Image)
+
+void hello::DispPic(HImage& Image, LocationView location)
 {
 	int width = Image.Width();
 	int height = Image.Height();
-
-
-	if (m_WindowHandle == 0)
+	HTuple* pWindowHandle = nullptr;
+	if (location == LeftView)
 	{
-		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), &m_WindowHandle);
-		DispObj(Image, m_WindowHandle);
+		pWindowHandle = &m_LeftWindowHandle;
+	}
+	else if(location == MiddleView)
+	{
+		pWindowHandle = &m_MiddleWindowHandle;
+	}
+	else
+	{
+		pWindowHandle = &m_RightWindowHandle;
+	}
+
+	if (*pWindowHandle == 0)
+	{
+		if (location == RightView)
+		{
+			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), pWindowHandle);
+		}
+		else if (location == MiddleView)
+		{
+			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), pWindowHandle);
+		}
+		else
+		{
+			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.LeftPicView->winId(), pWindowHandle);
+		}
+		
+		DispObj(Image, *pWindowHandle);
 		float scaleX = width / 1024.0;
 		float scaleY = height / 4000.0;
 		if (scaleY > scaleX)
@@ -180,11 +188,23 @@ void hello::DispPic(HImage& Image)
 	}
 	else
 	{
-		ClearWindow(m_WindowHandle);
-		CloseWindow(m_WindowHandle);
+		ClearWindow(*pWindowHandle);
+		CloseWindow(*pWindowHandle);
 
-		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), &m_WindowHandle);
-		DispImage(Image, m_WindowHandle);
+		if (location == RightView)
+		{
+			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), pWindowHandle);
+		}
+		else if (location == MiddleView)
+		{
+			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), pWindowHandle);
+		}
+		else
+		{
+			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.LeftPicView->winId(), pWindowHandle);
+		}
+
+		DispImage(Image, *pWindowHandle);
 		float scaleX = width / 1024.0;
 		float scaleY = height / 4000.0;
 		if (scaleY > scaleX)
@@ -199,4 +219,18 @@ void hello::DispPic(HImage& Image)
 
 }
 
-
+const HalconCpp::HTuple hello::GetViewWindowHandle(LocationView location)
+{
+	if (location == RightView)
+	{
+		return m_RightWindowHandle;
+	}
+	else if (location == MiddleView)
+	{
+		return m_MiddleWindowHandle;
+	}
+	else
+	{
+		return m_LeftWindowHandle;
+	}
+}

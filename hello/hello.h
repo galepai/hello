@@ -6,6 +6,7 @@
 #include "HalconCpp.h"
 #include "HandlePicThread.h"
 #include "HalconCpp.h"
+#include "Func.h"
 
 
 using namespace HalconCpp;
@@ -20,25 +21,24 @@ public:
 
 	bool getIsBadStatu(){ return m_bIsBad; };
 
-	//QObject* pobject;
-
 public slots:
 	void click();
 	void Open();
 	void About();
 	void OnLineRun();
 	void OnConfigure2();
-	void OnShutDown();
+	void OnShutDown();	//关闭系统
 	void handleResults(bool is_bad);
 	void readyDataSlot(QByteArray str);
 	
 
 private:
-	void DispPic(HImage& path);
+	void DispPic(HImage& path, LocationView location);	//显示图片在指定位置视图
+	const HalconCpp::HTuple GetViewWindowHandle(LocationView location);	//返回指定视图的窗口Handle（Halcon显示图片用）
 
 private:
 	Ui::helloClass ui;
-	HalconCpp::HTuple m_WindowHandle;
+	HalconCpp::HTuple m_LeftWindowHandle, m_MiddleWindowHandle, m_RightWindowHandle;	//左、中、右视图的窗口Handle（Halcon显示图片用）
 	QString m_Title;
 	HandlePicThread *m_pHandlePicThread;
 	HImage m_Image;

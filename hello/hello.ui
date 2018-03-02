@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>塑管检测系统</string>
+   <string>换向器外观检测系统</string>
   </property>
   <property name="windowIcon">
    <iconset resource="hello.qrc">

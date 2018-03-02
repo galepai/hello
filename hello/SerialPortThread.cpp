@@ -1,6 +1,4 @@
 #include "SerialPortThread.h"
-#include <QtSerialBus\qmodbusrtuserialmaster.h>
-#include <Windows.h>  //可以使用Sleep函数
 
 //这个函数用来设置波特率,打开串口的时候用到
 static QSerialPort::BaudRate getBaudRate(int baudRate)
@@ -27,17 +25,11 @@ static QSerialPort::BaudRate getBaudRate(int baudRate)
 		return QSerialPort::UnknownBaud;
 	}
 }
+
 SerialPort::SerialPort()
 {
 	qDebug() << "Worker Thread : " << QThread::currentThreadId();
-
 	m_serialPort = new QSerialPort();
-	m_baudRate = 9600;
-	m_portName = "com1";
-	StopThread = false;
-	m_bIsPauseThread = false;
-	m_reciveLen = 8;
-	
 }
 
 //window 下用"com1"   linux下用"/dev/ttyS0"
@@ -45,18 +37,20 @@ void SerialPort::setPortName(const QString &name)
 {
 	m_portName = name;
 }
+
 //用来获取串口的名字
 QString SerialPort::portName() const
 {
 	return m_portName;
 }
-//设置波特率 9600  19200  38400
+
+//设置波特率
 void SerialPort::setBaudRate(int baudRate)
 {
 	m_baudRate = baudRate;
 }
 
-//设置波特率 9600  19200  38400
+
 void SerialPort::setReciveLen(int Len)
 {
 	m_reciveLen = Len;
@@ -78,6 +72,7 @@ bool SerialPort::open()
 	m_serialPort->setReadBufferSize(1024);
 	return m_serialPort->open(QSerialPort::ReadWrite);
 }
+
 //用来关闭串口
 void SerialPort::close()
 {
@@ -86,6 +81,7 @@ void SerialPort::close()
 		m_serialPort->close();
 	}
 }
+
 //重启串口,清除数据
 bool SerialPort::clear()
 {
@@ -143,31 +139,6 @@ int SerialPort::writeData(char *data, int size)
 	return len;
 }
 
-//void SerialPort::recivedata()
-//{
-//	QByteArray requestData;
-// 	char temp[8] = "";
-//	//char* temp = new char[8];
-//	memset(temp, 0, 8);
-//	int q = readData(temp, 8);
-//	requestData.resize(8);
-//	
-//	for (int i = 0; i<8; i++)
-//	{
-//		requestData[i] = temp[i];
-//	}
-//
-//	if (!requestData.isEmpty())
-//	{
-//		emit emitdata(requestData);
-//		qDebug() << "recivedata Thread : " << QThread::currentThreadId();
-//		qDebug() << "recivedata : " << requestData.toHex();
-//	}
-//	requestData.clear();
-//	Sleep(20);	
-//
-//}
-
 void SerialPort::recivedata()
 {
 	QByteArray requestData;
@@ -182,8 +153,6 @@ void SerialPort::recivedata()
 		qDebug() << "children Thread : " << QThread::currentThreadId()
 				<< "    recivedata : " << requestData.toHex();
 	}
-	//requestData.clear();
-//	Sleep(20);
 
 }
 
