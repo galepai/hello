@@ -74,15 +74,6 @@
     <ClCompile Include="HandlePicThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SerialPortThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_SerialPortThread.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_SerialPortThread.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_configuredlg.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -90,6 +81,15 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="configuredlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_DeltaThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_DeltaThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="DeltaThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -112,13 +112,13 @@
     <CustomBuild Include="HandlePicThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="SerialPortThread.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="configuredlg.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="configuredlg.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="DeltaThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

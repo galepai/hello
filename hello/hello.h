@@ -8,7 +8,6 @@
 #include "HalconCpp.h"
 #include "Func.h"
 
-
 using namespace HalconCpp;
 
 class hello : public QMainWindow
@@ -43,6 +42,9 @@ private:
 	HandlePicThread *m_pHandlePicThread;
 	HImage m_Image;
 	bool m_bIsBad;
+
+signals:
+	void ReadyLoop();
 };
 
 #endif // HELLO_H

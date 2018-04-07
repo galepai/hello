@@ -25,6 +25,9 @@ void WriteCurrenDateTime(const QString& file, const QString& beginGroup, const Q
 void WriteConfigure(const QString& file, const QString& beginGroup, const QString& SetValueName, const QString& Param);	//配置文件中写入设置信息
 void ReadConfigure(const QString& file, const QString& beginGroup, const QString& GetValueName, QVariant& Value);	////配置文件中读取信息
 
+std::string Delta_Ascii_CR(const std::string& data);	////配置文件中读取信息
+std::string Delta_Ascii_CR(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& End_Address, const std::string& Other_Info);
+std::vector<short> Parse_Delta_Ascii(const std::string& data);	////配置文件中读取信息
 
 enum LocationView
 {
@@ -33,4 +36,14 @@ enum LocationView
 	RightView,
 };
 
+struct Delta_Ascii_Info
+{
+	short Slave;
+	short Function_Code;
+	short Start_Address_High;
+	short Start_Address_Low;
+	short End_Address_High;
+	short End_Address_Low;
+	short Other_Info;
+};
 #endif // FUNC_H

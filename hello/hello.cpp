@@ -1,11 +1,12 @@
 #include "hello.h"
-#include "CHH.h"
-#include "aboutdialog.h"
-#include "configuredlg.h"
 #include <qfiledialog.h>
 #include <QMessageBox>
 #include <qthread.h>
-#include "SerialPortThread.h"
+#include "CHH.h"
+#include "aboutdialog.h"
+#include "configuredlg.h"
+#include "DeltaThread.h"
+
 
 hello::hello(QWidget *parent)
 	: QMainWindow(parent)
@@ -23,6 +24,8 @@ hello::hello(QWidget *parent)
 
 	WriteCurrenDateTime("config.ini", "Config", "OpenProgramTime");  //不支持中文写入配置文件
 
+	qDebug() << "Hello  Thread : " << QThread::currentThreadId();
+	
 }
 
 
@@ -41,26 +44,46 @@ void hello::About()
 //创建线程
 void hello::click()
 {
-	HandlePicThread* m_pHandlePicThread = new HandlePicThread(this);
-	m_pHandlePicThread->m_Image = m_Image;
-	m_pHandlePicThread->m_WindowHandle = GetViewWindowHandle(LeftView);
+	//HandlePicThread* m_pHandlePicThread = new HandlePicThread(this);
+	//m_pHandlePicThread->m_Image = m_Image;
+	//m_pHandlePicThread->m_WindowHandle = GetViewWindowHandle(LeftView);
 
-	connect(m_pHandlePicThread, SIGNAL(resultReady(bool)), this, SLOT(handleResults(bool)));
-	// 线程结束后，自动销毁
-	connect(m_pHandlePicThread, SIGNAL(finished()), m_pHandlePicThread, SLOT(deleteLater()));
-	m_pHandlePicThread->start();
+	//connect(m_pHandlePicThread, SIGNAL(resultReady(bool)), this, SLOT(handleResults(bool)));
+	//// 线程结束后，自动销毁
+	//connect(m_pHandlePicThread, SIGNAL(finished()), m_pHandlePicThread, SLOT(deleteLater()));
+	//m_pHandlePicThread->start();
+
+	Delta_Thread::StopRun(true);
 
 }
 
 void hello::OnShutDown()
 {
-	close();
+	//close();
+	std::string str1 = ":000505FFFEF6\r\n";
+	std::vector<short> nums = Parse_Delta_Ascii(str1);
+	QString str = "000505000000";
+
+	Delta_Thread::setVectorInfo("00", "05", "0500", "", "FF00");
+	Delta_Thread::setVectorInfo("00", "05", "0501", "", "FF00");
+	Delta_Thread::setVectorInfo("00", "05", "0502", "", "FF00");
+	
 }
 
 void hello::OnConfigure2()
 {
-	ConfigureDlg Dlg(this);
-	Dlg.exec();
+	//ConfigureDlg Dlg(this);
+	//Dlg.exec();
+	void* p = this;
+	if (Delta_Thread::GetSerialPort() == nullptr)
+	{
+		Delta_Thread* thread = new Delta_Thread;
+		thread->InitSerialPortInfo("com3", 9600, QSerialPort::Parity::EvenParity, QSerialPort::DataBits::Data7);
+		connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+		connect(thread, SIGNAL(emitdata(QByteArray)), this, SLOT(readyDataSlot(QByteArray)));  //接收数据主界面类
+		thread->start();
+	}
+	
 }
 
 //得到线程的信号
@@ -81,41 +104,22 @@ void hello::OnLineRun()
 
 	statusBar()->showMessage(port + "," + Value.toString());
 
-	QThread *thread = new QThread;
-	SerialPort* pSerialPort = new SerialPort;
-
-	pSerialPort->setPortName(port);
-	pSerialPort->setBaudRate(baud);
-	pSerialPort->setReciveLen(8);
-
-	pSerialPort->moveToThread(thread);
-	thread->start();
-	
-	if (pSerialPort->open())
-	{
-		QObject::connect(pSerialPort->GetSerialPort(), SIGNAL(readyRead()), pSerialPort, SLOT(recivedata()));  //串口读取到数据信号，响应槽函数，多线程
-		QObject::connect(pSerialPort, SIGNAL(emitdata(QByteArray)), this, SLOT(readyDataSlot(QByteArray)));  //接收数据主界面类
-	}
-	else
-	{
-		QMessageBox::StandardButton reply;
-		reply = QMessageBox::warning(this, G2U("打开串口错误"), pSerialPort->GetSerialPort()->errorString());
-
-		delete pSerialPort;
-		pSerialPort = nullptr;
-	}
 }
 
 //对应串口的读取槽函数
 void hello::readyDataSlot(QByteArray str)  
 {	
 	qDebug() << "MainSlot Thread : " << QThread::currentThreadId();
-	statusBar()->showMessage(str.toHex());
+	//statusBar()->showMessage(str.toHex());
+	statusBar()->showMessage(str);
+	
+
 }
 
 
 void hello::Open()
 {
+
 	QString path = QFileDialog::getOpenFileName(this, tr("Open Image"), "", tr("Image Files(*.jpg *.png *.bmp)"));
 	
 	if (path.length() != 0 && 
