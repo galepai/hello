@@ -5,6 +5,7 @@
 #include "CHH.h"
 #include "aboutdialog.h"
 #include "configuredlg.h"
+#include "ComDialog.h"
 #include "DeltaThread.h"
 
 
@@ -62,11 +63,10 @@ void hello::OnShutDown()
 	//close();
 	std::string str1 = ":000505FFFEF6\r\n";
 	std::vector<short> nums = Parse_Delta_Ascii(str1);
-	QString str = "000505000000";
 
-	Delta_Thread::setVectorInfo("00", "05", "0500", "", "FF00");
-	Delta_Thread::setVectorInfo("00", "05", "0501", "", "FF00");
-	Delta_Thread::setVectorInfo("00", "05", "0502", "", "FF00");
+	Delta_Thread::AddSecondQueueInfo("00", "05", "0500", "FF00");
+	Delta_Thread::AddSecondQueueInfo("00", "05", "0501", "FF00");
+	Delta_Thread::AddSecondQueueInfo("00", "05", "0502", "FF00");
 	
 }
 
@@ -74,11 +74,22 @@ void hello::OnConfigure2()
 {
 	//ConfigureDlg Dlg(this);
 	//Dlg.exec();
-	void* p = this;
+
+	ComDialog Dlg(this);
+	Dlg.exec();
+
+	QVariant value;
+	ReadConfigure("config.ini", "Port", "Port", value);
+	QString PortName = value.toString();
+	ReadConfigure("config.ini", "Port", "Baud", value);
+	int Baud = value.toInt();
+	ReadConfigure("config.ini", "Port", "DataBits", value);
+	int DataBits = value.toInt();
+
 	if (Delta_Thread::GetSerialPort() == nullptr)
 	{
 		Delta_Thread* thread = new Delta_Thread;
-		thread->InitSerialPortInfo("com3", 9600, QSerialPort::Parity::EvenParity, QSerialPort::DataBits::Data7);
+		thread->InitSerialPortInfo(PortName.toStdString().c_str(), Baud, QSerialPort::Parity::EvenParity, QSerialPort::DataBits(DataBits));
 		connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 		connect(thread, SIGNAL(emitdata(QByteArray)), this, SLOT(readyDataSlot(QByteArray)));  //接收数据主界面类
 		thread->start();
@@ -111,8 +122,7 @@ void hello::readyDataSlot(QByteArray str)
 {	
 	qDebug() << "MainSlot Thread : " << QThread::currentThreadId();
 	//statusBar()->showMessage(str.toHex());
-	statusBar()->showMessage(str);
-	
+	statusBar()->showMessage(str);	
 
 }
 

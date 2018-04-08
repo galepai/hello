@@ -11,8 +11,8 @@
 #include <QTextCodec>
 #include <QVariant>
 
-
-#define G2U(s) ( QTextCodec::codecForName("GBK")->toUnicode(s) )	//QT中显示中文，使用方法 G2U("中文")
+//QT中显示中文，使用方法 G2U("中文")
+#define G2U(s) ( QTextCodec::codecForName("GBK")->toUnicode(s) )	
 #define U2G(s) ( QTextCodec::codecForName("GBK")->fromUnicode(s) )
 
 #define HSCROLL_HEIGHT_RightPic(height) ui.scrollAreaWidgetContentsRight->setMinimumHeight(height)	//显示右边区域高度，用于显示出滚动条
@@ -25,8 +25,9 @@ void WriteCurrenDateTime(const QString& file, const QString& beginGroup, const Q
 void WriteConfigure(const QString& file, const QString& beginGroup, const QString& SetValueName, const QString& Param);	//配置文件中写入设置信息
 void ReadConfigure(const QString& file, const QString& beginGroup, const QString& GetValueName, QVariant& Value);	////配置文件中读取信息
 
+std::string Gen_Delta_Ascii_CR(const std::string& data);
 std::string Delta_Ascii_CR(const std::string& data);	////配置文件中读取信息
-std::string Delta_Ascii_CR(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& End_Address, const std::string& Other_Info);
+std::string Delta_Ascii_CR(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
 std::vector<short> Parse_Delta_Ascii(const std::string& data);	////配置文件中读取信息
 
 enum LocationView
@@ -35,6 +36,8 @@ enum LocationView
 	MiddleView,
 	RightView,
 };
+
+
 
 struct Delta_Ascii_Info
 {

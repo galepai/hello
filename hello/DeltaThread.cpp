@@ -6,8 +6,14 @@ QSerialPort* Delta_Thread::m_SerialPort = nullptr;
 //std::string Thread22::str = "";
 std::atomic<std::string> Delta_Thread::m_write_string = "";
 std::atomic<bool> Delta_Thread::m_bIsStop = false;
-std::vector<std::string> Delta_Thread::m_Vector_String;
+std::queue<std::string> Delta_Thread::m_Add_Queue;
+std::queue<std::string> Delta_Thread::m_Default_Queue;
 bool Delta_Thread::m_bIsOneMode = false;
+int Delta_Thread::m_time_lag = 50;
+QueryMode Delta_Thread::m_QueryMode = AddQueue;
+QMutex Delta_Thread::m_mutex;
+QMutex Delta_Thread::m_mutex2;
+QWaitCondition Delta_Thread::m_waitCondition;
 
 Delta_Thread::Delta_Thread(QObject *parent)
 	: QThread(parent)
@@ -29,15 +35,38 @@ void Delta_Thread::setWriteInfo(const char* wirteInfo)
 
 }
 
-void Delta_Thread::setWriteInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& End_Address, const std::string& Other_Info)
+void Delta_Thread::setWriteInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
 {
-	m_write_string = Delta_Ascii_CR(Slave + Function_Code + Start_Address + End_Address + Other_Info);
+	m_write_string = Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info);
 
 }
 
-void Delta_Thread::setVectorInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& End_Address, const std::string& Other_Info)
+void Delta_Thread::AddSecondQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
 {
-	m_Vector_String.push_back(Delta_Ascii_CR(Slave + Function_Code + Start_Address + End_Address + Other_Info));
+	QMutexLocker locker(&m_mutex);
+	m_Add_Queue.push(Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info));
+}
+
+void Delta_Thread::AddSecondQueueInfo(const std::string& data)
+{
+	QMutexLocker locker(&m_mutex);
+	m_Add_Queue.push(Delta_Ascii_CR(data));
+	m_mutex2.lock();
+	m_waitCondition.wakeAll();
+	m_mutex2.unlock();
+}
+
+void Delta_Thread::AddDefaultQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
+{
+	QMutexLocker locker(&m_mutex);
+	m_Default_Queue.push(Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info));
+}
+
+void Delta_Thread::AddDefaultQueueInfo(const std::string& data)
+{
+	QMutexLocker locker(&m_mutex);
+	m_Default_Queue.push(Delta_Ascii_CR(data));
+
 }
 
 void Delta_Thread::setPortName(const char* PortName)
@@ -80,27 +109,62 @@ void Delta_Thread::run()
 
 	//setWriteInfo("00050520FF00");
 
-	Delta_Thread::setVectorInfo("00", "05", "0501", "", "FF00");
-
 	CreateSerialPort();
 
 	if (!m_SerialPort->open(QSerialPort::ReadWrite))
 	{
+		qDebug() << "Com open error,please check Com setting! ";
 		return;
 	}
 	
 	while (!m_bIsStop)
 	{
-		if (!m_Vector_String.empty())
+		QMutexLocker locker(&m_mutex);
+		switch (m_QueryMode)
 		{
-			m_write_string = m_Vector_String[m_Vector_String.size()-1];
-			m_Vector_String.pop_back();
+			case AddQueue:
+
+				if (!m_Add_Queue.empty())
+				{
+					m_write_string = m_Add_Queue.front();
+					m_Add_Queue.pop();
+				}
+				break;
+
+			case DefalueQuene:
+
+				if (m_Default_Queue.size() == 0) 
+				{
+					delete m_SerialPort;
+					m_SerialPort = nullptr;
+					return;
+				}
+				
+				m_write_string = m_Default_Queue.front();
+				m_Default_Queue.push(m_write_string._My_val);
+				m_Default_Queue.pop();
+				break;
+
+			default:
+				break;
 		}
-		writeData(m_write_string._My_val.c_str(), m_write_string._My_val.length());
-	
-		m_SerialPort->waitForReadyRead(1000);
-		receiveData();
-		m_SerialPort->clear();
+
+		if (!(m_write_string._My_val == ""))
+		{
+			writeData(m_write_string._My_val.c_str(), m_write_string._My_val.length());
+			m_SerialPort->waitForReadyRead(1000);
+			receiveData();
+			m_SerialPort->clear();		
+		}
+		else
+		{
+			locker.unlock();
+			qDebug() << "waiting data write ......... ";
+			m_mutex2.lock();
+			m_waitCondition.wait(&m_mutex2);
+			m_mutex2.unlock();
+		}
+		
 		if (m_bIsOneMode)
 			break;
 	}
@@ -141,7 +205,7 @@ void Delta_Thread::receiveData()
 
 	while (is_continue_recive)
 	{
-		m_SerialPort->waitForReadyRead(50);
+		m_SerialPort->waitForReadyRead(m_time_lag);
 		requestData = m_SerialPort->readAll();
 		//t++;
 		//if (!m_total_data.isEmpty() && m_total_data[m_total_data.length() - 1] == '\n')
@@ -151,14 +215,12 @@ void Delta_Thread::receiveData()
 			m_SerialPort->clear();
 			emit emitdata(m_total_data);
 			qDebug() << "recivedata : " << m_total_data;
-			//qDebug() << "p1 : " << (void*)m_total_data.constData();
 			m_total_data.clear();
 		}
 		else
 		{
 			m_total_data.append(requestData);
 		}
-
 	}
 }
 
@@ -170,6 +232,10 @@ void Delta_Thread::setOneMode(bool status)
 void Delta_Thread::StopRun(bool status)
 {
 	m_bIsStop = status;
+	m_mutex2.lock();
+	m_waitCondition.wakeAll();
+	m_mutex2.unlock();
+	
 }
 
 QSerialPort* Delta_Thread::GetSerialPort()
@@ -177,14 +243,21 @@ QSerialPort* Delta_Thread::GetSerialPort()
 	return m_SerialPort;
 }
 
+void Delta_Thread::SetTimeLag(int ms)
+{
+	m_time_lag = ms;
+}
+
 Delta_Thread::~Delta_Thread()
 {
-
 	if (isRunning())
 		wait();
 
 	m_bIsStop = false;
-	m_Vector_String.clear();
+	std::queue<std::string> empty;
+	swap(empty, m_Add_Queue);
+	m_write_string._My_val.clear();
 	m_bIsOneMode = false;
 
+	qDebug() << "~Delta_Thread";
 }

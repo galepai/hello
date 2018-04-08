@@ -5,6 +5,14 @@
 #include <QDebug>
 #include <QtSerialPort/QtSerialPort>
 #include <atomic>
+#include <queue>
+#include <QMutex>
+
+enum QueryMode
+{
+	AddQueue,
+	DefalueQuene,
+};
 
 class Delta_Thread : public QThread
 {
@@ -23,11 +31,17 @@ public:
 
 	void InitSerialPortInfo(const char* PortName, int BaudRate, QSerialPort::Parity parity, QSerialPort::DataBits databits);
 	static void setWriteInfo(const char* wirteInfo);
-	static void setWriteInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& End_Address, const std::string& Other_Info);
-	static void setVectorInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& End_Address, const std::string& Other_Info);
+	static void setWriteInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
+	static void AddSecondQueueInfo(const std::string& data);
+	static void AddSecondQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
+	static void AddDefaultQueueInfo(const std::string& data);
+	static void AddDefaultQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
 	static void setOneMode(bool status = false);
 	static void StopRun(bool status = false);
+	static void SetTimeLag(int ms);
 	static QSerialPort* GetSerialPort();
+	
+	static QueryMode m_QueryMode;
 
 protected:
 	virtual void run() Q_DECL_OVERRIDE;
@@ -44,9 +58,13 @@ protected:
 	//static std::string str;
 	static std::atomic<std::string> m_write_string;
 	static std::atomic<bool> m_bIsStop;
-	static std::vector<std::string> m_Vector_String;
+	static std::queue<std::string> m_Add_Queue;
+	static std::queue<std::string> m_Default_Queue;
 	static bool m_bIsOneMode;
-
+	static int m_time_lag;
+	static QMutex m_mutex;
+	static QMutex m_mutex2;
+	static QWaitCondition m_waitCondition;
 
 signals:
 	void emitdata(QByteArray receiveData);
