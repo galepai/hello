@@ -11,7 +11,8 @@
 enum QueryMode
 {
 	AddQueue,
-	DefalueQuene,
+	DefalutQuene,
+	OneQueryToDefalutQuene,
 };
 
 class Delta_Thread : public QThread
@@ -23,7 +24,7 @@ public:
 	~Delta_Thread();
 	
 	int writeData(const char *data, int size);
-	void receiveData();
+	bool receiveData();
 	void setPortName(const char* PortName);
 	void setBaudRate(int BaudRate);
 	void setParity(QSerialPort::Parity parity);
@@ -34,6 +35,8 @@ public:
 	static void setWriteInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
 	static void AddSecondQueueInfo(const std::string& data);
 	static void AddSecondQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
+	static void AddOneQueueInfo(const std::string& data);
+	static void AddOneQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
 	static void AddDefaultQueueInfo(const std::string& data);
 	static void AddDefaultQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
 	static void setOneMode(bool status = false);
@@ -63,8 +66,8 @@ protected:
 	static bool m_bIsOneMode;
 	static int m_time_lag;
 	static QMutex m_mutex;
-	static QMutex m_mutex2;
-	static QWaitCondition m_waitCondition;
+	static QMutex m_mutex_WriteData;
+	static QWaitCondition m_waitWriteData;
 
 signals:
 	void emitdata(QByteArray receiveData);

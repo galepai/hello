@@ -23,6 +23,7 @@ public slots:
 	void Send();
 	void GenLRC(const QString &);
 	void readyDataSlot(QByteArray);
+	void SetTimeLag();
 
 
 };

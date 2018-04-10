@@ -10,13 +10,22 @@ ComDialog::ComDialog(QWidget *parent) :
     ui->setupUi(this);
 
 	connect(ui->QPushButton_OpenComm, SIGNAL(clicked()), this, SLOT(OpenCommThread()));
-	connect(ui->QPushButton_Send_SencondQueue, SIGNAL(clicked()), this, SLOT(Send()));
+	connect(ui->QPushButton_Send_SencondQueue, SIGNAL(clicked()), this, SLOT(Send())); 
+	connect(ui->QPushButton_TimeLag, SIGNAL(clicked()), this, SLOT(SetTimeLag()));
 	connect(ui->lineEdit_Slave, SIGNAL(textChanged(const QString &)), this, SLOT(GenLRC(const QString &)));
 	connect(ui->lineEdit_FunctionCode, SIGNAL(textChanged(const QString &)), this, SLOT(GenLRC(const QString &)));
 	connect(ui->lineEdit_StartAddress, SIGNAL(textChanged(const QString &)), this, SLOT(GenLRC(const QString &)));
 	connect(ui->lineEdit_OtherInfo, SIGNAL(textChanged(const QString &)), this, SLOT(GenLRC(const QString &)));
 	if (Delta_Thread::GetSerialPort())
 		ui->QPushButton_OpenComm->setText(G2U("串口已打开"));
+
+	Delta_Thread::AddDefaultQueueInfo("00050500FF00");
+	Delta_Thread::AddDefaultQueueInfo("00050501FF00"); 
+	Delta_Thread::AddDefaultQueueInfo("00050502FF00");
+	Delta_Thread::AddDefaultQueueInfo("00050503FF00");
+	Delta_Thread::AddDefaultQueueInfo("00050504FF00");
+
+	
 
 }
 
@@ -53,7 +62,11 @@ void ComDialog::Send()
 	QString data = ui->lineEdit_Slave->text() + ui->lineEdit_FunctionCode->text() + ui->lineEdit_StartAddress->text() + ui->lineEdit_OtherInfo->text();
 
 	if (!data.isEmpty())
-		Delta_Thread::AddSecondQueueInfo(data.toUpper().toStdString());
+	{
+		Delta_Thread::AddOneQueueInfo(data.toUpper().toStdString());
+	}
+		
+
 
 }
 
@@ -83,4 +96,10 @@ void ComDialog::GenLRC(const QString & str)
 	QString data = ui->lineEdit_Slave->text() + ui->lineEdit_FunctionCode->text() + ui->lineEdit_StartAddress->text() + ui->lineEdit_OtherInfo->text();
 	ui->lineEdit_LRC->setText(Gen_Delta_Ascii_CR(data.toUpper().toStdString()).c_str());
 
+}
+
+void ComDialog::SetTimeLag()
+{
+	int time = ui->lineEdit_TimeLag->text().toInt();
+	Delta_Thread::SetTimeLag(time);
 }

@@ -7,6 +7,7 @@
 #include "configuredlg.h"
 #include "ComDialog.h"
 #include "DeltaThread.h"
+#include "CommDialog.h"
 
 
 hello::hello(QWidget *parent)
@@ -37,7 +38,10 @@ hello::~hello()
 
 void hello::About()
 {
-	AboutDialog Dlg(this);
+	//AboutDialog Dlg(this);
+	//Dlg.exec();
+
+	CommDialog Dlg(this);
 	Dlg.exec();
 }
 
