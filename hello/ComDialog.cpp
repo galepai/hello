@@ -19,14 +19,6 @@ ComDialog::ComDialog(QWidget *parent) :
 	if (Delta_Thread::GetSerialPort())
 		ui->QPushButton_OpenComm->setText(G2U("串口已打开"));
 
-	Delta_Thread::AddDefaultQueueInfo("00050500FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050501FF00"); 
-	Delta_Thread::AddDefaultQueueInfo("00050502FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050503FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050504FF00");
-
-	
-
 }
 
 ComDialog::~ComDialog()
@@ -44,6 +36,12 @@ void ComDialog::OpenCommThread()
 	int Baud = value.toInt();
 	ReadConfigure("config.ini", "Port", "DataBits", value);
 	int DataBits = value.toInt();
+
+	Delta_Thread::AddDefaultQueueInfo("00050500FF00");
+	Delta_Thread::AddDefaultQueueInfo("00050501FF00");
+	Delta_Thread::AddDefaultQueueInfo("00050502FF00");
+	Delta_Thread::AddDefaultQueueInfo("00050503FF00");
+	Delta_Thread::AddDefaultQueueInfo("00050504FF00");
 
 	if (Delta_Thread::GetSerialPort() == nullptr)
 	{

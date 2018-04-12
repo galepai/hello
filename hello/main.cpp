@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
-	QFile qss("Resources/qss/css.qss");
+	QFile qss("Resources/qss/css.h");
 	if (qss.open(QFile::ReadOnly))
 	{
 		qApp->setStyleSheet(qss.readAll());

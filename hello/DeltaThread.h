@@ -43,8 +43,9 @@ public:
 	static void StopRun(bool status = false);
 	static void SetTimeLag(int ms);
 	static QSerialPort* GetSerialPort();
+	static void setQueryMode(QueryMode query_mode);
 	
-	static QueryMode m_QueryMode;
+	
 
 protected:
 	virtual void run() Q_DECL_OVERRIDE;
@@ -65,6 +66,7 @@ protected:
 	static std::queue<std::string> m_Default_Queue;
 	static bool m_bIsOneMode;
 	static int m_time_lag;
+	static QueryMode m_QueryMode;
 	static QMutex m_mutex;
 	static QMutex m_mutex_WriteData;
 	static QWaitCondition m_waitWriteData;

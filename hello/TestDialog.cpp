@@ -4,6 +4,7 @@
 #include "Func.h"
 #include <QPushButton>
 #include <QLineEdit>
+#include <QPainter>
 
 
 TestDialog::TestDialog(QWidget *parent) :
@@ -12,9 +13,17 @@ TestDialog::TestDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 	connect(ui->btn_return, SIGNAL(clicked()), this, SLOT(CloseWindow()));
+	QList<QPushButton *> pPushButtons = findChildren<QPushButton *>();
+	for (int i = 0; i < pPushButtons.count(); i++)
+	{
+		pPushButtons.at(i)->setProperty("status",i>5);
+	}
+
+	m_pTimer = new QTimer(this);
+	connect(m_pTimer, SIGNAL(timeout()), this, SLOT(update()));
+	m_pTimer->start(200);
+		
 }
-
-
 
 void TestDialog::ChangeStyle()
 {
@@ -34,6 +43,7 @@ void TestDialog::CloseWindow()
 TestDialog::~TestDialog()
 {
     delete ui;
+	delete m_pTimer;
 }
 
 void TestDialog::setBtnQss(QPushButton *btn,
@@ -53,13 +63,7 @@ void TestDialog::setTxtQss(QLineEdit *txt, QString normalColor, QString focusCol
 
 {
 	QStringList qss;
-	/*QLineEdit{
-		border: 1px solid rgb(41, 57, 85);   # 边框1px宽，颜色为深紫色
-		border-radius: 3px;					# 给定3px边框圆角
-		background : white;			# 背景色定为白色吧
-		selection-background-color: green;	# 这个属性设定文本选中时的文本背景色
-		font-size: 14px;  # 文本的大小
-	}*/
+
 	qss.append(QString("QLineEdit{border:1px solid rgb(41, 57, 85);\
 							border-radius: 3px;\
 							background: black; \
@@ -71,4 +75,50 @@ void TestDialog::setTxtQss(QLineEdit *txt, QString normalColor, QString focusCol
 	qss.append(QString("QLineEdit:focus{border:2px solid %1;}").arg(focusColor));
 	txt->setStyleSheet(qss.join(""));
 
+}
+
+void TestDialog::paintEvent(QPaintEvent *event)
+{
+	QPainter painter(this);
+
+	QList<QPushButton *> pPushButtons = findChildren<QPushButton *>();
+	for (int i = 0; i < pPushButtons.count(); i++)
+	{
+		if (pPushButtons.at(i)->text() == G2U("拨手多位气缸缩") 
+			|| pPushButtons.at(i)->text() == G2U("拨手多位气缸伸")
+			|| pPushButtons.at(i)->text() == G2U("相机触发")
+			|| pPushButtons.at(i)->text() == G2U("返回主界面"))
+		{			
+		}
+		else
+		{
+			QPointF Center_Circle = pPushButtons.at(i)->geometry().topLeft();
+			pPushButtons.at(i)->geometry().topRight();
+			int width = pPushButtons.at(i)->geometry().width();
+			Center_Circle.setX(Center_Circle.x() + width / 2);
+			Center_Circle.setY(Center_Circle.y() - 30);
+
+			if (pPushButtons.at(i)->property("status").toBool())
+			{
+				PaintCirle(painter, Center_Circle, 10, QPen(QColor(0, 255, 90), 2), QColor(35, 255, 125));
+			}
+			else
+			{
+				PaintCirle(painter, Center_Circle, 10, QPen(QColor(255, 90, 90), 2), QColor(255, 45, 35));
+			}	
+		}
+	}
+
+}
+
+void TestDialog::PaintCirle(QPainter& painter, const QPointF& center_circle, int radius, const QPen &pen, const QBrush &brush)
+{
+	// 反走样
+	painter.setRenderHint(QPainter::Antialiasing, true);
+	// 设置画笔颜色、宽度,  边框
+	painter.setPen(pen);
+	// 设置画刷颜色
+	painter.setBrush(brush);
+	// 绘制圆
+	painter.drawEllipse(center_circle, radius, radius);
 }

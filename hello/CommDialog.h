@@ -31,6 +31,8 @@ public slots:
 	void ChangeStyle();
 	void DebugDialog();
 	void ChangeMode(int mode);
+	void start();
+	void stop();
 
 };
 

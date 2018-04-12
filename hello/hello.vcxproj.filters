@@ -193,4 +193,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\qss\css.h">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

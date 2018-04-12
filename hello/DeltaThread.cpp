@@ -10,7 +10,7 @@ std::atomic<bool> Delta_Thread::m_bIsStop = false;
 std::queue<std::string> Delta_Thread::m_Add_Queue;
 std::queue<std::string> Delta_Thread::m_Default_Queue;
 bool Delta_Thread::m_bIsOneMode = false;
-int Delta_Thread::m_time_lag = 10;
+int Delta_Thread::m_time_lag = 5;
 QueryMode Delta_Thread::m_QueryMode = DefalutQuene;
 QMutex Delta_Thread::m_mutex;
 QMutex Delta_Thread::m_mutex_WriteData;
@@ -314,6 +314,11 @@ QSerialPort* Delta_Thread::GetSerialPort()
 void Delta_Thread::SetTimeLag(int ms)
 {
 	m_time_lag = ms;
+}
+
+void Delta_Thread::setQueryMode(QueryMode query_mode)
+{
+	m_QueryMode = query_mode;
 }
 
 Delta_Thread::~Delta_Thread()
