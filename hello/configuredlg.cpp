@@ -13,8 +13,13 @@ ConfigureDlg::ConfigureDlg(QWidget *parent) :
     ui(new Ui::ConfigureDlg)
 {
     ui->setupUi(this);
+	HIDDLE_DIALOG_BUTTON
 
-	QList<QSerialPortInfo>  infos = QSerialPortInfo::availablePorts();
+	connect(ui->SavePortButton, SIGNAL(clicked()), this, SLOT(SavePortToIni()));
+	connect(ui->SelectRawButton, SIGNAL(clicked()), this, SLOT(SelectRawPath()));
+	connect(ui->SaveRawButton, SIGNAL(clicked()), this, SLOT(SaveRawPath()));
+
+	QList<QSerialPortInfo> infos = QSerialPortInfo::availablePorts();
 	if (infos.isEmpty())
 	{
 		ui->PortComboBox->addItem("");
@@ -28,22 +33,33 @@ ConfigureDlg::ConfigureDlg(QWidget *parent) :
 	ui->BaudComboBox->addItem("4800");
 	ui->BaudComboBox->addItem("9600");
 	ui->BaudComboBox->addItem("19200");
-	ui->BaudComboBox->setCurrentIndex(1);
 
 	ui->DataBitsComboBox->addItem("6");
 	ui->DataBitsComboBox->addItem("7");
 	ui->DataBitsComboBox->addItem("8");
-	ui->DataBitsComboBox->setCurrentIndex(2);
+
+	ReadIni();
+
+}
+
+void ConfigureDlg::ReadIni()
+{
 
 	QVariant Value;
+	ReadConfigure("config.ini", "Port", "Port", Value);
+	int index = ui->PortComboBox->findText(Value.toString());
+	ui->PortComboBox->setCurrentIndex(index);
+
+	ReadConfigure("config.ini", "Port", "Baud", Value);
+	index = ui->BaudComboBox->findText(Value.toString());
+	ui->BaudComboBox->setCurrentIndex(index);
+
+	ReadConfigure("config.ini", "Port", "DataBits", Value);
+	index = ui->DataBitsComboBox->findText(Value.toString());
+	ui->DataBitsComboBox->setCurrentIndex(index);
+
 	ReadConfigure("config.ini", "Raw", "Raw_Path", Value);
 	ui->lineEdit_Raw_Path->setText(Value.toString());
-
-	connect(ui->SavePortButton, SIGNAL(clicked()), this, SLOT(SavePortToIni()));
-	connect(ui->SelectRawButton, SIGNAL(clicked()), this, SLOT(SelectRawPath()));
-	connect(ui->SaveRawButton, SIGNAL(clicked()), this, SLOT(SaveRawPath()));
-
-	HIDDLE_DIALOG_BUTTON
 
 }
 
@@ -54,7 +70,6 @@ ConfigureDlg::~ConfigureDlg()
 
 void ConfigureDlg::SavePortToIni()
 {
-
 
 	double time_Start = (double)clock();
 
@@ -77,7 +92,6 @@ void ConfigureDlg::SavePortToIni()
 		reply = QMessageBox::warning(this, G2U("信息"), G2U("串口信息写入失败，请检测设置是否正确！"));
 	}
 	
-
 }
 
 void ConfigureDlg::SelectRawPath()

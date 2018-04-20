@@ -8,7 +8,8 @@
 #include "HandlePicThread.h"
 #include "HalconCpp.h"
 #include "Func.h"
-#include "CommDialog.h"
+#include "TestDialog.h"
+#include "CameraThread.h"
 
 using namespace HalconCpp;
 
@@ -24,33 +25,39 @@ public:
 	void AddItemToTableView(QTableView* view, QStandardItemModel* model, 
 		QStandardItem* item0, QStandardItem* item1, QStandardItem* item2, QStandardItem* item3,
 		const QBrush& textcolor, int RowHeight = 20);
-
+	void SetRightTableView();
 
 public slots:
-	void click();
-	void Open();
-	void About();
+
+	/***********菜单栏功能************/
+	void OnLRC();
+	void OnAbout();
+
+	/***********工具栏功能************/
+	void OnOneHandle();
+	void OnOpen();
 	void OnLineRun();
-	void OnConfigure2();
+	void OnConfigure();
 	void OnShutDown();	//关闭系统
 	void handleResults(bool is_bad);
 	void readyDataSlot(QByteArray str);
 	void TableSrolltoBottom(); 
 
-	/***********右端调试功能************/
+	/***********右端电气功能************/
 	void DebugDialog();
 	void ChangeMode(int mode);
-	void start();
-	void stop();
-	/***********右端调试功能************/
+	void OnStart();
+	void OnStop();
 
-
+	/////
+	void receiveImage(void* image);
+	void receiveError(QString error);
 
 private:
+	void FullScreenShow();	//全屏显示
 	void DispPic(HImage& path, LocationView location);	//显示图片在指定位置视图
 	const HalconCpp::HTuple GetViewWindowHandle(LocationView location);	//返回指定视图的窗口Handle（Halcon显示图片用）
 
-	CommDialog* pDlg;
 	QStandardItemModel* Right_dataModel;
 
 private:
@@ -63,6 +70,9 @@ private:
 
 signals:
 	void ReadyLoop();
+
+public:
+	Camera_Thread* m_camera_thread1;
 	
 };
 

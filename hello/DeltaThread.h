@@ -1,3 +1,8 @@
+/**
+*	功能：台达DVP_PLC线程。
+*	作者：chenhui
+*/
+
 #ifndef DELTA_THREAD_H
 #define DELTA_THREAD_H
 
@@ -8,18 +13,19 @@
 #include <queue>
 #include <QMutex>
 
-enum QueryMode
-{
-	AddQueue,
-	DefalutQuene,
-	OneQueryToDefalutQuene,
-};
 
 class Delta_Thread : public QThread
 {
 	Q_OBJECT
 
 public:
+	enum QueryMode
+	{
+		LoopOneQueue,
+		DefalutQuene,	//默认队列反复循环查询
+		OneQueryToDefalutQuene,	//查询一次后,切换到默认队列查询
+	};
+
 	explicit Delta_Thread(QObject *parent = 0);
 	~Delta_Thread();
 	
@@ -32,18 +38,18 @@ public:
 
 	void InitSerialPortInfo(const char* PortName, int BaudRate, QSerialPort::Parity parity, QSerialPort::DataBits databits);
 	static void setWriteInfo(const char* wirteInfo);
-	static void setWriteInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
-	static void AddSecondQueueInfo(const std::string& data);
-	static void AddSecondQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
-	static void AddOneQueueInfo(const std::string& data);
-	static void AddOneQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
-	static void AddDefaultQueueInfo(const std::string& data);
-	static void AddDefaultQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
+	static void setWriteInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);	
+	//static void AddSecondQueueInfo(const std::string& data);
+	//static void AddSecondQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
+	static void AddOneQueueInfo(const std::string& data);	//添加查询字段到查询一次队列
+	static void AddOneQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);	//添加查询字段到查询一次队列
+	static void AddDefaultQueueInfo(const std::string& data);	//添加查询字段到默认队列
+	static void AddDefaultQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);	//添加查询字段到默认队列
 	static void setOneMode(bool status = false);
-	static void StopRun(bool status = false);
-	static void SetTimeLag(int ms);
-	static QSerialPort* GetSerialPort();
-	static void setQueryMode(QueryMode query_mode);
+	static void StopRun(bool status = false);	//停止查询，退出线程
+	static void SetTimeLag(int ms);	//设置查询间隔时间
+	static QSerialPort* GetSerialPort();	//判断是否为空
+	static void setQueryMode(QueryMode query_mode);	//切换查询模式
 	
 	
 

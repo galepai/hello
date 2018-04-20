@@ -22,6 +22,7 @@ public slots:
 
 private:
     Ui::ConfigureDlg *ui;
+	void ReadIni();
 };
 
 #endif // CONFIGUREDLG_H

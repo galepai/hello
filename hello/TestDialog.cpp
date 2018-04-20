@@ -23,6 +23,7 @@ TestDialog::TestDialog(QWidget *parent) :
 	connect(m_pTimer, SIGNAL(timeout()), this, SLOT(update()));
 	m_pTimer->start(200);
 		
+	HIDDLE_DIALOG_BUTTON
 }
 
 void TestDialog::ChangeStyle()

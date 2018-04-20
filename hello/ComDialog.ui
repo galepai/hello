@@ -283,7 +283,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>发送</string>
+    <string>间隔时间(ms)</string>
    </property>
   </widget>
  </widget>

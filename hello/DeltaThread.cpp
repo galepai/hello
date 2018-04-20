@@ -11,7 +11,7 @@ std::queue<std::string> Delta_Thread::m_Add_Queue;
 std::queue<std::string> Delta_Thread::m_Default_Queue;
 bool Delta_Thread::m_bIsOneMode = false;
 int Delta_Thread::m_time_lag = 5;
-QueryMode Delta_Thread::m_QueryMode = DefalutQuene;
+Delta_Thread::QueryMode Delta_Thread::m_QueryMode = DefalutQuene;
 QMutex Delta_Thread::m_mutex;
 QMutex Delta_Thread::m_mutex_WriteData;
 QWaitCondition Delta_Thread::m_waitWriteData;
@@ -42,23 +42,23 @@ void Delta_Thread::setWriteInfo(const std::string& Slave, const std::string& Fun
 
 }
 
-void Delta_Thread::AddSecondQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
-{
-	QMutexLocker locker(&m_mutex);
-	m_Add_Queue.push(Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info));
-	m_mutex_WriteData.lock();
-	m_waitWriteData.wakeAll();
-	m_mutex_WriteData.unlock();
-}
+//void Delta_Thread::AddSecondQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
+//{
+//	QMutexLocker locker(&m_mutex);
+//	m_Add_Queue.push(Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info));
+//	m_mutex_WriteData.lock();
+//	m_waitWriteData.wakeAll();
+//	m_mutex_WriteData.unlock();
+//}
 
-void Delta_Thread::AddSecondQueueInfo(const std::string& data)
-{
-	QMutexLocker locker(&m_mutex);
-	m_Add_Queue.push(Delta_Ascii_CR(data));
-	m_mutex_WriteData.lock();
-	m_waitWriteData.wakeAll();
-	m_mutex_WriteData.unlock();
-}
+//void Delta_Thread::AddSecondQueueInfo(const std::string& data)
+//{
+//	QMutexLocker locker(&m_mutex);
+//	m_Add_Queue.push(Delta_Ascii_CR(data));
+//	m_mutex_WriteData.lock();
+//	m_waitWriteData.wakeAll();
+//	m_mutex_WriteData.unlock();
+//}
 
 void Delta_Thread::AddOneQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
 {
@@ -155,7 +155,7 @@ void Delta_Thread::run()
 		QMutexLocker locker(&m_mutex);
 		switch (m_QueryMode)
 		{
-			case AddQueue:
+			case LoopOneQueue:
 
 				if (!m_Add_Queue.empty())
 				{

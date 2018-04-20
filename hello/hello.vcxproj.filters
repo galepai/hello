@@ -119,6 +119,15 @@
     <ClCompile Include="TestDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_CameraThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_CameraThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="hello.h">
@@ -164,6 +173,9 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="TestDialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="CameraThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

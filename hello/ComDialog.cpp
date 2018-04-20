@@ -37,11 +37,8 @@ void ComDialog::OpenCommThread()
 	ReadConfigure("config.ini", "Port", "DataBits", value);
 	int DataBits = value.toInt();
 
-	Delta_Thread::AddDefaultQueueInfo("00050500FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050501FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050502FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050503FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050504FF00");
+
+	Delta_Thread::setQueryMode(Delta_Thread::QueryMode::OneQueryToDefalutQuene);
 
 	if (Delta_Thread::GetSerialPort() == nullptr)
 	{
@@ -64,8 +61,6 @@ void ComDialog::Send()
 		Delta_Thread::AddOneQueueInfo(data.toUpper().toStdString());
 	}
 		
-
-
 }
 
 //void ComDialog::GenLRC()
