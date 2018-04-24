@@ -327,3 +327,6 @@ ASALocalRun/
 
 # Qt GeneratedFiles
 GeneratedFiles/
+
+# SaveImageFiles
+images/

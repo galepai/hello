@@ -34,7 +34,7 @@ hello::hello(QWidget *parent)
 	connect(ui.verticalSlider_mode, SIGNAL(valueChanged(int)), this, SLOT(ChangeMode(int)));
 
 	WriteCurrenDateTime("config.ini", "Config", "OpenProgramTime");  //不支持中文写入配置文件
-
+	
 	SetRightTableView();
 	
 	//定时刷新列表滚动条至底部
@@ -47,6 +47,9 @@ hello::hello(QWidget *parent)
 
 	m_camera_thread1 = nullptr;
 	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, "[0] USB3_CMOS_8.8M(1)", this);
+	QVariant value;
+	ReadConfigure("config.ini", "Config", "ImagePath3", value);
+	m_camera_thread1->setSaveImagePath(value.toString());
 	connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveImage(void*)));
 	connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
 	connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));

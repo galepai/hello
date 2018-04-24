@@ -2,9 +2,10 @@
 #include "Func.h"
 #include <QTime>
 #include <QSettings>
+#include <QDir>
 #include <vector>
 
-
+//配置文件中写入当前时间 Use QSetting slower than QFile 
 void WriteCurrenDateTime(const QString& file, const QString& beginGroup, const QString& SetValueName)
 {
 	QDateTime datetime;
@@ -85,6 +86,7 @@ std::string Delta_Ascii_CR(const std::string& data)
 	return all_data;
 }
 
+//生成台达ASCII模式下的LRC
 std::string Gen_Delta_Ascii_CR(const std::string& data)
 {
 	// "01020304FF05"  ~( 0X(01+02+03+04+EF+05) ) + 0x01;	两两字符用高低字节表示1个字节再相加，比如EF，用1个字节表示，E是1110,F是1111，组成字节是11101111。
@@ -137,7 +139,7 @@ std::string Delta_Ascii_CR(const std::string& Slave, const std::string& Function
 	return Delta_Ascii_CR(Slave + Function_Code + Function_Code + Start_Address + Other_Info);
 }
 
-//解析功能，还未完善
+//解析功能，还未完善...
 std::vector<short> Parse_Delta_Ascii(const std::string& data)
 {
 	//data = ':00050520FF00D7\r\n';
@@ -172,4 +174,80 @@ std::vector<short> Parse_Delta_Ascii(const std::string& data)
 	}
 	
 	return nums;
+}
+
+//	Use QFile faster than QSetting
+void QtWriteFile(const QString& path_filename, const QStringList& writeinfo_list)
+{
+	
+	QFile file(path_filename);
+
+	if (file.open(QFile::WriteOnly | QFile::Truncate))
+	{  
+		QTextStream out(&file);
+		foreach(QString str, writeinfo_list)
+		{
+			out << str << "\r\n";
+		}
+	}
+	else
+	{
+
+	}
+	file.close();
+
+}
+
+void QtReadFile(const QString& path_filename, QStringList& readinfo_list)
+{
+	QFile file(path_filename);
+
+	if (file.open(QFile::ReadOnly))
+	{
+		QTextStream in(&file);
+		QByteArray str = file.readLine();
+		while (!str.isEmpty())
+		{
+			readinfo_list.append(str);
+			str = file.readLine();
+		}
+			
+	}
+	else
+	{
+
+	}
+	file.close();
+}
+
+//生成保存图像，以日期做为文件夹（内含子文件夹），例如在当前路径“images/180424”
+bool CreaImagetDir()
+{
+	QString parent_dir_path = "images";
+	QDate date;
+	QString currentDate = date.currentDate().toString("yyMMdd");
+	currentDate = parent_dir_path + "/" + currentDate;
+	QDir dir(currentDate);
+	if (!dir.exists())
+	{
+		QDir dir1;
+		QStringList path_list = { currentDate, currentDate + "/aal", 
+			currentDate + "/camera1",
+			currentDate + "/camera2", 
+			currentDate + "/camera3", 
+			currentDate + "/camera4" };
+
+		int index = 0;
+		for (auto path : path_list)
+		{
+			index++;
+			dir1.mkpath(path);
+			WriteConfigure("config.ini", "Config", QString("ImagePath%1").arg(index), path);
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

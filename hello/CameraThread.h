@@ -29,7 +29,7 @@ public:
 	~Camera_Thread();
 	
 	QString CameraId() const;
-	
+	void setSaveImagePath(const QString& path);
 	void stop();
 
 protected:
@@ -40,6 +40,7 @@ protected:
 	static QMutex m_mutex;
 	static QMutex m_mutex_WriteData;
 	static QWaitCondition m_waitWriteData;
+	void QueueSaveImage(const HObject& Image, int maxnum);
 	
 
 signals:
@@ -51,6 +52,8 @@ private:
 	ConnectionType m_connectionType;
 	HFramegrabber* pGrabber;
 	bool m_bIsStop;
+	QString m_SaveImagePath;
+	int m_image_index;
 
 };
 

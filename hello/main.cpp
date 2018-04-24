@@ -5,8 +5,12 @@
 #include <QSplashScreen>
 #include <QElapsedTimer>
 #include "Func.h"
-
+#include <QTime>
 //#define STARTLOGO
+
+
+bool CreaImagetDir();
+
 
 int main(int argc, char *argv[])
 {
@@ -23,6 +27,13 @@ int main(int argc, char *argv[])
 	QSplashScreen* screen=new QSplashScreen(pixmap);
 	screen->show();
 	screen->showMessage(G2U("初始化..."), Qt::AlignTop | Qt::AlignLeft, Qt::black);
+	
+	screen->showMessage(G2U("检查影像文件夹是否存在..."), Qt::AlignTop | Qt::AlignLeft, Qt::black);
+	if(CreaImagetDir())
+		screen->showMessage(G2U("创建影像文件夹成功"), Qt::AlignTop | Qt::AlignLeft, Qt::black);
+	else
+		screen->showMessage(G2U("影像文件夹存在"), Qt::AlignTop | Qt::AlignLeft, Qt::black);
+
 
 
 #ifdef STARTLOGO 
@@ -45,4 +56,3 @@ int main(int argc, char *argv[])
 
 	return a.exec();
 }
-

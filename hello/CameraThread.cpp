@@ -1,6 +1,7 @@
 #include "CameraThread.h"
 #include <QMessageBox>
 #include <QTime>
+#include "Func.h"
 
 
 QMutex Camera_Thread::m_mutex;
@@ -10,6 +11,7 @@ QWaitCondition Camera_Thread::m_waitWriteData;
 Camera_Thread::Camera_Thread(ConnectionType connection_type,QString CameraId, QObject *parent)
 	: m_connectionType(connection_type),m_CameraId(CameraId),QThread(parent)
 {
+	m_image_index = 1;
 
 }
 
@@ -26,6 +28,7 @@ void Camera_Thread::run()
 		Image = pGrabber->GrabImageAsync(-1);
 		//GrabImageAsync(&Image, hv_AcqHandle, -1);
 		signal_image(&Image);
+		QueueSaveImage(Image, 50);
 	}
 	pGrabber->Clear();
 	//CloseFramegrabber(hv_AcqHandle);
@@ -86,4 +89,26 @@ bool Camera_Thread::OpenCamera()
 void Camera_Thread::stop()
 {
 	m_bIsStop = true;
+}
+
+void Camera_Thread::setSaveImagePath(const QString& path)
+{
+	m_SaveImagePath = path;
+}
+
+void Camera_Thread::QueueSaveImage(const HObject& Image,int maxnum)
+{
+	if (m_image_index <= maxnum)
+	{
+		QString savePath = QString(m_SaveImagePath + "/%1").arg(m_image_index,4,10,QChar('0'));
+		WriteImage(Image, "bmp", 0, savePath.toStdString().c_str());
+		m_image_index++;
+	}
+	else
+	{
+		m_image_index = 1;
+		QString savePath = QString(m_SaveImagePath + "/%1").arg(m_image_index, 4, 10, QChar('0'));
+		WriteImage(Image, "bmp", 0, savePath.toStdString().c_str());
+		m_image_index++;
+	}
 }
