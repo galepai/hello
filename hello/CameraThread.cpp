@@ -7,12 +7,13 @@
 QMutex Camera_Thread::m_mutex;
 QMutex Camera_Thread::m_mutex_WriteData;
 QWaitCondition Camera_Thread::m_waitWriteData;
+QStringList Camera_Thread::m_CameraIdlist;
 
 Camera_Thread::Camera_Thread(ConnectionType connection_type,QString CameraId, QObject *parent)
 	: m_connectionType(connection_type),m_CameraId(CameraId),QThread(parent)
 {
 	m_image_index = 1;
-
+	m_CameraIdlist.append(CameraId);
 }
 
 void Camera_Thread::run()
@@ -25,7 +26,8 @@ void Camera_Thread::run()
 	HImage Image;
 	while (!m_bIsStop)
 	{
-		Image = pGrabber->GrabImageAsync(-1);
+		//Image = pGrabber->GrabImageAsync(-1);
+		Image = pGrabber->GrabImage();
 		//GrabImageAsync(&Image, hv_AcqHandle, -1);
 		signal_image(&Image);
 		QueueSaveImage(Image, 50);
@@ -37,8 +39,14 @@ void Camera_Thread::run()
 
 Camera_Thread::~Camera_Thread()
 {
+	m_CameraIdlist.removeAll(m_CameraId);
 	delete pGrabber;
 	pGrabber = nullptr;
+}
+
+bool Camera_Thread::IsExistCameraId(QString cameraId)
+{
+	return m_CameraIdlist.contains(cameraId);
 }
 
 
@@ -55,21 +63,24 @@ bool Camera_Thread::OpenCamera()
 		switch (m_connectionType)
 		{
 		case Camera_Thread::DirectShow:
-			pGrabber->OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
+			pGrabber->OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "rgb", -1, "false", "default", \
 				m_CameraId.toStdString().c_str(), 0, -1);
-			pGrabber->SetFramegrabberParam("exposure", -2);
-			pGrabber->GrabImageStart(-1);
+			pGrabber->SetFramegrabberParam("exposure", -1);
+			//pGrabber->GrabImageStart(-1);
 			break;
 
 		case Camera_Thread::GigEVision:
+		//	pGrabber->OpenFramegrabber("GigEVision", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
+			//	m_CameraId.toStdString().c_str(), 0, -1);
 			pGrabber->OpenFramegrabber("GigEVision", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
-				m_CameraId.toStdString().c_str(), 0, -1);
+				"003053255252_Basler_raL204848gm", 0, -1);
 			pGrabber->SetFramegrabberParam("PixelFormat", "Mono8");
-			pGrabber->SetFramegrabberParam("Height", 12288);
+			pGrabber->SetFramegrabberParam("Height", 10000);
 			pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
 			pGrabber->SetFramegrabberParam("TriggerMode", "Off");
 			//pGrabber->SetFramegrabberParam ( "ExposureTimeRaw", 550);
 			//pGrabber->SetFramegrabberParam ( "AcquisitionLineRateAbs", 12285.0);
+			pGrabber->GrabImageStart(-1);
 			break;
 
 		default:
@@ -80,7 +91,8 @@ bool Camera_Thread::OpenCamera()
 	}
 	catch (HException& e)
 	{
-		emit signal_error(e.ErrorMessage().Text());
+		//emit signal_error(e.ErrorMessage().Text());
+		emit signal_error(G2U("不能获取相机，请检测相机ID是否正确"));
 		return false;
 	}
 }

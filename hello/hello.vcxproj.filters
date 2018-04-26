@@ -204,6 +204,9 @@
     <ClInclude Include="GeneratedFiles\ui_TestDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="ConstParam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\qss\css.h">

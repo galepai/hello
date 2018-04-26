@@ -32,6 +32,9 @@ public:
 	void setSaveImagePath(const QString& path);
 	void stop();
 
+	static QStringList m_CameraIdlist;
+	static bool IsExistCameraId(QString cameraId);
+
 protected:
 	virtual void run() Q_DECL_OVERRIDE;
 
@@ -54,7 +57,6 @@ private:
 	bool m_bIsStop;
 	QString m_SaveImagePath;
 	int m_image_index;
-
 };
 
 #endif

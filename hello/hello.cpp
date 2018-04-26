@@ -8,6 +8,7 @@
 #include "configuredlg.h"
 #include "ComDialog.h"
 #include "DeltaThread.h"
+#include "ConstParam.h"
 
 
 
@@ -27,6 +28,8 @@ hello::hello(QWidget *parent)
 	connect(ui.OnStop, SIGNAL(triggered()), this, SLOT(OnStop()));
 	connect(ui.Configure, SIGNAL(triggered()), this, SLOT(OnConfigure()));
 	connect(ui.ShutDown, SIGNAL(triggered()), this, SLOT(OnShutDown()));
+	connect(ui.ShutDown, SIGNAL(triggered()), this, SLOT(OnShutDown()));
+	connect(ui.Configure2, SIGNAL(triggered()), this, SLOT(OnTest()));
 	//右端界面对应功能
 	connect(ui.btn_debug, SIGNAL(clicked()), this, SLOT(DebugDialog()));
 	connect(ui.btn_start, SIGNAL(clicked()), this, SLOT(OnStart()));
@@ -46,14 +49,7 @@ hello::hello(QWidget *parent)
 	FullScreenShow();	//全屏显示
 
 	m_camera_thread1 = nullptr;
-	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, "[0] USB3_CMOS_8.8M(1)", this);
-	QVariant value;
-	ReadConfigure("config.ini", "Config", "ImagePath3", value);
-	m_camera_thread1->setSaveImagePath(value.toString());
-	connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveImage(void*)));
-	connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-	connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
-	m_camera_thread1->start();
+	m_camera_thread2 = nullptr;
 
 }
 
@@ -125,9 +121,25 @@ void hello::OnOneHandle()
 
 void hello::OnShutDown()
 {
-	m_camera_thread1->stop();
-	m_camera_thread1 = nullptr;
-	
+	if (Camera_Thread::IsExistCameraId(AreaCameraId))
+	{
+		if (m_camera_thread1->isRunning())
+		{
+			m_camera_thread1->stop();
+			m_camera_thread1->wait();
+		}
+	}
+
+	if (Camera_Thread::IsExistCameraId(LineCameraId))
+	{
+		if (m_camera_thread2->isRunning())
+		{
+			m_camera_thread2->stop();
+			m_camera_thread2->wait();
+		}
+	}
+
+		
 	//close();
 	qApp->quit();
 }
@@ -223,26 +235,28 @@ void hello::OnOpen()
 	}
 }
 
-//void hello::Open()
-//{
-//	QString path = QFileDialog::getOpenFileName(this, tr("Open ALL"), "", tr("Image Files(*.gll)"));
-//
-//	//ReadConfigure("")
-//	if (path.length() != 0 &&
-//		(path.contains(".bmp") || path.contains(".jpg")))
-//	{
-//		ReadImage(&m_Image, path.toLocal8Bit().constData());
-//		DispPic(m_Image,LeftView);
-//	}
-//}
-
 
 void hello::DispPic(HImage& Image, LocationView location)
 {
 	int width = Image.Width();
 	int height = Image.Height();
 	HTuple* pWindowHandle = nullptr;
-	if (location == LeftView)
+	switch (location)
+	{
+		case RightView:
+			pWindowHandle = &m_RightWindowHandle;;
+			break;
+
+		case LeftView:
+			pWindowHandle = &m_LeftWindowHandle;
+			break;
+
+		case MiddleView:
+			pWindowHandle = &m_MiddleWindowHandle;
+			break;
+
+	}
+	/*if (location == LeftView)
 	{
 		pWindowHandle = &m_LeftWindowHandle;
 	}
@@ -253,56 +267,55 @@ void hello::DispPic(HImage& Image, LocationView location)
 	else
 	{
 		pWindowHandle = &m_RightWindowHandle;
-	}
+	}*/
 
 	if (*pWindowHandle == 0)
 	{
-		if (location == RightView)
-		{
-			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), pWindowHandle);
-		}
-		else if (location == MiddleView)
-		{
-			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), pWindowHandle);
-		}
-		else
-		{
-			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.LeftPicView->winId(), pWindowHandle);
-		}
 		
+		SetOpenWindowHandle(Image, pWindowHandle, location);
 		DispObj(Image, *pWindowHandle);
-		float scaleX = width / 1024.0;
-		float scaleY = height / 4000.0;
-		if (scaleY > scaleX)
-		{
-			HSCROLL_HEIGHT_RightPic(4000);
-		}
-		else
-		{
-			HSCROLL_HEIGHT_RightPic(500);
-		}
+		SetPicViewScroll(width, height, location);
+
 	}
 	else
 	{
 		ClearWindow(*pWindowHandle);
 		CloseWindow(*pWindowHandle);
 
-		if (location == RightView)
-		{
-			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), pWindowHandle);
-		}
-		else if (location == MiddleView)
-		{
-			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), pWindowHandle);
-		}
-		else
-		{
-			CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.LeftPicView->winId(), pWindowHandle);
-		}
+		SetOpenWindowHandle(Image, pWindowHandle, location);
+		DispObj(Image, *pWindowHandle);
+		SetPicViewScroll(width, height, location);
+	}
 
-		DispImage(Image, *pWindowHandle);
-		float scaleX = width / 1024.0;
-		float scaleY = height / 4000.0;
+}
+
+//指定显示窗口的句柄
+void hello::SetOpenWindowHandle(HImage& Image, HTuple* pWindowHandle, LocationView location)
+{
+	switch (location)
+	{
+	case RightView:
+		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), pWindowHandle);
+		break;
+
+	case LeftView:
+		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.LeftPicView->winId(), pWindowHandle);
+		break;
+
+	case MiddleView:
+		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.MiddlePicView->winId(), pWindowHandle);
+		break;
+	}
+}
+
+//指定视图的滚动条长度
+void hello::SetPicViewScroll(int width, int height, LocationView location)
+{
+	float scaleX = width / 1024.0;
+	float scaleY = height / 4000.0;
+	switch (location)
+	{
+	case RightView:
 		if (scaleY > scaleX)
 		{
 			HSCROLL_HEIGHT_RightPic(4000);
@@ -311,9 +324,30 @@ void hello::DispPic(HImage& Image, LocationView location)
 		{
 			HSCROLL_HEIGHT_RightPic(500);
 		}
+		break;
+	case LeftView:
+		if (scaleY > scaleX)
+		{
+			HSCROLL_HEIGHT_LeftPic(4000);
+		}
+		else
+		{
+			HSCROLL_HEIGHT_LeftPic(500);
+		}
+		break;
+	case MiddleView:
+		if (scaleY > scaleX)
+		{
+			HSCROLL_HEIGHT_MiddlePic(4000);
+		}
+		else
+		{
+			HSCROLL_HEIGHT_MiddlePic(500);
+		}
+		break;
 	}
-
 }
+
 
 const HalconCpp::HTuple hello::GetViewWindowHandle(LocationView location)
 {
@@ -397,14 +431,50 @@ void hello::ChangeMode(int mode)
 	}
 }
 
-void hello::receiveImage(void* image)
+
+
+//******
+void hello::receiveLeftImage(void* image)
 {
 	HImage ima = *(HImage*)image;
 	DispPic(ima, LeftView);
+}
+
+void hello::receiveRightImage(void* image)
+{
+	HImage ima = *(HImage*)image;
+	DispPic(ima, RightView);
+}
+
+void hello::receiveMiddleImage(void* image)
+{
+	HImage ima = *(HImage*)image;
+	DispPic(ima, MiddleView);
 }
 
 void hello::receiveError(QString error)
 {
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::warning(this, G2U("错误"), error);
+}
+
+void hello::OnTest()
+{
+	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCameraId, this);
+	QVariant value;
+	ReadConfigure("config.ini", "Config", "ImagePath3", value);
+	m_camera_thread1->setSaveImagePath(value.toString());
+	connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
+	connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
+	m_camera_thread1->start();
+
+	/*m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId, this);
+	ReadConfigure("config.ini", "Config", "ImagePath4", value);
+	m_camera_thread2->setSaveImagePath(value.toString());
+	connect(m_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
+	connect(m_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_camera_thread2, SIGNAL(finished()), m_camera_thread2, SLOT(deleteLater()));
+	m_camera_thread2->start();*/
+
 }

@@ -18,6 +18,7 @@
 
 #define HSCROLL_HEIGHT_RightPic(height) ui.scrollAreaWidgetContentsRight->setMinimumHeight(height)	//显示右边区域高度，用于显示出滚动条
 #define HSCROLL_HEIGHT_LeftPic(height) ui.scrollAreaWidgetContentsLeft->setMinimumHeight(height)	//显示左边区域高度，用于显示出滚动条
+#define HSCROLL_HEIGHT_MiddlePic(height) ui.scrollAreaWidgetContentsMiddle->setMinimumHeight(height)	//显示中间区域高度，用于显示出滚动条
 
 #define HIDDLE_DIALOG_BUTTON setWindowFlags(Qt::ToolTip);	//隐藏标题栏，比如最小化，最大化、关闭按钮
 

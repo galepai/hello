@@ -39,9 +39,7 @@ public slots:
 	void OnLineRun();
 	void OnConfigure();
 	void OnShutDown();	//关闭系统
-	void handleResults(bool is_bad);
-	void readyDataSlot(QByteArray str);
-	void TableSrolltoBottom(); 
+	void OnTest();
 
 	/***********右端电气功能************/
 	void DebugDialog();
@@ -49,14 +47,21 @@ public slots:
 	void OnStart();
 	void OnStop();
 
-	/////
-	void receiveImage(void* image);
+	//
+	void handleResults(bool is_bad);
+	void readyDataSlot(QByteArray str);
+	void TableSrolltoBottom();
+	void receiveLeftImage(void* image);
+	void receiveMiddleImage(void* image);
+	void receiveRightImage(void* image);
 	void receiveError(QString error);
 
 private:
 	void FullScreenShow();	//全屏显示
 	void DispPic(HImage& path, LocationView location);	//显示图片在指定位置视图
 	const HalconCpp::HTuple GetViewWindowHandle(LocationView location);	//返回指定视图的窗口Handle（Halcon显示图片用）
+	void SetOpenWindowHandle(HImage& Image, HTuple* pWindowHandle, LocationView location);	//指定显示窗口的句柄
+	void SetPicViewScroll(int width, int height, LocationView location); //指定视图的滚动条长度
 
 	QStandardItemModel* Right_dataModel;
 
@@ -73,7 +78,7 @@ signals:
 
 public:
 	Camera_Thread* m_camera_thread1;
-	
+	Camera_Thread* m_camera_thread2;
 };
 
 #endif // HELLO_H
