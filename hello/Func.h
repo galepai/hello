@@ -55,6 +55,8 @@ std::vector<short> Parse_Delta_Ascii(const std::string& data);	//解析功能,还未完
 
 bool CreaImagetDir();
 
+
+
 enum LocationView
 {
 	LeftView,

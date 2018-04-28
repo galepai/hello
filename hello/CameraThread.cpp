@@ -14,6 +14,7 @@ Camera_Thread::Camera_Thread(ConnectionType connection_type,QString CameraId, QO
 {
 	m_image_index = 1;
 	m_CameraIdlist.append(CameraId);
+	m_pGrabber = nullptr;
 }
 
 void Camera_Thread::run()
@@ -27,12 +28,12 @@ void Camera_Thread::run()
 	while (!m_bIsStop)
 	{
 		//Image = pGrabber->GrabImageAsync(-1);
-		Image = pGrabber->GrabImage();
+		Image = m_pGrabber->GrabImage();
 		//GrabImageAsync(&Image, hv_AcqHandle, -1);
 		signal_image(&Image);
-		QueueSaveImage(Image, 50);
+		QueueSaveImage(Image, m_MaxNum);
 	}
-	pGrabber->Clear();
+	m_pGrabber->Clear();
 	//CloseFramegrabber(hv_AcqHandle);
 	
 }
@@ -40,8 +41,8 @@ void Camera_Thread::run()
 Camera_Thread::~Camera_Thread()
 {
 	m_CameraIdlist.removeAll(m_CameraId);
-	delete pGrabber;
-	pGrabber = nullptr;
+	delete m_pGrabber;
+	m_pGrabber = nullptr;
 }
 
 bool Camera_Thread::IsExistCameraId(QString cameraId)
@@ -57,30 +58,48 @@ QString Camera_Thread::CameraId() const
 
 bool Camera_Thread::OpenCamera()
 {
-	pGrabber = new HalconCpp::HFramegrabber;
+	m_pGrabber = new HalconCpp::HFramegrabber;
 
 	try{
 		switch (m_connectionType)
 		{
 		case Camera_Thread::DirectShow:
-			pGrabber->OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "rgb", -1, "false", "default", \
+			m_pGrabber->OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "rgb", -1, "false", "default", \
 				m_CameraId.toStdString().c_str(), 0, -1);
-			pGrabber->SetFramegrabberParam("exposure", -1);
+			m_pGrabber->SetFramegrabberParam("exposure", -1);
 			//pGrabber->GrabImageStart(-1);
 			break;
 
 		case Camera_Thread::GigEVision:
-		//	pGrabber->OpenFramegrabber("GigEVision", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
-			//	m_CameraId.toStdString().c_str(), 0, -1);
-			pGrabber->OpenFramegrabber("GigEVision", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
-				"003053255252_Basler_raL204848gm", 0, -1);
-			pGrabber->SetFramegrabberParam("PixelFormat", "Mono8");
-			pGrabber->SetFramegrabberParam("Height", 10000);
-			pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
-			pGrabber->SetFramegrabberParam("TriggerMode", "Off");
-			//pGrabber->SetFramegrabberParam ( "ExposureTimeRaw", 550);
-			//pGrabber->SetFramegrabberParam ( "AcquisitionLineRateAbs", 12285.0);
-			pGrabber->GrabImageStart(-1);
+			m_pGrabber->OpenFramegrabber("GigEVision", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
+				m_CameraId.toStdString().c_str(), 0, -1);
+			//m_pGrabber->OpenFramegrabber("GigEVision", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
+				//"003053255252_Basler_raL204848gm", 0, -1);
+			if (m_CameraId.contains("Basler"))
+			{
+				m_pGrabber->SetFramegrabberParam("PixelFormat", "Mono8");
+				m_pGrabber->SetFramegrabberParam("Height", 10000);
+				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
+				m_pGrabber->SetFramegrabberParam("TriggerMode", "Off");
+				m_pGrabber->SetFramegrabberParam("ExposureTimeRaw", 550);
+				m_pGrabber->SetFramegrabberParam("AcquisitionLineRateAbs", 12285.0);
+			}
+			else if (m_CameraId.contains("DALSA"))
+			{
+				m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
+				m_pGrabber->SetFramegrabberParam("ExposureTime", 50.0);
+				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
+				m_pGrabber->SetFramegrabberParam("TriggerMode", "On");
+				m_pGrabber->SetFramegrabberParam("TriggerSource", "Line1");
+				m_pGrabber->SetFramegrabberParam("TriggerActivation", "RisingEdge");
+				m_pGrabber->SetFramegrabberParam("LineSelector", "Line1");
+				m_pGrabber->SetFramegrabberParam("LineFormat", "SingleEnded");
+				m_pGrabber->SetFramegrabberParam("lineDetectionLevel", "Threshold_for_5V");
+				m_pGrabber->SetFramegrabberParam("Height", 10000);
+				m_pGrabber->SetFramegrabberParam("grab_timeout", -1);
+			}
+
+			m_pGrabber->GrabImageStart(-1);
 			break;
 
 		default:

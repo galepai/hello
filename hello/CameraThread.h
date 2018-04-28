@@ -30,6 +30,7 @@ public:
 	
 	QString CameraId() const;
 	void setSaveImagePath(const QString& path);
+	void setSaveImageNum(int MaxNum = 50){ m_MaxNum = MaxNum; };
 	void stop();
 
 	static QStringList m_CameraIdlist;
@@ -53,10 +54,10 @@ signals:
 private:
 	QString m_CameraId;
 	ConnectionType m_connectionType;
-	HFramegrabber* pGrabber;
+	HFramegrabber* m_pGrabber;
 	bool m_bIsStop;
 	QString m_SaveImagePath;
-	int m_image_index;
+	int m_image_index, m_MaxNum;
 };
 
 #endif
