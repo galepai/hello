@@ -140,17 +140,32 @@ std::string Delta_Ascii_CR(const std::string& Slave, const std::string& Function
 }
 
 //解析功能，还未完善...
-std::vector<short> Parse_Delta_Ascii(const std::string& data)
+std::vector<bool> Parse_Delta_Ascii(const std::string& data)
 {
 	//data = ':00050520FF00D7\r\n';
-	
+	//":00010500000A6E0082\r\n"		//读取Y00-Y47返回的数据
+	//":000205042AA8A2057C\r\n"		//读取X00-X47返回的数据
+
 	std::string temp;
 	int len = data.length() / 2;
-	std::vector<short> nums;
+	std::vector<bool> nums;
 	if (data[0] == ':' && data[data.length() - 1] == '\n')
 	{
 		temp = data.substr(1, data.length() - 5);
-
+		std::string function_code = temp.substr(2, 2);
+		if (function_code == "01")	//读取Y00 - Y47返回的数据
+		{
+			std::string byte_count = temp.substr(4, 2);
+			int count = atoi(byte_count.c_str());
+			temp = data.substr(7, count*2);
+		}
+		else if (function_code == "02")	//读取X00 - X47返回的数据
+		{
+			std::string byte_count = temp.substr(4, 2);
+			int count = atoi(byte_count.c_str());
+			temp = data.substr(7, count * 2);
+		}
+		
 		for (int index = 0; index < temp.length() / 2; index++)
 		{
 			unsigned char high = temp[index * 2];
@@ -165,13 +180,28 @@ std::vector<short> Parse_Delta_Ascii(const std::string& data)
 			else
 				low = low - 0x37;
 
-			nums.push_back(high + low);
+			unsigned char byte = high + low;
+			unsigned char bit = 0x01;
+			for (int i = 0; i < 8; i++)
+			{
+				if ((byte&bit) == bit)
+				{
+					nums.push_back(true);
+					bit <<= 1;
+				}	
+				else
+				{
+					nums.push_back(false);
+					bit <<= 1;
+				}
+			}
 		}
 	}
 	else
 	{
 		// 数据不完整或者数据有错
 	}
+	
 	
 	return nums;
 }

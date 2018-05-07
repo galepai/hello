@@ -51,6 +51,10 @@ hello::hello(QWidget *parent)
 	m_camera_thread1 = nullptr;
 	m_camera_thread2 = nullptr;
 
+	std::string str = ":000205042AA8A2057C\r\n";
+
+	Parse_Delta_Ascii(str);
+
 }
 
 //全屏显示
@@ -388,11 +392,13 @@ void hello::OnStart()
 
 	//设置默认查询队列
 	Delta_Thread::setQueryMode(Delta_Thread::QueryMode::DefalutQuene);
-	Delta_Thread::AddDefaultQueueInfo("00050500FF00");
+	/*Delta_Thread::AddDefaultQueueInfo("00050500FF00");
 	Delta_Thread::AddDefaultQueueInfo("00050501FF00");
 	Delta_Thread::AddDefaultQueueInfo("00050502FF00");
 	Delta_Thread::AddDefaultQueueInfo("00050503FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050504FF00");
+	Delta_Thread::AddDefaultQueueInfo("00050504FF00");*/
+	Delta_Thread::AddDefaultQueueInfo("000105000028");	//读X00-X47
+	Delta_Thread::AddDefaultQueueInfo("000204000028");	//读Y00-Y47
 
 	if (!Delta_Thread::GetSerialPort())
 	{

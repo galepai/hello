@@ -50,7 +50,7 @@ void QtReadFile(const QString& path_filename,  QStringList& readinfo_list);
 std::string Gen_Delta_Ascii_CR(const std::string& data);	//生成台达ASCII模式下的LRC
 std::string Delta_Ascii_CR(const std::string& data);	//生成台达ASCII模式下的完整data,包括:+data+LRC+\r\n
 std::string Delta_Ascii_CR(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);	//生成台达ASCII模式下的完整data,包括:+data+LRC+\r\n
-std::vector<short> Parse_Delta_Ascii(const std::string& data);	//解析功能,还未完善
+std::vector<bool> Parse_Delta_Ascii(const std::string& data);	//解析功能,还未完善
 
 
 bool CreaImagetDir();
