@@ -121,7 +121,7 @@ void hello::OnOneHandle()
 
 void hello::OnShutDown()
 {
-	if (Camera_Thread::IsExistCameraId(AreaCameraId))
+	if (Camera_Thread::IsExistCameraId(AreaCameraId2))
 	{
 		if (m_camera_thread1->isRunning())
 		{
@@ -139,7 +139,8 @@ void hello::OnShutDown()
 		}
 	}
 
-		
+	//m_camera_thread1->destroyed();
+	//m_camera_thread1->exit();
 	//close();
 	qApp->quit();
 }
@@ -460,7 +461,7 @@ void hello::receiveError(QString error)
 
 void hello::OnTest()
 {
-	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCameraId, this);
+	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCameraId2, this);
 	QVariant value;
 	ReadConfigure("config.ini", "Config", "ImagePath3", value);
 	m_camera_thread1->setSaveImagePath(value.toString());
@@ -470,12 +471,12 @@ void hello::OnTest()
 	connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
 	m_camera_thread1->start();
 
-	m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId, this);
+	/*m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId, this);
 	ReadConfigure("config.ini", "Config", "ImagePath4", value);
 	m_camera_thread2->setSaveImagePath(value.toString());
 	m_camera_thread1->setSaveImageNum(50);
 	connect(m_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
 	connect(m_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
 	connect(m_camera_thread2, SIGNAL(finished()), m_camera_thread2, SLOT(deleteLater()));
-	m_camera_thread2->start();
+	m_camera_thread2->start();*/
 }

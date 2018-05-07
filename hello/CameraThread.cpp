@@ -27,11 +27,21 @@ void Camera_Thread::run()
 	HImage Image;
 	while (!m_bIsStop)
 	{
-		//Image = pGrabber->GrabImageAsync(-1);
-		Image = m_pGrabber->GrabImage();
-		//GrabImageAsync(&Image, hv_AcqHandle, -1);
-		signal_image(&Image);
-		QueueSaveImage(Image, m_MaxNum);
+		try{
+			//Image = pGrabber->GrabImageAsync(-1);
+			Image = m_pGrabber->GrabImage();
+			//GrabImageAsync(&Image, hv_AcqHandle, -1);
+			signal_image(&Image);
+			QueueSaveImage(Image, m_MaxNum);
+		}
+		catch (HException& e)
+		{
+			QString error = e.ErrorMessage().Text();
+			if (!m_bIsStop)
+				continue;
+			else
+				break;
+		}	
 	}
 	m_pGrabber->Clear();
 	//CloseFramegrabber(hv_AcqHandle);
@@ -67,7 +77,8 @@ bool Camera_Thread::OpenCamera()
 			m_pGrabber->OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "rgb", -1, "false", "default", \
 				m_CameraId.toStdString().c_str(), 0, -1);
 			m_pGrabber->SetFramegrabberParam("exposure", -1);
-			//pGrabber->GrabImageStart(-1);
+			m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);
+			m_pGrabber->GrabImageStart(-1);
 			break;
 
 		case Camera_Thread::GigEVision:

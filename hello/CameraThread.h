@@ -35,7 +35,7 @@ public:
 
 	static QStringList m_CameraIdlist;
 	static bool IsExistCameraId(QString cameraId);
-
+	
 protected:
 	virtual void run() Q_DECL_OVERRIDE;
 
