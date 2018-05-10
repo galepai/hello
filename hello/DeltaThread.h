@@ -24,6 +24,7 @@ public:
 		LoopOneQueue,
 		DefalutQuene,	//默认队列反复循环查询
 		OneQueryToDefalutQuene,	//查询一次后,切换到默认队列查询
+		OneQuery,	//查询一次，阻塞下次有数据再查询
 	};
 
 	explicit Delta_Thread(QObject *parent = 0);

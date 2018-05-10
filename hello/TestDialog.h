@@ -34,6 +34,10 @@ private:
 public slots:
 	void ChangeStyle();
 	void CloseWindow();
+	void OnShuiPingLeft();
+	void OnShuiPingRight();
+	void OnHandOpen();
+	void OnHandClose();
 };
 
 #endif // TestDialog_H

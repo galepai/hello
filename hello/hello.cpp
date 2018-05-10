@@ -35,11 +35,13 @@ hello::hello(QWidget *parent)
 	connect(ui.btn_start, SIGNAL(clicked()), this, SLOT(OnStart()));
 	connect(ui.btn_stop, SIGNAL(clicked()), this, SLOT(OnStop()));
 	connect(ui.verticalSlider_mode, SIGNAL(valueChanged(int)), this, SLOT(ChangeMode(int)));
+	ui.btn_debug->setEnabled(false);
+	ui.btn_stop->setEnabled(false);
 
 	WriteCurrenDateTime("config.ini", "Config", "OpenProgramTime");  //不支持中文写入配置文件
 	
 	SetRightTableView();
-	
+
 	//定时刷新列表滚动条至底部
 	QTimer* timer = new QTimer(this);
 	QObject::connect(timer, SIGNAL(timeout()), this, SLOT(TableSrolltoBottom()));
@@ -50,11 +52,10 @@ hello::hello(QWidget *parent)
 
 	m_camera_thread1 = nullptr;
 	m_camera_thread2 = nullptr;
-
+	QTime time;
+	
 	std::string str = ":000205042AA8A2057C\r\n";
-
-	Parse_Delta_Ascii(str);
-
+	std::vector<bool> X_Status = Parse_Delta_Ascii(str);
 }
 
 //全屏显示

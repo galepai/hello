@@ -2,6 +2,7 @@
 #include "ui_TestDialog.h"
 #include "DeltaThread.h"
 #include "Func.h"
+#include "ConstParam.h"
 #include <QPushButton>
 #include <QLineEdit>
 #include <QPainter>
@@ -13,6 +14,12 @@ TestDialog::TestDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 	connect(ui->btn_return, SIGNAL(clicked()), this, SLOT(CloseWindow()));
+	connect(ui->btn_shuiping_zhuashou_left, SIGNAL(clicked()), this, SLOT(OnShuiPingLeft()));
+	connect(ui->btn_shuiping_zhuashou_right, SIGNAL(clicked()), this, SLOT(OnShuiPingRight()));
+	connect(ui->btn_hand_open, SIGNAL(clicked()), this, SLOT(OnHandOpen()));
+	connect(ui->btn_hand_close, SIGNAL(clicked()), this, SLOT(OnHandClose()));
+
+
 	QList<QPushButton *> pPushButtons = findChildren<QPushButton *>();
 	for (int i = 0; i < pPushButtons.count(); i++)
 	{
@@ -22,6 +29,27 @@ TestDialog::TestDialog(QWidget *parent) :
 	m_pTimer = new QTimer(this);
 	connect(m_pTimer, SIGNAL(timeout()), this, SLOT(update()));
 	m_pTimer->start(200);
+
+	QVariant value;
+	ReadConfigure("config.ini", "Port", "Port", value);
+	QString PortName = value.toString();
+	ReadConfigure("config.ini", "Port", "Baud", value);
+	int Baud = value.toInt();
+	ReadConfigure("config.ini", "Port", "DataBits", value);
+	int DataBits = value.toInt();
+
+	//设置默认查询队列
+	Delta_Thread::setQueryMode(Delta_Thread::QueryMode::DefalutQuene);
+	Delta_Thread::AddDefaultQueueInfo("000204000028");	//读Y00-Y47
+
+	if (!Delta_Thread::GetSerialPort())
+	{
+		Delta_Thread* thread = new Delta_Thread;
+		thread->InitSerialPortInfo(PortName.toStdString().c_str(), Baud, QSerialPort::Parity::EvenParity, QSerialPort::DataBits(DataBits));
+		connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+		connect(thread, SIGNAL(emitdata(QByteArray)), this, SLOT(readyDataSlot(QByteArray)));
+		thread->start();
+	}
 		
 	HIDDLE_DIALOG_BUTTON
 }
@@ -38,8 +66,35 @@ void TestDialog::ChangeStyle()
 
 void TestDialog::CloseWindow()
 {
+	//Delta_Thread::AddOneQueueInfo("000204000028");	//读Y00-Y47
+	Delta_Thread::StopRun(true);
 	close();
 }
+
+void TestDialog::OnShuiPingLeft()
+{
+	Delta_Thread::AddOneQueueInfo(SHUIPING_ZHUASHOU_LEFT_ON);
+	Delta_Thread::AddOneQueueInfo(SHUIPING_ZHUASHOU_LEFT_OFF);
+}
+
+void TestDialog::OnShuiPingRight()
+{
+	Delta_Thread::AddOneQueueInfo(SHUIPING_ZHUASHOU_RIGHT_ON);	
+	Delta_Thread::AddOneQueueInfo(SHUIPING_ZHUASHOU_RIGHT_OFF);	
+}
+
+void TestDialog::OnHandOpen()
+{
+	Delta_Thread::AddOneQueueInfo(SHUIPING_HAND_OPEN_ON);
+	Delta_Thread::AddOneQueueInfo(SHUIPING_HAND_OPEN_OFF);
+}
+
+void TestDialog::OnHandClose()
+{
+	Delta_Thread::AddOneQueueInfo(SHUIPING_HAND_CLOSE_ON);
+	Delta_Thread::AddOneQueueInfo(SHUIPING_HAND_CLOSE_OFF);
+}
+
 
 TestDialog::~TestDialog()
 {

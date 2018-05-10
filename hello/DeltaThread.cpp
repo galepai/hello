@@ -185,6 +185,12 @@ void Delta_Thread::run()
 				m_Add_Queue.pop();
 				break;
 
+			case OneQuery:
+
+				m_write_string = m_Add_Queue.front();
+				m_Add_Queue.pop();
+				break;
+
 			default:
 				break;
 		}
@@ -256,13 +262,13 @@ bool Delta_Thread::receiveData()
 			is_continue_recive = false;
 			m_SerialPort->clear();
 
-			
 			if (m_QueryMode == OneQueryToDefalutQuene)
 			{
 					m_QueryMode = DefalutQuene;		
 			}
 
 			emit emitdata(m_total_data);
+			//Parse_Delta_Ascii(m_total_data.toStdString());
 			qDebug() << "recivedata : " << m_total_data;
 			m_total_data.clear();
 		}

@@ -4,6 +4,7 @@
 #include <QSettings>
 #include <QDir>
 #include <vector>
+#include <bitset>
 
 //配置文件中写入当前时间 Use QSetting slower than QFile 
 void WriteCurrenDateTime(const QString& file, const QString& beginGroup, const QString& SetValueName)
@@ -181,7 +182,7 @@ std::vector<bool> Parse_Delta_Ascii(const std::string& data)
 				low = low - 0x37;
 
 			unsigned char byte = high + low;
-			unsigned char bit = 0x01;
+			/*unsigned char bit = 0x01;
 			for (int i = 0; i < 8; i++)
 			{
 				if ((byte&bit) == bit)
@@ -194,14 +195,26 @@ std::vector<bool> Parse_Delta_Ascii(const std::string& data)
 					nums.push_back(false);
 					bit <<= 1;
 				}
-			}
+			}*/
+
+			std::bitset<8> bar(byte);
+			for (int i = 0; i < 8; i++)
+			{
+				if (bar[i] == 1)
+				{
+					nums.push_back(true);
+				}
+				else
+				{
+					nums.push_back(false);
+				}
+			}		
 		}
 	}
 	else
 	{
 		// 数据不完整或者数据有错
 	}
-	
 	
 	return nums;
 }
