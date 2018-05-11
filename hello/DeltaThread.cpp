@@ -143,9 +143,12 @@ void Delta_Thread::run()
 	if (!m_SerialPort->open(QSerialPort::ReadWrite))
 	{
 		qDebug() << "Com open error,please check Com setting! ";
+		delete m_SerialPort;
+		m_SerialPort = nullptr;
 		return;
 	}
 	
+	m_bIsStop = false;
 	while (!m_bIsStop)
 	{
 

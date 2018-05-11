@@ -27,6 +27,9 @@ public:
 		const QBrush& textcolor, int RowHeight = 20);
 	void SetRightTableView();
 
+	//*********图像处理线程**************/
+	void HandleImageThread(HImage& ima, LocationView view);
+
 public slots:
 
 	/***********菜单栏功能************/

@@ -20,8 +20,8 @@
 #define HSCROLL_HEIGHT_LeftPic(height) ui.scrollAreaWidgetContentsLeft->setMinimumHeight(height)	//显示左边区域高度，用于显示出滚动条
 #define HSCROLL_HEIGHT_MiddlePic(height) ui.scrollAreaWidgetContentsMiddle->setMinimumHeight(height)	//显示中间区域高度，用于显示出滚动条
 
-#define HIDDLE_DIALOG_BUTTON setWindowFlags(Qt::ToolTip);	//隐藏标题栏，比如最小化，最大化、关闭按钮
-
+//#define HIDDLE_DIALOG_BUTTON setWindowFlags(Qt::ToolTip);	//隐藏标题栏，比如最小化，最大化、关闭按钮
+#define HIDDLE_DIALOG_BUTTON setWindowFlags(Qt::SplashScreen);	//隐藏标题栏，比如最小化，最大化、关闭按钮
 
 void WriteCurrenDateTime(const QString& file, const QString& beginGroup, const QString& SetValueName);	//配置文件中写入当前时间 Use QSetting,slower than QFile 
 void WriteConfigure(const QString& file, const QString& beginGroup, const QString& SetValueName, const QString& Param);	//配置文件中写入设置信息

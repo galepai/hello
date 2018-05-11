@@ -33,8 +33,6 @@ void HandlePicThread::run()
 		{*/
 			isbad = true;
 		//}
-		
-
 		emit resultReady(isbad);
 	}
 		

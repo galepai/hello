@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QLineEdit>
+#include <vector>
 
 namespace Ui {
 class TestDialog;
@@ -20,6 +21,8 @@ public:
 private:
 	Ui::TestDialog *ui;
 	QTimer* m_pTimer;
+	std::vector<bool> m_Y_States;
+	std::vector<bool> m_X_States;
 	virtual void paintEvent(QPaintEvent *event);
 
 	void setBtnQss(QPushButton *btn,
@@ -32,12 +35,19 @@ private:
 	void updateButtonStatu(QPushButton* PushButton, bool status);
 
 public slots:
+	void readyDataSlot(QByteArray str);
 	void ChangeStyle();
 	void CloseWindow();
-	void OnShuiPingLeft();
-	void OnShuiPingRight();
-	void OnHandOpen();
-	void OnHandClose();
+	void OnZhuaShouLeft();	//抓手左
+	void OnZhuaShouRight();	//抓手右
+	void OnZhuaShouUp();	//抓手上
+	void OnZhuaShouDown();	//抓手下
+	void OnHandOpen();	//手指开
+	void OnHandClose();	//手指关
+	void OnBoShouUp();	//拨手伸
+	void OnBoShouDown();	//拨手缩
+	void OnBoShouShiPingUp();	//拨手左
+	void OnBoShouShiPingDown();	//拨手右
 };
 
 #endif // TestDialog_H

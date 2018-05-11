@@ -17,400 +17,6 @@
    <iconset resource="hello.qrc">
     <normaloff>:/logo/Resources/fivision.ico</normaloff>:/logo/Resources/fivision.ico</iconset>
   </property>
-  <widget class="QPushButton" name="btn3">
-   <property name="geometry">
-    <rect>
-     <x>340</x>
-     <y>160</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>抽风机启动</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn4">
-   <property name="geometry">
-    <rect>
-     <x>250</x>
-     <y>160</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>给料机停止</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn1">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>160</y>
-     <width>91</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>抛光电机停止</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn2">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>160</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>输送带启动</string>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn3_2">
-   <property name="geometry">
-    <rect>
-     <x>710</x>
-     <y>160</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>挡料气缸3闭</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn4_2">
-   <property name="geometry">
-    <rect>
-     <x>620</x>
-     <y>160</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>挡料气缸2闭</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn1_2">
-   <property name="geometry">
-    <rect>
-     <x>430</x>
-     <y>160</y>
-     <width>91</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>吹嘴气阀闭</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn2_2">
-   <property name="geometry">
-    <rect>
-     <x>530</x>
-     <y>160</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>挡料气缸1闭</string>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn3_3">
-   <property name="geometry">
-    <rect>
-     <x>810</x>
-     <y>270</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>下压气缸关</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn4_3">
-   <property name="geometry">
-    <rect>
-     <x>300</x>
-     <y>270</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>手指气缸关</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn4_4">
-   <property name="geometry">
-    <rect>
-     <x>720</x>
-     <y>270</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>拨手气缸关</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn1_3">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>270</y>
-     <width>111</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>抓手垂直气缸升</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn2_3">
-   <property name="geometry">
-    <rect>
-     <x>180</x>
-     <y>270</y>
-     <width>111</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>抓手水平气缸缩</string>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn1_4">
-   <property name="geometry">
-    <rect>
-     <x>510</x>
-     <y>270</y>
-     <width>91</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>前推模组1停止</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn2_4">
-   <property name="geometry">
-    <rect>
-     <x>610</x>
-     <y>270</y>
-     <width>101</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>前推模组2停止</string>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn3_4">
-   <property name="geometry">
-    <rect>
-     <x>390</x>
-     <y>270</y>
-     <width>111</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>旋转垂直气缸升</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn3_5">
-   <property name="geometry">
-    <rect>
-     <x>150</x>
-     <y>380</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>筛选气缸缩</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn4_5">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>380</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>旋转电机停止</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn2_5">
-   <property name="geometry">
-    <rect>
-     <x>260</x>
-     <y>380</y>
-     <width>111</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>拨手多位气缸伸</string>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn2_6">
-   <property name="geometry">
-    <rect>
-     <x>260</x>
-     <y>440</y>
-     <width>111</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>拨手多位气缸缩</string>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="radioButton">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>410</y>
-     <width>61</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>2</string>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="radioButton_2">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>440</y>
-     <width>61</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>1</string>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="radioButton_3">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>470</y>
-     <width>61</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>0</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>380</y>
-     <width>54</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>位置</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btn3_6">
-   <property name="geometry">
-    <rect>
-     <x>470</x>
-     <y>420</y>
-     <width>80</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>相机触发</string>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
   <widget class="QPushButton" name="btn_return">
    <property name="geometry">
     <rect>
@@ -430,56 +36,176 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="btn_shuiping_zhuashou_left">
+  <widget class="QPushButton" name="btn_zhuashou_left">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>50</y>
+     <x>50</x>
+     <y>110</y>
      <width>91</width>
      <height>50</height>
     </rect>
    </property>
    <property name="text">
-    <string>水平抓手左</string>
+    <string>抓手左移</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="btn_shuiping_zhuashou_right">
+  <widget class="QPushButton" name="btn_zhuashou_right">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>50</y>
+     <x>160</x>
+     <y>110</y>
      <width>91</width>
      <height>50</height>
     </rect>
    </property>
    <property name="text">
-    <string>水平抓手右</string>
+    <string>抓手右移</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btn_hand_close">
    <property name="geometry">
     <rect>
-     <x>390</x>
-     <y>50</y>
+     <x>290</x>
+     <y>150</y>
      <width>91</width>
      <height>50</height>
     </rect>
    </property>
    <property name="text">
-    <string>手指紧</string>
+    <string>手指夹紧</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btn_hand_open">
    <property name="geometry">
     <rect>
-     <x>280</x>
+     <x>290</x>
+     <y>80</y>
+     <width>91</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>手指松开</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_boshou_down">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>170</y>
+     <width>91</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>拨手退回</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_boshou_up">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
      <y>50</y>
      <width>91</width>
      <height>50</height>
     </rect>
    </property>
    <property name="text">
-    <string>手指松</string>
+    <string>拨手伸出</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_boshou_shuiping_down">
+   <property name="geometry">
+    <rect>
+     <x>580</x>
+     <y>110</y>
+     <width>91</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>拨手水平左</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_boshou_shuiping_up">
+   <property name="geometry">
+    <rect>
+     <x>690</x>
+     <y>110</y>
+     <width>91</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>拨手水平右</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_zhuashou_up">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>50</y>
+     <width>91</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>抓手上升</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_zhuashou_down">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>170</y>
+     <width>91</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>抓手下降</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>520</y>
+     <width>54</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Agency FB</family>
+     <pointsize>12</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>IN</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>520</y>
+     <width>54</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Agency FB</family>
+     <pointsize>12</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>OUT</string>
    </property>
   </widget>
  </widget>

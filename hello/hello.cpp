@@ -28,7 +28,6 @@ hello::hello(QWidget *parent)
 	connect(ui.OnStop, SIGNAL(triggered()), this, SLOT(OnStop()));
 	connect(ui.Configure, SIGNAL(triggered()), this, SLOT(OnConfigure()));
 	connect(ui.ShutDown, SIGNAL(triggered()), this, SLOT(OnShutDown()));
-	connect(ui.ShutDown, SIGNAL(triggered()), this, SLOT(OnShutDown()));
 	connect(ui.Configure2, SIGNAL(triggered()), this, SLOT(OnTest()));
 	//右端界面对应功能
 	connect(ui.btn_debug, SIGNAL(clicked()), this, SLOT(DebugDialog()));
@@ -126,28 +125,34 @@ void hello::OnOneHandle()
 
 void hello::OnShutDown()
 {
-	if (Camera_Thread::IsExistCameraId(AreaCameraId2))
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(this, G2U("系统"), G2U("确认退出系统"));
+	if (reply == QMessageBox::StandardButton::Yes)
 	{
-		if (m_camera_thread1->isRunning())
+		if (Camera_Thread::IsExistCameraId(AreaCamera880Id))
 		{
-			m_camera_thread1->stop();
-			m_camera_thread1->wait();
+			if (m_camera_thread1->isRunning())
+			{
+				m_camera_thread1->stop();
+				m_camera_thread1->wait();
+			}
 		}
-	}
 
-	if (Camera_Thread::IsExistCameraId(LineCameraId))
-	{
-		if (m_camera_thread2->isRunning())
+		if (Camera_Thread::IsExistCameraId(LineCameraId))
 		{
-			m_camera_thread2->stop();
-			m_camera_thread2->wait();
+			if (m_camera_thread2->isRunning())
+			{
+				m_camera_thread2->stop();
+				m_camera_thread2->wait();
+			}
 		}
-	}
 
-	//m_camera_thread1->destroyed();
-	//m_camera_thread1->exit();
-	//close();
-	qApp->quit();
+		//m_camera_thread1->destroyed();
+		//m_camera_thread1->exit();
+		//close();
+		qApp->quit();
+	}
+	
 }
 
 void hello::OnConfigure()
@@ -172,6 +177,8 @@ void hello::OnLineRun()
 	ReadConfigure("config.ini", "Port", "Baud", Value);
 	int baud = Value.toInt();
 	statusBar()->showMessage(port + "," + Value.toString());
+
+
 
 }
 
@@ -381,7 +388,7 @@ void hello::DebugDialog()
 
 //启动
 void hello::OnStart()
-{
+{/*
 	ui.btn_start->setEnabled(false);
 	QVariant value;
 	ReadConfigure("config.ini", "Port", "Port", value);
@@ -400,7 +407,7 @@ void hello::OnStart()
 	Delta_Thread::AddDefaultQueueInfo("00050504FF00");*/
 	Delta_Thread::AddDefaultQueueInfo("000105000028");	//读X00-X47
 	Delta_Thread::AddDefaultQueueInfo("000204000028");	//读Y00-Y47
-
+	/*
 	if (!Delta_Thread::GetSerialPort())
 	{
 		Delta_Thread* thread = new Delta_Thread;
@@ -412,6 +419,7 @@ void hello::OnStart()
 		ui.btn_debug->setEnabled(false);
 		ui.verticalSlider_mode->setEnabled(false);
 	}
+	*/
 }
 
 //停止
@@ -446,12 +454,22 @@ void hello::receiveLeftImage(void* image)
 {
 	HImage ima = *(HImage*)image;
 	DispPic(ima, LeftView);
+
+	/*HandlePicThread* m_pHandlePicThread = new HandlePicThread(this);
+	m_pHandlePicThread->m_Image = ima;
+	m_pHandlePicThread->m_WindowHandle = GetViewWindowHandle(LeftView);
+
+	connect(m_pHandlePicThread, SIGNAL(resultReady(bool)), this, SLOT(handleResults(bool)));
+	connect(m_pHandlePicThread, SIGNAL(finished()), m_pHandlePicThread, SLOT(deleteLater()));
+	m_pHandlePicThread->start();*/
+	HandleImageThread(ima, LeftView);
 }
 
 void hello::receiveRightImage(void* image)
 {
 	HImage ima = *(HImage*)image;
 	DispPic(ima, RightView);
+	
 }
 
 void hello::receiveMiddleImage(void* image)
@@ -468,7 +486,7 @@ void hello::receiveError(QString error)
 
 void hello::OnTest()
 {
-	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCameraId2, this);
+	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCamera880Id, this);
 	QVariant value;
 	ReadConfigure("config.ini", "Config", "ImagePath3", value);
 	m_camera_thread1->setSaveImagePath(value.toString());
@@ -486,4 +504,15 @@ void hello::OnTest()
 	connect(m_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
 	connect(m_camera_thread2, SIGNAL(finished()), m_camera_thread2, SLOT(deleteLater()));
 	m_camera_thread2->start();*/
+}
+
+void hello::HandleImageThread(HImage& ima, LocationView view)
+{
+	HandlePicThread* m_pHandlePicThread = new HandlePicThread(this);
+	m_pHandlePicThread->m_Image = ima;
+	m_pHandlePicThread->m_WindowHandle = GetViewWindowHandle(view);
+
+	connect(m_pHandlePicThread, SIGNAL(resultReady(bool)), this, SLOT(handleResults(bool)));
+	connect(m_pHandlePicThread, SIGNAL(finished()), m_pHandlePicThread, SLOT(deleteLater()));
+	m_pHandlePicThread->start();
 }
