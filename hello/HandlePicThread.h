@@ -14,7 +14,7 @@ public:
 	explicit HandlePicThread(QObject *parent = 0)
 		: QThread(parent)
 	{
-		qDebug() << "Worker Thread : " << QThread::currentThreadId();
+		//qDebug() << "Worker Thread : " << QThread::currentThreadId();
 	}
 
 

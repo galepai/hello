@@ -263,8 +263,8 @@ void QtReadFile(const QString& path_filename, QStringList& readinfo_list)
 	file.close();
 }
 
-//生成保存图像，以日期做为文件夹（内含子文件夹），例如在当前路径“images/180424”
-bool CreaImagetDir()
+//生成保存图像文件夹，以日期做为文件夹（内含子文件夹），例如在当前路径“images/180424”
+bool CreateImagetDir()
 {
 	QString parent_dir_path = "images";
 	QDate date;
@@ -274,7 +274,7 @@ bool CreaImagetDir()
 	if (!dir.exists())
 	{
 		QDir dir1;
-		QStringList path_list = { currentDate, currentDate + "/aal", 
+		QStringList path_list = { currentDate, 
 			currentDate + "/camera1",
 			currentDate + "/camera2", 
 			currentDate + "/camera3", 

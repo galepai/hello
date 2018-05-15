@@ -17,14 +17,14 @@
 
 void HandlePicThread::run()
 {
-	qDebug() << "Worker Run Thread : " << QThread::currentThreadId();
+	//qDebug() << "Worker Run Thread : " << QThread::currentThreadId();
 
 	if (m_Image.Key() != 0)
 	{
 		bool isbad = false;
 		
 		HObject Region;
-		Threshold(m_Image, &Region, 128, 255);
+		Threshold(m_Image, &Region, 0, 10);
 		SetDraw(m_WindowHandle, "margin");
 		SetColor(m_WindowHandle, "red");
 		DispObj(Region, m_WindowHandle);

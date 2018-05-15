@@ -51,10 +51,10 @@ hello::hello(QWidget *parent)
 
 	m_camera_thread1 = nullptr;
 	m_camera_thread2 = nullptr;
-	QTime time;
 	
-	std::string str = ":000205042AA8A2057C\r\n";
-	std::vector<bool> X_Status = Parse_Delta_Ascii(str);
+	//std::string str = ":000205042AA8A2057C\r\n";
+	//std::vector<bool> X_Status = Parse_Delta_Ascii(str);
+
 }
 
 //全屏显示
@@ -87,7 +87,7 @@ void hello::SetRightTableView()
 //列表滚动条至底部
 void hello::TableSrolltoBottom()
 {
-
+		
 	if (!ui.tableView_right->hasFocus())
 		ui.tableView_right->scrollToBottom();
 
@@ -238,14 +238,33 @@ void hello::OnOpen()
 {
 
 	QString path = QFileDialog::getOpenFileName(this, tr("Open Image"), "", tr("Image Files(*.jpg *.png *.bmp)"));
-	
-	if (path.length() != 0 && 
-		(path.contains(".bmp") || path.contains(".jpg"))) 
+
+	if (path.contains("camera1") || path.contains("camera2"))
 	{
-		ReadImage(&m_Image, path.toLocal8Bit().constData());
-		DispPic(m_Image,RightView);
-		WriteConfigure("0001.all", "Pic_Path", "GB_Pic", path);
+		int i =path.lastIndexOf('/');
+		QString ImageName = path.toStdString().substr(i, path.length() - 1).c_str();
+		QString tempPath = path.remove(ImageName);
+		i = tempPath.lastIndexOf('/');
+		QString DateName = tempPath.toStdString().substr(0, i+1).c_str();
+		
+		QString ImagePath = DateName + "camera1" + ImageName;
+		ReadImage(&m_Image, ImagePath.toLocal8Bit().constData());
+		DispPic(m_Image, LeftView);
+
+		ImagePath = DateName + "camera2" + ImageName;
+		ReadImage(&m_Image, ImagePath.toLocal8Bit().constData());
+		DispPic(m_Image, RightView);
 	}
+	else
+	{
+		if (path.length() != 0 &&
+			(path.contains(".bmp") || path.contains(".jpg")))
+		{
+			ReadImage(&m_Image, path.toLocal8Bit().constData());
+			DispPic(m_Image, RightView);
+		}
+	}
+	
 }
 
 
@@ -292,10 +311,10 @@ void hello::DispPic(HImage& Image, LocationView location)
 	}
 	else
 	{
-		ClearWindow(*pWindowHandle);
-		CloseWindow(*pWindowHandle);
+		//ClearWindow(*pWindowHandle);
+		//CloseWindow(*pWindowHandle);
 
-		SetOpenWindowHandle(Image, pWindowHandle, location);
+		//SetOpenWindowHandle(Image, pWindowHandle, location);
 		DispObj(Image, *pWindowHandle);
 		SetPicViewScroll(width, height, location);
 	}
@@ -454,14 +473,6 @@ void hello::receiveLeftImage(void* image)
 {
 	HImage ima = *(HImage*)image;
 	DispPic(ima, LeftView);
-
-	/*HandlePicThread* m_pHandlePicThread = new HandlePicThread(this);
-	m_pHandlePicThread->m_Image = ima;
-	m_pHandlePicThread->m_WindowHandle = GetViewWindowHandle(LeftView);
-
-	connect(m_pHandlePicThread, SIGNAL(resultReady(bool)), this, SLOT(handleResults(bool)));
-	connect(m_pHandlePicThread, SIGNAL(finished()), m_pHandlePicThread, SLOT(deleteLater()));
-	m_pHandlePicThread->start();*/
 	HandleImageThread(ima, LeftView);
 }
 
@@ -486,24 +497,28 @@ void hello::receiveError(QString error)
 
 void hello::OnTest()
 {
-	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCamera880Id, this);
 	QVariant value;
-	ReadConfigure("config.ini", "Config", "ImagePath3", value);
-	m_camera_thread1->setSaveImagePath(value.toString());
+	ReadConfigure("config.ini", "Config", "ImagePath1", value);
+
+	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCamera880Id, this);
+	m_camera_thread1->setSaveDatePath(value.toString());
+	m_camera_thread1->setSaveImageDirName("Camera1");
+	m_camera_thread1->setAalConfigureName("Camera1");
 	m_camera_thread1->setSaveImageNum(50);
 	connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
 	connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
 	connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
 	m_camera_thread1->start();
 
-	/*m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId, this);
-	ReadConfigure("config.ini", "Config", "ImagePath4", value);
-	m_camera_thread2->setSaveImagePath(value.toString());
-	m_camera_thread1->setSaveImageNum(50);
+	m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId, this);
+	m_camera_thread2->setSaveDatePath(value.toString());
+	m_camera_thread2->setSaveImageDirName("Camera2");
+	m_camera_thread2->setAalConfigureName("Camera2");
+	m_camera_thread2->setSaveImageNum(50);
 	connect(m_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
 	connect(m_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
 	connect(m_camera_thread2, SIGNAL(finished()), m_camera_thread2, SLOT(deleteLater()));
-	m_camera_thread2->start();*/
+	m_camera_thread2->start();
 }
 
 void hello::HandleImageThread(HImage& ima, LocationView view)

@@ -29,12 +29,17 @@ public:
 	~Camera_Thread();
 	
 	QString CameraId() const;
-	void setSaveImagePath(const QString& path);
+	void setSaveDatePath(const QString& path);
 	void setSaveImageNum(int MaxNum = 50){ m_MaxNum = MaxNum; };
+	void setSaveImageDirName(const QString& path);
+	void setAalConfigureName(const QString& str){m_ConfigureName = str; };
+
 	void stop();
 
 	static QStringList m_CameraIdlist;
 	static bool IsExistCameraId(QString cameraId);
+
+	HTuple m_WindowHandle;
 	
 protected:
 	virtual void run() Q_DECL_OVERRIDE;
@@ -56,7 +61,7 @@ private:
 	ConnectionType m_connectionType;
 	HFramegrabber* m_pGrabber;
 	bool m_bIsStop;
-	QString m_SaveImagePath;
+	QString m_SaveDatePath, m_SaveImageDirName, m_ConfigureName;
 	int m_image_index, m_MaxNum;
 };
 

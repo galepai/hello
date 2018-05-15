@@ -8,10 +8,11 @@
 #ifndef CONSTPARAM_H
 #define CONSTPARAM_H
 
-static const char* AreaCamera880Id = "[0] USB3_CMOS_8.8M";
+static const char* AreaCamera880Id = "[0] USB3_CMOS_8.8M(2)";
 static const char* AreaCameraId = "[0] USB3_CMOS_8.8M(1)";
 static const char* AreaCameraId2 = "[0] USB3_CMOS_1.3M_M(2)";
-static const char* LineCameraId = "003053255252_Basler_raL204848gm";
+//static const char* LineCameraId = "003053255252_Basler_raL204848gm";
+static const char* LineCameraId = "00010dc2ae11_TeledyneDALSA_LineaM20487um";
 
 //	抓手水平左移
 static const char* ZHUASHOU_LEFT_ON = "000508E2FF00";  //M226 SET 抓手水平左移
