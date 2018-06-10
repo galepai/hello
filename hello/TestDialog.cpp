@@ -26,6 +26,20 @@ TestDialog::TestDialog(QWidget *parent) :
 	connect(ui->btn_hand_open, SIGNAL(clicked()), this, SLOT(OnHandOpen()));
 	connect(ui->btn_hand_close, SIGNAL(clicked()), this, SLOT(OnHandClose()));
 
+	connect(ui->btn_vision_up, SIGNAL(clicked()), this, SLOT(OnVisionUp()));
+	connect(ui->btn_vision_down, SIGNAL(clicked()), this, SLOT(OnVisionDown()));
+	connect(ui->btn_rotate_start, SIGNAL(clicked()), this, SLOT(OnRotateStart()));
+	connect(ui->btn_rotate_stop, SIGNAL(clicked()), this, SLOT(OnRotateStop()));
+
+	connect(ui->btn_paoguang, SIGNAL(clicked()), this, SLOT(OnPaoGuang()));
+
+	connect(ui->btn_manual_mode, SIGNAL(clicked()), this, SLOT(OnManualMode()));
+	connect(ui->btn_auto_mode, SIGNAL(clicked()), this, SLOT(OnAutoMode()));
+	connect(ui->btn_auto_start, SIGNAL(clicked()), this, SLOT(OnAutoStart()));
+
+	connect(ui->btn_distance_confirm, SIGNAL(clicked()), this, SLOT(OnDistanceConfirm()));
+	connect(ui->btn_time_confirm, SIGNAL(clicked()), this, SLOT(OnTimeConfirm()));
+
 
 	QList<QPushButton *> pPushButtons = findChildren<QPushButton *>();
 	for (int i = 0; i < pPushButtons.count(); i++)
@@ -50,6 +64,7 @@ TestDialog::TestDialog(QWidget *parent) :
 	Delta_Thread::AddDefaultQueueInfo("000105000028");	//读Y00-Y47
 	Delta_Thread::AddDefaultQueueInfo("000204000028");	//读X00-X47
 
+
 	if (!Delta_Thread::GetSerialPort())
 	{
 		Delta_Thread* thread = new Delta_Thread;
@@ -59,7 +74,7 @@ TestDialog::TestDialog(QWidget *parent) :
 		thread->start();
 	}
 		
-
+	Delta_Thread::AddOneQueueInfo("000310C80006");	//读D200-D205 000310C80006
 	HIDDLE_DIALOG_BUTTON
 }
 
@@ -138,6 +153,135 @@ void TestDialog::OnBoShouShiPingDown()
 {
 	Delta_Thread::AddOneQueueInfo(BOSHOU_SHUIPING_DOWN_ON);
 	Delta_Thread::AddOneQueueInfo(BOSHOU_SHUIPING_DOWN_OFF);
+}
+
+void TestDialog::OnVisionUp()
+{
+	Delta_Thread::AddOneQueueInfo(VISION_UP_ON);
+	Delta_Thread::AddOneQueueInfo(VISION_UP_OFF);
+}
+
+void TestDialog::OnVisionDown()
+{
+	Delta_Thread::AddOneQueueInfo(VISION_DOWN_ON);
+	Delta_Thread::AddOneQueueInfo(VISION_DOWN_OFF);
+}
+
+void TestDialog::OnRotateStart()	//电平信号
+{
+	Delta_Thread::AddOneQueueInfo(ROTATE_START_ON);
+}
+
+void TestDialog::OnRotateStop()
+{
+	Delta_Thread::AddOneQueueInfo(ROTATE_STOP_ON);
+	Delta_Thread::AddOneQueueInfo(ROTATE_STOP_OFF);
+	Delta_Thread::AddOneQueueInfo(ROTATE_START_OFF);
+}
+
+void TestDialog::OnPaoGuang()
+{
+	Delta_Thread::AddOneQueueInfo(PAOGUANG_ON);
+	Delta_Thread::AddOneQueueInfo(PAOGUANG_OFF);
+}
+
+void TestDialog::OnManualMode()	//手动模式
+{
+	Delta_Thread::AddOneQueueInfo(MANUAL_MODE);
+	Delta_Thread::AddOneQueueInfo(AUTO_STOP);
+	
+}
+
+void TestDialog::OnAutoMode()	//自动模式
+{
+	Delta_Thread::AddOneQueueInfo(AUTO_MODE);
+	ui->btn_manual_mode->setEnabled(false);
+}
+
+void TestDialog::OnAutoStart()	//自动启动
+{
+	if (ui->btn_auto_start->text() == G2U("自动启动"))
+	{
+		Delta_Thread::AddOneQueueInfo(AUTO_START);
+		ui->btn_auto_start->setText(G2U("停止"));	
+	}
+	else
+	{
+		Delta_Thread::AddOneQueueInfo(AUTO_STOP);
+		ui->btn_auto_start->setText(G2U("自动启动"));
+		ui->btn_manual_mode->setEnabled(true);
+	}
+}
+ 
+void TestDialog::OnAutoStop()	//自动启动
+{
+	
+}
+
+void TestDialog::OnDistanceConfirm() //距离设置
+{
+	QString Distance = ui->lineEdit_distance_set->text();
+	ushort  distance = Distance.toInt();
+
+	std::vector<ushort> data;
+	ushort first = distance / 4096;
+	ushort leave = distance % 4096;
+	ushort second = leave / 256;
+	leave = leave % 256;
+	ushort third = leave / 16;
+	leave = leave % 16;
+	ushort forth = leave;
+	data.push_back(first);
+	data.push_back(second);
+	data.push_back(third);
+	data.push_back(forth);
+	
+	QString dist("0000");
+	for (int index = 0; index < data.size(); index++)
+	{
+		if (data[index] < 10)
+			dist[index] = 0x30 + data[index];
+		else
+			dist[index] = 0x37 + data[index];
+
+	}
+
+	Delta_Thread::AddOneQueueInfo((QString(SET_DISTANCE) + dist).toStdString());
+
+	Delta_Thread::AddOneQueueInfo("000310C80006");	//读D200-D205 000310C80006
+}
+
+void TestDialog::OnTimeConfirm()	//时间设置
+{
+	QString Time = ui->lineEdit_time_set->text();
+	ushort  time = Time.toInt();
+
+	std::vector<ushort> data;
+	ushort first = time / 4096;
+	ushort leave = time % 4096;
+	ushort second = leave / 256;
+	leave = leave % 256;
+	ushort third = leave / 16;
+	leave = leave % 16;
+	ushort forth = leave;
+	data.push_back(first);
+	data.push_back(second);
+	data.push_back(third);
+	data.push_back(forth);
+
+	QString ti("0000");
+	for (int index = 0; index < data.size(); index++)
+	{
+		if (data[index] < 10)
+			ti[index] = 0x30 + data[index];
+		else
+			ti[index] = 0x37 + data[index];
+
+	}
+
+	Delta_Thread::AddOneQueueInfo((QString(SET_TIME) + ti).toStdString());
+
+	Delta_Thread::AddOneQueueInfo("000310C80006");	//读D200-D205 000310C80006
 }
 
 TestDialog::~TestDialog()
@@ -273,12 +417,26 @@ void TestDialog::readyDataSlot(QByteArray str)
 			m_Y_States = Parse_Delta_Ascii(str.toStdString());
 
 		if (function_code == "02")
+		{
 			m_X_States = Parse_Delta_Ascii(str.toStdString());
+		}
+			
+		if (function_code == "03")
+		{
+			m_D_Register = Parse_Delta_Ascii_03(str.toStdString());	
+			if (!m_D_Register.empty())
+			{
+				ui->lineEdit_distance->setText(QString("%1").arg(m_D_Register[0]));
+				ui->lineEdit_time->setText(QString("%1").arg(m_D_Register[4]));
+			}	
+		}
+			
 	}
 	else
 	{
 		//std::vector<bool> temp(40, false);
 		m_Y_States.clear();
 		m_X_States.clear();
+		m_D_Register.clear();
 	}
 }

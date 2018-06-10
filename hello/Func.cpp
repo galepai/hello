@@ -5,6 +5,7 @@
 #include <QDir>
 #include <vector>
 #include <bitset>
+#include <qdebug.h>
 
 //配置文件中写入当前时间 Use QSetting slower than QFile 
 void WriteCurrenDateTime(const QString& file, const QString& beginGroup, const QString& SetValueName)
@@ -216,6 +217,74 @@ std::vector<bool> Parse_Delta_Ascii(const std::string& data)
 		// 数据不完整或者数据有错
 	}
 	
+	return nums;
+}
+
+std::vector<ushort> Parse_Delta_Ascii_03(const std::string& data)
+{
+	//data = ':000310C8000223\r\n'; 写入PLC的数据,读取D200-D201
+	//":000304006E00008B\r\n"	//读取D200-D201返回的数据 04代表字节数,006E代表D200的32数据,0000代表D201的32数据
+
+	std::string temp;
+	int len = data.length() / 2;
+	std::vector<ushort> nums;
+	if (data[0] == ':' && data[data.length() - 1] == '\n')
+	{
+		temp = data.substr(1, data.length() - 5);
+		std::string function_code = temp.substr(2, 2);
+		std::string byte_count = temp.substr(4, 2);
+		unsigned char high = byte_count[0];
+		unsigned char low = byte_count[1];
+		if (high<0x3a)
+			high = (high - 0x30) << 4;
+		else
+			high = (high - 0x37) << 4;
+
+		if (low<0x3a)
+			low = low - 0x30;
+		else
+			low = low - 0x37;
+
+		unsigned char byte = high + low;
+		int count = byte;
+		temp = data.substr(7, count * 2);
+
+		std::vector<unsigned char> total_char;
+		for (int index = 0; index < temp.length() / 2; index++)
+		{
+			unsigned char high = temp[index * 2];
+			unsigned char low = temp[index * 2 + 1];
+			if (high<0x3a)
+				high = (high - 0x30) << 4;
+			else
+				high = (high - 0x37) << 4;
+
+			if (low<0x3a)
+				low = low - 0x30;
+			else
+				low = low - 0x37;
+
+			unsigned char byte = high + low;
+			total_char.push_back(byte);
+		}
+
+		
+		int DataNum = total_char.size() / 2;
+		
+		for (int index = 0; index < DataNum; index++)
+		{
+			ushort Hi = total_char[index * 2];
+			Hi = Hi * 0x100;
+			ushort Lo = total_char[index * 2 + 1];
+			ushort Data = Hi + Lo;
+			nums.push_back(Data);
+		}
+	}
+	else
+	{
+		// 数据不完整或者数据有错
+	}
+
 	return nums;
 }
 

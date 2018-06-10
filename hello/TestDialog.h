@@ -23,6 +23,8 @@ private:
 	QTimer* m_pTimer;
 	std::vector<bool> m_Y_States;
 	std::vector<bool> m_X_States;
+	std::vector<ushort> m_D_Register;
+
 	virtual void paintEvent(QPaintEvent *event);
 
 	void setBtnQss(QPushButton *btn,
@@ -48,6 +50,20 @@ public slots:
 	void OnBoShouDown();	//拨手缩
 	void OnBoShouShiPingUp();	//拨手左
 	void OnBoShouShiPingDown();	//拨手右
+
+	void OnVisionUp();	//视觉升
+	void OnVisionDown();	//视觉降
+	void OnRotateStart();	//开始旋转
+	void OnRotateStop();	//停止旋转
+	void OnPaoGuang();	//停止旋转
+
+	void OnManualMode();	//手动模式
+	void OnAutoMode();	//自动模式
+	void OnAutoStart();	//自动启动
+	void OnAutoStop();	//自动停止
+
+	void OnDistanceConfirm(); //距离设置
+	void OnTimeConfirm();	//时间设置
 };
 
 #endif // TestDialog_H

@@ -269,8 +269,10 @@ bool Delta_Thread::receiveData()
 			{
 					m_QueryMode = DefalutQuene;		
 			}
-
-			emit emitdata(m_total_data);
+			if (m_total_data[0] == ':' && m_total_data[m_total_data.size() - 1] == '\n')
+			{
+				emit emitdata(m_total_data);
+			}
 			//Parse_Delta_Ascii(m_total_data.toStdString());
 			qDebug() << "recivedata : " << m_total_data;
 			m_total_data.clear();

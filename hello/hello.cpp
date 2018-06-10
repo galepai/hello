@@ -52,8 +52,9 @@ hello::hello(QWidget *parent)
 	m_camera_thread1 = nullptr;
 	m_camera_thread2 = nullptr;
 	
-	//std::string str = ":000205042AA8A2057C\r\n";
-	//std::vector<bool> X_Status = Parse_Delta_Ascii(str);
+	//std::string str = ":00030C03E8000000000000003200005B\r\n";
+	std::string str = ":00030C043F00000000000000320";
+	std::vector<ushort> X_Status = Parse_Delta_Ascii_03(str);
 
 }
 
@@ -500,15 +501,15 @@ void hello::OnTest()
 	QVariant value;
 	ReadConfigure("config.ini", "Config", "ImagePath1", value);
 
-	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCamera880Id, this);
-	m_camera_thread1->setSaveDatePath(value.toString());
-	m_camera_thread1->setSaveImageDirName("Camera1");
-	m_camera_thread1->setAalConfigureName("Camera1");
-	m_camera_thread1->setSaveImageNum(50);
-	connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
-	connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-	connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
-	m_camera_thread1->start();
+	//m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCamera880Id, this);
+	//m_camera_thread1->setSaveDatePath(value.toString());
+	//m_camera_thread1->setSaveImageDirName("Camera1");
+	//m_camera_thread1->setAalConfigureName("Camera1");
+	//m_camera_thread1->setSaveImageNum(50);
+	//connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
+	//connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	//connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
+	//m_camera_thread1->start();
 
 	m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId, this);
 	m_camera_thread2->setSaveDatePath(value.toString());
