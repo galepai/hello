@@ -130,21 +130,21 @@ void hello::OnShutDown()
 	reply = QMessageBox::question(this, G2U("系统"), G2U("确认退出系统"));
 	if (reply == QMessageBox::StandardButton::Yes)
 	{
-		if (Camera_Thread::IsExistCameraId(AreaCamera880Id))
-		{
-			if (m_camera_thread1->isRunning())
-			{
-				m_camera_thread1->stop();
-				m_camera_thread1->wait();
-			}
-		}
-
-		if (Camera_Thread::IsExistCameraId(LineCameraId))
+		if (Camera_Thread::IsExistCameraId(LineCameraId_Basler2))
 		{
 			if (m_camera_thread2->isRunning())
 			{
 				m_camera_thread2->stop();
 				m_camera_thread2->wait();
+			}
+		}
+
+		if (Camera_Thread::IsExistCameraId(LineCameraId_Basler1))
+		{
+			if (m_camera_thread1->isRunning())
+			{
+				m_camera_thread1->stop();
+				m_camera_thread1->wait();
 			}
 		}
 
@@ -481,6 +481,7 @@ void hello::receiveRightImage(void* image)
 {
 	HImage ima = *(HImage*)image;
 	DispPic(ima, RightView);
+	HandleImageThread(ima, RightView);
 	
 }
 
@@ -511,15 +512,26 @@ void hello::OnTest()
 	//connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
 	//m_camera_thread1->start();
 
-	m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId, this);
+	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Basler1, this);
+	m_camera_thread1->setSaveDatePath(value.toString());
+	m_camera_thread1->setSaveImageDirName("Camera1");
+	m_camera_thread1->setAalConfigureName("Camera1");
+	m_camera_thread1->setSaveImageNum(50);
+	connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
+	connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
+	m_camera_thread1->start();
+
+	m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Basler2, this);
 	m_camera_thread2->setSaveDatePath(value.toString());
 	m_camera_thread2->setSaveImageDirName("Camera2");
 	m_camera_thread2->setAalConfigureName("Camera2");
 	m_camera_thread2->setSaveImageNum(50);
-	connect(m_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
+	connect(m_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
 	connect(m_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
 	connect(m_camera_thread2, SIGNAL(finished()), m_camera_thread2, SLOT(deleteLater()));
 	m_camera_thread2->start();
+
 }
 
 void hello::HandleImageThread(HImage& ima, LocationView view)

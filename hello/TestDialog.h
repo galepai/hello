@@ -62,8 +62,19 @@ public slots:
 	void OnAutoStart();	//自动启动
 	void OnAutoStop();	//自动停止
 
+	//单步
+	void OnForward();
+	void OnBackWard();
+	void OnRotateStepStart();
+	void OnRotateStepStop();
+
 	void OnDistanceConfirm(); //距离设置
 	void OnTimeConfirm();	//时间设置
+
+	void OnDetectEnd();	//检测结束
+	void OnResultGood();	//检测结果合格
+	void OnResultBad();	//检测结果不合格
+
 };
 
 #endif // TestDialog_H

@@ -84,7 +84,7 @@ std::string Delta_Ascii_CR(const std::string& data)
 
 	std::string all_data(":");
 	all_data += data + Gen_Delta_Ascii_CR(data) + "\r\n";
-
+	
 	return all_data;
 }
 

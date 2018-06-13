@@ -37,8 +37,17 @@ TestDialog::TestDialog(QWidget *parent) :
 	connect(ui->btn_auto_mode, SIGNAL(clicked()), this, SLOT(OnAutoMode()));
 	connect(ui->btn_auto_start, SIGNAL(clicked()), this, SLOT(OnAutoStart()));
 
+	connect(ui->btn_forward,SIGNAL(clicked()), this, SLOT(OnForward()));
+	connect(ui->btn_backword, SIGNAL(clicked()), this, SLOT(OnBackWard()));
+	connect(ui->btn_paoguang_rotate_start, SIGNAL(clicked()), this, SLOT(OnRotateStepStart()));
+	connect(ui->btn_paoguang_rotate_stop, SIGNAL(clicked()), this, SLOT(OnRotateStepStop()));
+
 	connect(ui->btn_distance_confirm, SIGNAL(clicked()), this, SLOT(OnDistanceConfirm()));
 	connect(ui->btn_time_confirm, SIGNAL(clicked()), this, SLOT(OnTimeConfirm()));
+
+	connect(ui->btn_detect_end, SIGNAL(clicked()), this, SLOT(OnDetectEnd()));
+	connect(ui->btn_result_good, SIGNAL(clicked()), this, SLOT(OnResultGood()));
+	connect(ui->btn_result_bad, SIGNAL(clicked()), this, SLOT(OnResultBad()));
 
 
 	QList<QPushButton *> pPushButtons = findChildren<QPushButton *>();
@@ -61,8 +70,8 @@ TestDialog::TestDialog(QWidget *parent) :
 
 	//设置默认查询队列
 	Delta_Thread::setQueryMode(Delta_Thread::QueryMode::DefalutQuene);
-	Delta_Thread::AddDefaultQueueInfo("000105000028");	//读Y00-Y47
-	Delta_Thread::AddDefaultQueueInfo("000204000028");	//读X00-X47
+	Delta_Thread::AddDefaultQueueInfo(READ_X_INPUT);	//读X00-X87
+	Delta_Thread::AddDefaultQueueInfo(READ_Y_OUTPUT);	//读Y00-Y67
 
 
 	if (!Delta_Thread::GetSerialPort())
@@ -74,7 +83,12 @@ TestDialog::TestDialog(QWidget *parent) :
 		thread->start();
 	}
 		
-	Delta_Thread::AddOneQueueInfo("000310C80006");	//读D200-D205 000310C80006
+	Delta_Thread::AddOneQueueInfo(READ_TIME_AND_DISTANCE);	//读D200-D205 000310C80006
+
+	ui->lcd_distance->setStyleSheet("color: white;");
+	ui->lcd_time->setStyleSheet("color: white;");
+	//ui->lcd_time->setStyleSheet("border: 1px solid white; color: green; background: silver;");
+	
 	HIDDLE_DIALOG_BUTTON
 }
 
@@ -169,14 +183,15 @@ void TestDialog::OnVisionDown()
 
 void TestDialog::OnRotateStart()	//电平信号
 {
-	Delta_Thread::AddOneQueueInfo(ROTATE_START_ON);
+	Delta_Thread::AddOneQueueInfo(VISION_ROTATE_START_ON);
 }
 
 void TestDialog::OnRotateStop()
 {
-	Delta_Thread::AddOneQueueInfo(ROTATE_STOP_ON);
-	Delta_Thread::AddOneQueueInfo(ROTATE_STOP_OFF);
-	Delta_Thread::AddOneQueueInfo(ROTATE_START_OFF);
+	Delta_Thread::AddOneQueueInfo(VISION_ROTATE_START_OFF);
+	Delta_Thread::AddOneQueueInfo(VISION_ROTATE_STOP_ON);
+	Delta_Thread::AddOneQueueInfo(VISION_ROTATE_STOP_OFF);
+	
 }
 
 void TestDialog::OnPaoGuang()
@@ -189,13 +204,13 @@ void TestDialog::OnManualMode()	//手动模式
 {
 	Delta_Thread::AddOneQueueInfo(MANUAL_MODE);
 	Delta_Thread::AddOneQueueInfo(AUTO_STOP);
-	
+	ui->btn_auto_start->setEnabled(false);
 }
 
 void TestDialog::OnAutoMode()	//自动模式
 {
 	Delta_Thread::AddOneQueueInfo(AUTO_MODE);
-	ui->btn_manual_mode->setEnabled(false);
+	ui->btn_auto_start->setEnabled(true);
 }
 
 void TestDialog::OnAutoStart()	//自动启动
@@ -204,6 +219,7 @@ void TestDialog::OnAutoStart()	//自动启动
 	{
 		Delta_Thread::AddOneQueueInfo(AUTO_START);
 		ui->btn_auto_start->setText(G2U("停止"));	
+		ui->btn_manual_mode->setEnabled(false);
 	}
 	else
 	{
@@ -220,8 +236,8 @@ void TestDialog::OnAutoStop()	//自动启动
 
 void TestDialog::OnDistanceConfirm() //距离设置
 {
-	QString Distance = ui->lineEdit_distance_set->text();
-	ushort  distance = Distance.toInt();
+	
+	ushort  distance = static_cast<ushort>(ui->doubleSpinBox_distance->value() * 10);
 
 	std::vector<ushort> data;
 	ushort first = distance / 4096;
@@ -236,8 +252,10 @@ void TestDialog::OnDistanceConfirm() //距离设置
 	data.push_back(third);
 	data.push_back(forth);
 	
-	QString dist("0000");
-	for (int index = 0; index < data.size(); index++)
+	int length = data.size();
+	QString dist;
+	dist.resize(length);
+	for (int index = 0; index < length; index++)
 	{
 		if (data[index] < 10)
 			dist[index] = 0x30 + data[index];
@@ -248,14 +266,16 @@ void TestDialog::OnDistanceConfirm() //距离设置
 
 	Delta_Thread::AddOneQueueInfo((QString(SET_DISTANCE) + dist).toStdString());
 
-	Delta_Thread::AddOneQueueInfo("000310C80006");	//读D200-D205 000310C80006
+	Delta_Thread::AddOneQueueInfo(READ_TIME_AND_DISTANCE);	//读D200-D205 000310C80006
 }
 
 void TestDialog::OnTimeConfirm()	//时间设置
 {
-	QString Time = ui->lineEdit_time_set->text();
-	ushort  time = Time.toInt();
+	//QString Time = ui->lineEdit_time_set->text();
+	//ui->doubleSpinBox_time->value();
+	ushort  time = static_cast<ushort>(ui->doubleSpinBox_time->value() * 10);
 
+	//std::string DecToHex(ushort num);
 	std::vector<ushort> data;
 	ushort first = time / 4096;
 	ushort leave = time % 4096;
@@ -281,7 +301,25 @@ void TestDialog::OnTimeConfirm()	//时间设置
 
 	Delta_Thread::AddOneQueueInfo((QString(SET_TIME) + ti).toStdString());
 
-	Delta_Thread::AddOneQueueInfo("000310C80006");	//读D200-D205 000310C80006
+	Delta_Thread::AddOneQueueInfo(READ_TIME_AND_DISTANCE);	//读D200-D205 000310C80006
+}
+
+
+void TestDialog::OnDetectEnd()	//检测结束
+{
+	Delta_Thread::AddOneQueueInfo(DETECT_END_ON); 
+	Delta_Thread::AddOneQueueInfo(DETECT_END_OFF);
+}
+
+void TestDialog::OnResultGood()	//检测结果合格
+{
+	Delta_Thread::AddOneQueueInfo(RESULT_GODD);
+}
+
+void TestDialog::OnResultBad() //检测结果不合格
+{
+	Delta_Thread::AddOneQueueInfo(RESULT_BAD);
+
 }
 
 TestDialog::~TestDialog()
@@ -356,9 +394,9 @@ void TestDialog::paintEvent(QPaintEvent *event)
 	int radius = 5;
 	int distance = 15;
 	QPointF x_origin(75, 550);
-	if (m_X_States.size() == 40)
+	if (m_X_States.size() != 0 && m_X_States.size() % 8 == 0)
 	{
-		for (int row = 0; row < 5; row++)
+		for (int row = 0; row < m_X_States.size()/8; row++)
 		{
 			for (int column = 0; column < 8; column++)
 			{
@@ -376,9 +414,9 @@ void TestDialog::paintEvent(QPaintEvent *event)
 	
 	QPointF y_origin(350, 550);
 
-	if (m_Y_States.size() == 40)
+	if (m_Y_States.size() != 0 && m_Y_States.size()%8 == 0)
 	{
-		for (int row = 0; row < 5; row++)
+		for (int row = 0; row < m_Y_States.size()/8; row++)
 		{
 			for (int column = 0; column < 8; column++)
 			{
@@ -426,17 +464,43 @@ void TestDialog::readyDataSlot(QByteArray str)
 			m_D_Register = Parse_Delta_Ascii_03(str.toStdString());	
 			if (!m_D_Register.empty())
 			{
-				ui->lineEdit_distance->setText(QString("%1").arg(m_D_Register[0]));
-				ui->lineEdit_time->setText(QString("%1").arg(m_D_Register[4]));
+				ui->lcd_distance->display(m_D_Register[0] / 10.0);
+				ui->lcd_time->display(m_D_Register[4] / 10.0);
+				ui->doubleSpinBox_distance->setValue(m_D_Register[0] / 10.0);
+				ui->doubleSpinBox_time->setValue(m_D_Register[4] / 10.0);
 			}	
 		}
 			
 	}
 	else
 	{
-		//std::vector<bool> temp(40, false);
 		m_Y_States.clear();
 		m_X_States.clear();
 		m_D_Register.clear();
 	}
+}
+
+
+void TestDialog::OnForward()
+{
+	Delta_Thread::AddOneQueueInfo(FORWARD_ON);
+	Delta_Thread::AddOneQueueInfo(FORWARD_OFF);
+}
+
+void TestDialog::OnBackWard()
+{
+	Delta_Thread::AddOneQueueInfo(BACKWARD_ON);
+	Delta_Thread::AddOneQueueInfo(BACKWARD_OFF);
+}
+
+void TestDialog::OnRotateStepStart()
+{
+	Delta_Thread::AddOneQueueInfo(PAOGUANG_ROTATE_START_ON);
+	Delta_Thread::AddOneQueueInfo(PAOGUANG_ROTATE_START_OFF);
+}
+
+void TestDialog::OnRotateStepStop()
+{
+	Delta_Thread::AddOneQueueInfo(PAOGUANG_ROTATE_STOP_ON);
+	Delta_Thread::AddOneQueueInfo(PAOGUANG_ROTATE_STOP_OFF);
 }

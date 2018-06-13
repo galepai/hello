@@ -4,13 +4,12 @@
 #include <QTime>
 
 QSerialPort* Delta_Thread::m_SerialPort = nullptr;
-//std::string Thread22::str = "";
 std::atomic<std::string> Delta_Thread::m_write_string = "";
 std::atomic<bool> Delta_Thread::m_bIsStop = false;
 std::queue<std::string> Delta_Thread::m_Add_Queue;
 std::queue<std::string> Delta_Thread::m_Default_Queue;
 bool Delta_Thread::m_bIsOneMode = false;
-int Delta_Thread::m_time_lag = 5;
+int Delta_Thread::m_time_lag = 20;
 Delta_Thread::QueryMode Delta_Thread::m_QueryMode = DefalutQuene;
 QMutex Delta_Thread::m_mutex;
 QMutex Delta_Thread::m_mutex_WriteData;
@@ -252,7 +251,7 @@ bool Delta_Thread::receiveData()
 {
 
 	bool is_continue_recive = true;
-	bool is_Clear_m_write_string = false;
+	//bool is_Clear_m_write_string = false;
 
 
 	while (is_continue_recive)
@@ -301,7 +300,7 @@ bool Delta_Thread::receiveData()
 		is_continue_recive = false;
 	}
 	*/
-	return is_Clear_m_write_string;
+	return is_continue_recive;
 }
 
 void Delta_Thread::setOneMode(bool status)

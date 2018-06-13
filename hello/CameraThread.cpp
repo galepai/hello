@@ -42,7 +42,11 @@ void Camera_Thread::run()
 		{
 			QString error = e.ErrorMessage().Text();
 			if (!m_bIsStop)
+			{
+				qDebug() << m_CameraId << error ;
 				continue;
+
+			}		
 			else
 				break;
 		}	
@@ -95,9 +99,10 @@ bool Camera_Thread::OpenCamera()
 				m_pGrabber->SetFramegrabberParam("PixelFormat", "Mono8");
 				m_pGrabber->SetFramegrabberParam("Height", 10000);
 				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
-				m_pGrabber->SetFramegrabberParam("TriggerMode", "Off");
-				m_pGrabber->SetFramegrabberParam("ExposureTimeRaw", 550);
-				m_pGrabber->SetFramegrabberParam("AcquisitionLineRateAbs", 12285.0);
+				m_pGrabber->SetFramegrabberParam("TriggerMode", "On");
+				m_pGrabber->SetFramegrabberParam("ExposureTimeRaw", 700);
+				m_pGrabber->SetFramegrabberParam("AcquisitionLineRateAbs", 10000);
+				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);
 			}
 			else if (m_CameraId.contains("DALSA"))
 			{/*

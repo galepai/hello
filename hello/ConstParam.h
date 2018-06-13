@@ -11,8 +11,11 @@
 static const char* AreaCamera880Id = "[0] USB3_CMOS_8.8M(2)";
 static const char* AreaCameraId = "[0] USB3_CMOS_8.8M(1)";
 static const char* AreaCameraId2 = "[0] USB3_CMOS_1.3M_M(2)";
-//static const char* LineCameraId = "003053255252_Basler_raL204848gm";
-static const char* LineCameraId = "00010dc2ae11_TeledyneDALSA_LineaM20487um";
+static const char* LineCameraId_Basler1= "0030531d42b0_Basler_raL204848gm";	//192.168.2.7
+static const char* LineCameraId_Basler2 = "003053255252_Basler_raL204848gm";	//192.168.3.7
+//static const char* LineCameraId = "00010dc2ae11_TeledyneDALSA_LineaM20487um";
+
+
 
 //	抓手水平左移
 static const char* ZHUASHOU_LEFT_ON = "000508E2FF00";  //M226 SET 抓手水平左移
@@ -54,50 +57,164 @@ static const char* BOSHOU_SHUIPING_UP_OFF = "000508EA0000";  //M234 RST 拨手伸
 static const char* BOSHOU_SHUIPING_DOWN_ON = "000508EBFF00";  //M235 SET 拨手缩
 static const char* BOSHOU_SHUIPING_DOWN_OFF = "000508EB0000";  //M235 RST 拨手缩
 
+
+
+/*******************COM1 从站00*******************/
+/************************************************/
+/***********************************************/
+//static const char* READ_X_INPUT = "000204000048";  //读X00-X87
+//static const char* READ_Y_OUTPUT = "000105000038";  //读Y00-Y67
+//
+////	直线模组前进(自动),自动定时抛光
+//static const char* PAOGUANG_ON = "000508A9FF00";  //M169 SET 直线模组前进,自动定时抛光
+//static const char* PAOGUANG_OFF = "000508A90000";  //M169 RST 直线模组前进,自动定时抛光
+//
+////	视觉升
+//static const char* VISION_UP_ON = "000508A5FF00";  //M165 SET 视觉升
+//static const char* VISION_UP_OFF = "000508A50000";  //M165 RST 视觉升
+//
+////	视觉降
+//static const char* VISION_DOWN_ON = "000508A6FF00";  //M166 SET 视觉降
+//static const char* VISION_DOWN_OFF = "000508A60000";  //M166 RST 视觉降
+//
+////	视觉开始旋转，电平信号
+//static const char* VISION_ROTATE_START_ON = "000508A7FF00";  //M167 SET 视觉开始旋转
+//
+////	视觉停止旋转
+//static const char* VISION_ROTATE_STOP_ON = "000508A8FF00";  //M168 SET 视觉停止旋转
+//static const char* VISION_ROTATE_STOP_OFF = "000508A80000";  //M168 RST 视觉停止旋转
+//static const char* VISION_ROTATE_START_OFF = "000508A70000";  //M167 RST 视觉开始旋转
+//
+////	直线模组前进
+//static const char* FORWARD_ON = "000508ADFF00";  //M173 SET 直线模组前进
+//static const char* FORWARD_OFF = "000508AD0000";  //M173 RST 直线模组前进
+//
+////	直线模组后退
+//static const char* BACKWARD_ON = "000508AEFF00";  //M174 SET 直线模组后退
+//static const char* BACKWARD_OFF = "000508AE0000";  //M174 RST 直线模组后退
+//
+////	抛光电机旋转
+//static const char* PAOGUANG_ROTATE_START_ON = "000508AFFF00";  //M175 SET 抛光电机旋转
+//static const char* PAOGUANG_ROTATE_START_OFF = "000508AF0000";  //M175 RST 抛光电机旋转
+//
+////	抛光电机停止
+//static const char* PAOGUANG_ROTATE_STOP_ON = "000508B0FF00";  //M176 SET 抛光电机停止
+//static const char* PAOGUANG_ROTATE_STOP_OFF = "000508B00000";  //M176 RST 抛光电机停止
+//
+////	读D200-D205,  
+////	返回的D200的16位数据代表直线模组的距离.	(单位:0.1mm),
+////	返回的D202的16位数据代表抛光时间.	(单位:100ms)
+//static const char* READ_TIME_AND_DISTANCE = "000310C80006";  //  读D200-D206,  *返回的D200(10C8)的32位数据代表直线模组的距离.(单位:0.1mm)		*返回的D204的16位数据代表抛光时间.(单位:100ms)
+//
+////	自动模式(电平信号),M115置1为自动
+//static const char* AUTO_MODE = "00050873FF00";  //自动模式(电平信号),M115置1为自动
+//
+////	手动模式(电平信号),M115置0为手动
+//static const char* MANUAL_MODE = "000508730000";  //手动模式(电平信号),M115置0为手动
+//
+////	自动模式启动(电平信号),M116置为1S
+//static const char* AUTO_START = "00050874FF00";  //自动模式启动(电平信号),M116置为1
+//
+////	自动模式停止(电平信号),M116置为0
+//static const char* AUTO_STOP = "000508740000";  //自动模式停止(电平信号),M116置为0
+//
+////	距离设置,D200(10C8) (单位:0.1mm)
+//static const char* SET_DISTANCE = "000610C8";  //距离设置,D200(10C8) (单位:0.1mm)
+//
+////	时间设置,D204(10CC) 单位:100ms
+//static const char* SET_TIME = "000610CC";  //时间设置,D204(10CC) 单位:100ms
+//
+//
+////	检测完成信号,M177
+//static const char* DETECT_END_ON = "000508B1FF00";  //M177 SET 检测完成信号
+//static const char* DETECT_END_OFF = "000508B10000";  //M177 RST 检测完成信号
+//
+////	检测结果GOOD,D240(10F0) 
+//static const char* RESULT_GODD = "000610F00010";  //时间设置,D240(10F0) 1合格
+//
+////	检测结果BAD,D240(10F0)
+//static const char* RESULT_BAD = "000610F00020";  //时间设置,D240(10F0) 0不合格
+//
+
+
+/*********************COM2 站号01*****************/
+/************************************************/
+/***********************************************/
+
+static const char* READ_X_INPUT = "010204000048";  //读X00-X87
+static const char* READ_Y_OUTPUT = "010105000028";  //读Y00-Y67
+
+
+//	直线模组前进(自动),自动定时抛光
+static const char* PAOGUANG_ON = "010508A9FF00";  //M169 SET 直线模组前进,自动定时抛光
+static const char* PAOGUANG_OFF = "010508A90000";  //M169 RST 直线模组前进,自动定时抛光
+
 //	视觉升
-static const char* VISION_UP_ON = "000508A5FF00";  //M165 SET 视觉升
-static const char* VISION_UP_OFF = "000508A50000";  //M165 RST 视觉升
+static const char* VISION_UP_ON = "010508A5FF00";  //M165 SET 视觉升
+static const char* VISION_UP_OFF = "010508A50000";  //M165 RST 视觉升
 
 //	视觉降
-static const char* VISION_DOWN_ON = "000508A6FF00";  //M166 SET 视觉降
-static const char* VISION_DOWN_OFF = "000508A60000";  //M166 RST 视觉降
+static const char* VISION_DOWN_ON = "010508A6FF00";  //M166 SET 视觉降
+static const char* VISION_DOWN_OFF = "010508A60000";  //M166 RST 视觉降
 
-//	开始旋转，电平信号
-static const char* ROTATE_START_ON = "000508A7FF00";  //M167 SET 开始旋转
+//	视觉开始旋转，电平信号
+static const char* VISION_ROTATE_START_ON = "010508A7FF00";  //M167 SET 视觉开始旋转
 
-//	停止旋转
-static const char* ROTATE_STOP_ON = "000508A8FF00";  //M168 SET 停止旋转
-static const char* ROTATE_STOP_OFF = "000508A80000";  //M168 RST 停止旋转
-static const char* ROTATE_START_OFF = "000508A70000";  //M167 RST 开始旋转
+//	视觉停止旋转
+static const char* VISION_ROTATE_STOP_ON = "010508A8FF00";  //M168 SET 视觉停止旋转
+static const char* VISION_ROTATE_STOP_OFF = "010508A80000";  //M168 RST 视觉停止旋转
+static const char* VISION_ROTATE_START_OFF = "010508A70000";  //M167 RST 视觉开始旋转
 
 //	直线模组前进
-static const char* PAOGUANG_ON = "000508A9FF00";  //M169 SET 直线模组前进
-static const char* PAOGUANG_OFF = "000508A90000";  //M169 RST 直线模组前进
+static const char* FORWARD_ON = "010508ADFF00";  //M173 SET 直线模组前进
+static const char* FORWARD_OFF = "010508AD0000";  //M173 RST 直线模组前进
+
+//	直线模组后退
+static const char* BACKWARD_ON = "010508AEFF00";  //M174 SET 直线模组后退
+static const char* BACKWARD_OFF = "010508AE0000";  //M174 RST 直线模组后退
+
+//	抛光电机旋转
+static const char* PAOGUANG_ROTATE_START_ON = "010508AFFF00";  //M175 SET 抛光电机旋转
+static const char* PAOGUANG_ROTATE_START_OFF = "010508AF0000";  //M175 RST 抛光电机旋转
+
+//	抛光电机停止
+static const char* PAOGUANG_ROTATE_STOP_ON = "010508B0FF00";  //M176 SET 抛光电机停止
+static const char* PAOGUANG_ROTATE_STOP_OFF = "010508B00000";  //M176 RST 抛光电机停止
 
 //	读D200-D205,  
 //	返回的D200的16位数据代表直线模组的距离.	(单位:0.1mm),
 //	返回的D202的16位数据代表抛光时间.	(单位:100ms)
-static const char* READ_D_REGISTER = "000310C80006";  //  读D200-D206,  *返回的D200(10C8)的32位数据代表直线模组的距离.(单位:0.1mm)		*返回的D204的16位数据代表抛光时间.(单位:100ms)
-
-////	 读抛光轮时间 D202-D203,  返回的D202的32位数据代表抛光时间.	(单位是100ms)
-//static const char* READ_PAOGUANG_TIME = "000310CA0002";  //读抛光轮时间 D202-D203,  返回的D202的32位数据代表抛光时间.	(单位:100ms)
+static const char* READ_TIME_AND_DISTANCE = "010310C80006";  //  读D200-D206,  *返回的D200(10C8)的32位数据代表直线模组的距离.(单位:0.1mm)		*返回的D204的16位数据代表抛光时间.(单位:100ms)
 
 //	自动模式(电平信号),M115置1为自动
-static const char* AUTO_MODE = "00050873FF00";  //自动模式(电平信号),M115置1为自动
+static const char* AUTO_MODE = "01050873FF00";  //自动模式(电平信号),M115置1为自动
 
 //	手动模式(电平信号),M115置0为手动
-static const char* MANUAL_MODE = "000508730000";  //手动模式(电平信号),M115置0为手动
+static const char* MANUAL_MODE = "010508730000";  //手动模式(电平信号),M115置0为手动
 
 //	自动模式启动(电平信号),M116置为1S
-static const char* AUTO_START = "00050874FF00";  //自动模式启动(电平信号),M116置为1
+static const char* AUTO_START = "01050874FF00";  //自动模式启动(电平信号),M116置为1
 
 //	自动模式停止(电平信号),M116置为0
-static const char* AUTO_STOP = "000508740000";  //自动模式停止(电平信号),M116置为0
+static const char* AUTO_STOP = "010508740000";  //自动模式停止(电平信号),M116置为0
 
 //	距离设置,D200(10C8) (单位:0.1mm)
-static const char* SET_DISTANCE = "000610C8";  //距离设置,D200(10C8) (单位:0.1mm)
+static const char* SET_DISTANCE = "010610C8";  //距离设置,D200(10C8) (单位:0.1mm)
 
 //	时间设置,D204(10CC) 单位:100ms
-static const char* SET_TIME = "000610CC";  //时间设置,D204(10CC) 单位:100ms
+static const char* SET_TIME = "010610CC";  //时间设置,D204(10CC) 单位:100ms
+
+
+
+
+//	检测完成信号,M177
+static const char* DETECT_END_ON = "010508B1FF00";  //M177 SET 检测完成信号
+static const char* DETECT_END_OFF = "010508B10000";  //M177 RST 检测完成信号
+
+//	检测结果GOOD,D240(10F0) 
+static const char* RESULT_GODD = "010610F00010";  //时间设置,D240(10F0) 1合格
+
+//	检测结果BAD,D240(10F0)
+static const char* RESULT_BAD = "010610F00020";  //时间设置,D240(10F0) 0不合格
 
 #endif
