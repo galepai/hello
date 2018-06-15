@@ -148,6 +148,23 @@ void hello::OnShutDown()
 			}
 		}
 
+		if (PylonCamera_Thread::IsExistCameraId(LineCameraId_Pylon_Basler1))
+		{
+			if (m_Pylon_camera_thread1->isRunning())
+			{
+				m_Pylon_camera_thread1->stop();
+				m_Pylon_camera_thread1->wait();
+			}
+		}
+
+		if (PylonCamera_Thread::IsExistCameraId(LineCameraId_Pylon_Basler2))
+		{
+			if (m_Pylon_camera_thread2->isRunning())
+			{
+				m_Pylon_camera_thread2->stop();
+				m_Pylon_camera_thread2->wait();
+			}
+		}
 		//m_camera_thread1->destroyed();
 		//m_camera_thread1->exit();
 		//close();
@@ -512,7 +529,7 @@ void hello::OnTest()
 	//connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
 	//m_camera_thread1->start();
 
-	m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Basler1, this);
+	/*m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Basler1, this);
 	m_camera_thread1->setSaveDatePath(value.toString());
 	m_camera_thread1->setSaveImageDirName("Camera1");
 	m_camera_thread1->setAalConfigureName("Camera1");
@@ -520,17 +537,38 @@ void hello::OnTest()
 	connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
 	connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
 	connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
-	m_camera_thread1->start();
+	m_camera_thread1->start();*/
 
-	m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Basler2, this);
+	/*m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Basler2, this);
 	m_camera_thread2->setSaveDatePath(value.toString());
 	m_camera_thread2->setSaveImageDirName("Camera2");
 	m_camera_thread2->setAalConfigureName("Camera2");
 	m_camera_thread2->setSaveImageNum(50);
-	connect(m_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
+	connect(m_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
 	connect(m_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
 	connect(m_camera_thread2, SIGNAL(finished()), m_camera_thread2, SLOT(deleteLater()));
 	m_camera_thread2->start();
+*/
+
+	m_Pylon_camera_thread1 = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler1, this);
+	m_Pylon_camera_thread1->setSaveDatePath(value.toString());
+	m_Pylon_camera_thread1->setSaveImageDirName("Camera1");
+	m_Pylon_camera_thread1->setAalConfigureName("Camera1");
+	m_Pylon_camera_thread1->setSaveImageNum(50);
+	connect(m_Pylon_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
+	connect(m_Pylon_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_Pylon_camera_thread1, SIGNAL(finished()), m_Pylon_camera_thread1, SLOT(deleteLater()));
+	m_Pylon_camera_thread1->start();
+
+	m_Pylon_camera_thread2 = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler2, this);
+	m_Pylon_camera_thread2->setSaveDatePath(value.toString());
+	m_Pylon_camera_thread2->setSaveImageDirName("Camera2");
+	m_Pylon_camera_thread2->setAalConfigureName("Camera2");
+	m_Pylon_camera_thread2->setSaveImageNum(50);
+	connect(m_Pylon_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
+	connect(m_Pylon_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_Pylon_camera_thread2, SIGNAL(finished()), m_Pylon_camera_thread2, SLOT(deleteLater()));
+	m_Pylon_camera_thread2->start();
 
 }
 

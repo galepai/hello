@@ -42,6 +42,8 @@ public:
 	static void setWriteInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);	
 	//static void AddSecondQueueInfo(const std::string& data);
 	//static void AddSecondQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);
+	static void AddOneQueryInfo(const std::string& data);	//单次查询
+	static void AddOneQueryInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);	//单次查询
 	static void AddOneQueueInfo(const std::string& data);	//添加查询字段到查询一次队列
 	static void AddOneQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info);	//添加查询字段到查询一次队列
 	static void AddDefaultQueueInfo(const std::string& data);	//添加查询字段到默认队列

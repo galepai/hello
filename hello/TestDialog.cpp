@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QPainter>
 
+//#define ADD_DefaultQueueInfo Delta_Thread::AddDefaultQueueInfo(READ_Y_OUTPUT);	//∂¡Y00-Y67
 
 TestDialog::TestDialog(QWidget *parent) :
     QDialog(parent),
@@ -26,6 +27,9 @@ TestDialog::TestDialog(QWidget *parent) :
 	connect(ui->btn_hand_open, SIGNAL(clicked()), this, SLOT(OnHandOpen()));
 	connect(ui->btn_hand_close, SIGNAL(clicked()), this, SLOT(OnHandClose()));
 
+	connect(ui->btn_protect_up, SIGNAL(clicked()), this, SLOT(OnProtectUp()));
+	connect(ui->btn_protect_down, SIGNAL(clicked()), this, SLOT(OnProtectDown()));
+
 	connect(ui->btn_vision_up, SIGNAL(clicked()), this, SLOT(OnVisionUp()));
 	connect(ui->btn_vision_down, SIGNAL(clicked()), this, SLOT(OnVisionDown()));
 	connect(ui->btn_rotate_start, SIGNAL(clicked()), this, SLOT(OnRotateStart()));
@@ -39,10 +43,15 @@ TestDialog::TestDialog(QWidget *parent) :
 
 	connect(ui->btn_forward,SIGNAL(clicked()), this, SLOT(OnForward()));
 	connect(ui->btn_backword, SIGNAL(clicked()), this, SLOT(OnBackWard()));
+	connect(ui->btn_forward_2, SIGNAL(clicked()), this, SLOT(OnForward_2()));
+	connect(ui->btn_backword_2, SIGNAL(clicked()), this, SLOT(OnBackWard_2()));
 	connect(ui->btn_paoguang_rotate_start, SIGNAL(clicked()), this, SLOT(OnRotateStepStart()));
 	connect(ui->btn_paoguang_rotate_stop, SIGNAL(clicked()), this, SLOT(OnRotateStepStop()));
+	connect(ui->btn_wind_up, SIGNAL(clicked()), this, SLOT(OnWindUp()));
+	connect(ui->btn_wind_down, SIGNAL(clicked()), this, SLOT(OnWindDown()));
 
 	connect(ui->btn_distance_confirm, SIGNAL(clicked()), this, SLOT(OnDistanceConfirm()));
+	connect(ui->btn_distance_confirm_2, SIGNAL(clicked()), this, SLOT(OnDistanceConfirm_2()));
 	connect(ui->btn_time_confirm, SIGNAL(clicked()), this, SLOT(OnTimeConfirm()));
 
 	connect(ui->btn_detect_end, SIGNAL(clicked()), this, SLOT(OnDetectEnd()));
@@ -73,6 +82,10 @@ TestDialog::TestDialog(QWidget *parent) :
 	Delta_Thread::AddDefaultQueueInfo(READ_X_INPUT);	//∂¡X00-X87
 	Delta_Thread::AddDefaultQueueInfo(READ_Y_OUTPUT);	//∂¡Y00-Y67
 
+	//…Ë÷√ƒ¨»œ≤È—Ø∂”¡–
+	//Delta_Thread::setQueryMode(Delta_Thread::QueryMode::OneQuery);
+
+
 
 	if (!Delta_Thread::GetSerialPort())
 	{
@@ -86,6 +99,7 @@ TestDialog::TestDialog(QWidget *parent) :
 	Delta_Thread::AddOneQueueInfo(READ_TIME_AND_DISTANCE);	//∂¡D200-D205 000310C80006
 
 	ui->lcd_distance->setStyleSheet("color: white;");
+	ui->lcd_distance_2->setStyleSheet("color: white;");
 	ui->lcd_time->setStyleSheet("color: white;");
 	//ui->lcd_time->setStyleSheet("border: 1px solid white; color: green; background: silver;");
 	
@@ -156,7 +170,6 @@ void TestDialog::OnBoShouDown()
 	Delta_Thread::AddOneQueueInfo(BOSHOU_DOWN_OFF);
 }
 
-
 void TestDialog::OnBoShouShiPingUp()
 {
 	Delta_Thread::AddOneQueueInfo(BOSHOU_SHUIPING_UP_ON);
@@ -167,6 +180,18 @@ void TestDialog::OnBoShouShiPingDown()
 {
 	Delta_Thread::AddOneQueueInfo(BOSHOU_SHUIPING_DOWN_ON);
 	Delta_Thread::AddOneQueueInfo(BOSHOU_SHUIPING_DOWN_OFF);
+}
+
+void TestDialog::OnProtectUp()
+{
+	Delta_Thread::AddOneQueueInfo(PROTECT_UP_ON);
+	Delta_Thread::AddOneQueueInfo(PROTECT_UP_OFF);
+}
+
+void TestDialog::OnProtectDown()
+{
+	Delta_Thread::AddOneQueueInfo(PROTECT_DOWN_ON);
+	Delta_Thread::AddOneQueueInfo(PROTECT_DOWN_OFF);
 }
 
 void TestDialog::OnVisionUp()
@@ -265,6 +290,41 @@ void TestDialog::OnDistanceConfirm() //æ‡¿Î…Ë÷√
 	}
 
 	Delta_Thread::AddOneQueueInfo((QString(SET_DISTANCE) + dist).toStdString());
+
+	Delta_Thread::AddOneQueueInfo(READ_TIME_AND_DISTANCE);	//∂¡D200-D205 000310C80006
+}
+
+void TestDialog::OnDistanceConfirm_2() //æ‡¿Î…Ë÷√
+{
+
+	ushort  distance = static_cast<ushort>(ui->doubleSpinBox_distance_2->value() * 10);
+
+	std::vector<ushort> data;
+	ushort first = distance / 4096;
+	ushort leave = distance % 4096;
+	ushort second = leave / 256;
+	leave = leave % 256;
+	ushort third = leave / 16;
+	leave = leave % 16;
+	ushort forth = leave;
+	data.push_back(first);
+	data.push_back(second);
+	data.push_back(third);
+	data.push_back(forth);
+
+	int length = data.size();
+	QString dist;
+	dist.resize(length);
+	for (int index = 0; index < length; index++)
+	{
+		if (data[index] < 10)
+			dist[index] = 0x30 + data[index];
+		else
+			dist[index] = 0x37 + data[index];
+
+	}
+
+	Delta_Thread::AddOneQueueInfo((QString(SET_DISTANCE_2) + dist).toStdString());
 
 	Delta_Thread::AddOneQueueInfo(READ_TIME_AND_DISTANCE);	//∂¡D200-D205 000310C80006
 }
@@ -462,12 +522,14 @@ void TestDialog::readyDataSlot(QByteArray str)
 		if (function_code == "03")
 		{
 			m_D_Register = Parse_Delta_Ascii_03(str.toStdString());	
-			if (!m_D_Register.empty())
+			if (!m_D_Register.empty() && m_D_Register.size() == 9)
 			{
 				ui->lcd_distance->display(m_D_Register[0] / 10.0);
 				ui->lcd_time->display(m_D_Register[4] / 10.0);
+				ui->lcd_distance_2->display(m_D_Register[8] / 10.0);
 				ui->doubleSpinBox_distance->setValue(m_D_Register[0] / 10.0);
 				ui->doubleSpinBox_time->setValue(m_D_Register[4] / 10.0);
+				ui->doubleSpinBox_distance_2->setValue(m_D_Register[8] / 10.0);
 			}	
 		}
 			
@@ -493,6 +555,18 @@ void TestDialog::OnBackWard()
 	Delta_Thread::AddOneQueueInfo(BACKWARD_OFF);
 }
 
+void TestDialog::OnForward_2()
+{
+	Delta_Thread::AddOneQueueInfo(FORWARD_2_ON);
+	Delta_Thread::AddOneQueueInfo(FORWARD_2_OFF);
+}
+
+void TestDialog::OnBackWard_2()
+{
+	Delta_Thread::AddOneQueueInfo(BACKWARD_2_ON);
+	Delta_Thread::AddOneQueueInfo(BACKWARD_2_OFF);
+}
+
 void TestDialog::OnRotateStepStart()
 {
 	Delta_Thread::AddOneQueueInfo(PAOGUANG_ROTATE_START_ON);
@@ -503,4 +577,16 @@ void TestDialog::OnRotateStepStop()
 {
 	Delta_Thread::AddOneQueueInfo(PAOGUANG_ROTATE_STOP_ON);
 	Delta_Thread::AddOneQueueInfo(PAOGUANG_ROTATE_STOP_OFF);
+}
+
+void TestDialog::OnWindUp()
+{
+	Delta_Thread::AddOneQueueInfo(WIND_UP_ON);
+	Delta_Thread::AddOneQueueInfo(WIND_UP_OFF);
+}
+
+void TestDialog::OnWindDown()
+{
+	Delta_Thread::AddOneQueueInfo(WIND_DOWN_ON);
+	Delta_Thread::AddOneQueueInfo(WIND_DOWN_OFF);
 }

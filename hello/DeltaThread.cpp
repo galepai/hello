@@ -59,6 +59,26 @@ void Delta_Thread::setWriteInfo(const std::string& Slave, const std::string& Fun
 //	m_mutex_WriteData.unlock();
 //}
 
+void Delta_Thread::AddOneQueryInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
+{
+	QMutexLocker locker(&m_mutex);
+	m_Add_Queue.push(Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info));
+	m_QueryMode = OneQuery;
+	m_mutex_WriteData.lock();
+	m_waitWriteData.wakeAll();
+	m_mutex_WriteData.unlock();
+}
+
+void Delta_Thread::AddOneQueryInfo(const std::string& data)
+{
+	QMutexLocker locker(&m_mutex);
+	m_Add_Queue.push(Delta_Ascii_CR(data));
+	m_mutex_WriteData.lock();
+	m_QueryMode = OneQuery;
+	m_waitWriteData.wakeAll();
+	m_mutex_WriteData.unlock();
+}
+
 void Delta_Thread::AddOneQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
 {
 	QMutexLocker locker(&m_mutex);
@@ -75,18 +95,19 @@ void Delta_Thread::AddOneQueueInfo(const std::string& data)
 	m_Add_Queue.push(Delta_Ascii_CR(data));
 	m_mutex_WriteData.lock();
 	m_QueryMode = OneQueryToDefalutQuene;
+	//m_QueryMode = OneQuery;
 	m_waitWriteData.wakeAll();
 	m_mutex_WriteData.unlock();
 }
 
-void Delta_Thread::AddDefaultQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
-{
-	QMutexLocker locker(&m_mutex);
-	m_Default_Queue.push(Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info));
-	m_mutex_WriteData.lock();
-	m_waitWriteData.wakeAll();
-	m_mutex_WriteData.unlock();
-}
+//void Delta_Thread::AddDefaultQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
+//{
+//	QMutexLocker locker(&m_mutex);
+//	m_Default_Queue.push(Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info));
+//	m_mutex_WriteData.lock();
+//	m_waitWriteData.wakeAll();
+//	m_mutex_WriteData.unlock();
+//}
 
 void Delta_Thread::AddDefaultQueueInfo(const std::string& data)
 {
@@ -188,9 +209,13 @@ void Delta_Thread::run()
 				break;
 
 			case OneQuery:
-
-				m_write_string = m_Add_Queue.front();
-				m_Add_Queue.pop();
+				if (!m_Add_Queue.empty())
+				{
+					m_write_string = m_Add_Queue.front();
+					m_Add_Queue.pop();
+				}
+				else
+					m_write_string = "";
 				break;
 
 			default:

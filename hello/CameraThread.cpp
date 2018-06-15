@@ -3,10 +3,12 @@
 #include <QTime>
 #include "Func.h"
 
+#include <pylon/PylonIncludes.h>
 
-QMutex Camera_Thread::m_mutex;
-QMutex Camera_Thread::m_mutex_WriteData;
-QWaitCondition Camera_Thread::m_waitWriteData;
+
+//QMutex Camera_Thread::m_mutex;
+//QMutex Camera_Thread::m_mutex_WriteData;
+//QWaitCondition Camera_Thread::m_waitWriteData;
 QStringList Camera_Thread::m_CameraIdlist;
 
 Camera_Thread::Camera_Thread(ConnectionType connection_type,QString CameraId, QObject *parent)
@@ -30,8 +32,10 @@ void Camera_Thread::run()
 	{
 		try{
 			time.start();
-			//Image = m_pGrabber->GrabImageAsync(-1);
+			qDebug() << m_CameraId << " ready cap.... ";
 			Image = m_pGrabber->GrabImage();
+			//Image = m_pGrabber->GrabImageAsync(-1);
+			qDebug() << m_CameraId << " cap suceess.";
 			//GrabImageAsync(&Image, hv_AcqHandle, -1);
 			signal_image(&Image);
 			//DispColor(Image, m_WindowHandle);
@@ -87,19 +91,22 @@ bool Camera_Thread::OpenCamera()
 			m_pGrabber->SetFramegrabberParam("exposure", -5);
 			m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);
 			m_pGrabber->GrabImageStart(-1);
+			
 			break;
 
 		case Camera_Thread::GigEVision:
+			qDebug() << "ready Open Cam....";
 			m_pGrabber->OpenFramegrabber("GigEVision", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
 				m_CameraId.toStdString().c_str(), 0, -1);
-			//m_pGrabber->OpenFramegrabber("GigEVision", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
-				//"003053255252_Basler_raL204848gm", 0, -1);
+			qDebug() << "Open Cam OK";
+		
 			if (m_CameraId.contains("Basler"))
 			{
 				m_pGrabber->SetFramegrabberParam("PixelFormat", "Mono8");
 				m_pGrabber->SetFramegrabberParam("Height", 10000);
 				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
 				m_pGrabber->SetFramegrabberParam("TriggerMode", "On");
+				m_pGrabber->SetFramegrabberParam("TriggerSource", "Line1");
 				m_pGrabber->SetFramegrabberParam("ExposureTimeRaw", 700);
 				m_pGrabber->SetFramegrabberParam("AcquisitionLineRateAbs", 10000);
 				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);
@@ -131,7 +138,8 @@ bool Camera_Thread::OpenCamera()
 				m_pGrabber->SetFramegrabberParam("grab_timeout", -1);
 			}
 
-			//m_pGrabber->GrabImageStart(-1);
+			m_pGrabber->GrabImageStart(-1);
+
 			break;
 
 		default:
@@ -143,9 +151,16 @@ bool Camera_Thread::OpenCamera()
 	catch (HException& e)
 	{
 		//emit signal_error(e.ErrorMessage().Text());
+
+		QString eror = e.ErrorMessage().Text();
 		emit signal_error(G2U("不能获取相机，请检测相机ID是否正确"));
 		return false;
 	}
+	catch (GenICam::AccessException& e)
+	{
+		QString error = e.GetDescription();
+	}
+
 }
 
 

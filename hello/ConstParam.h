@@ -15,6 +15,13 @@ static const char* LineCameraId_Basler1= "0030531d42b0_Basler_raL204848gm";	//19
 static const char* LineCameraId_Basler2 = "003053255252_Basler_raL204848gm";	//192.168.3.7
 //static const char* LineCameraId = "00010dc2ae11_TeledyneDALSA_LineaM20487um";
 
+static const char* LineCameraId_Pylon_Basler1 = "Basler raL2048-48gm#0030531D42B0#192.168.2.7:3956";	//192.168.2.7
+static const char* LineCameraId_Pylon_Basler2 = "Basler raL2048-48gm#003053255252#192.168.3.7:3956";	//192.168.3.7
+//m_camera.Attach(CTlFactory::GetInstance().CreateDevice("Basler raL2048-48gm#0030531D42B0#192.168.2.7:3956"));
+//"Basler raL2048-48gm#0030531D42B0#192.168.2.7:3956"
+//"Basler raL2048-48gm#003053255252#192.168.3.7:3956"
+
+
 
 
 //	×¥ÊÖË®Æ½×óÒÆ
@@ -50,12 +57,20 @@ static const char* BOSHOU_DOWN_ON = "000508EDFF00";  //M237 SET ²¦ÊÖËõ
 static const char* BOSHOU_DOWN_OFF = "000508ED0000";  //M237 RST ²¦ÊÖËõ
 
 //	²¦ÊÖË®Æ½Éì
-static const char* BOSHOU_SHUIPING_UP_ON = "000508EAFF00";  //M234 SET ²¦ÊÖÉì
-static const char* BOSHOU_SHUIPING_UP_OFF = "000508EA0000";  //M234 RST ²¦ÊÖÉì
+static const char* BOSHOU_SHUIPING_UP_ON = "000508EAFF00";  //M234 SET ²¦ÊÖË®Æ½Éì
+static const char* BOSHOU_SHUIPING_UP_OFF = "000508EA0000";  //M234 RST ²¦ÊÖË®Æ½Éì
 
 //	²¦ÊÖË®Æ½Ëõ
-static const char* BOSHOU_SHUIPING_DOWN_ON = "000508EBFF00";  //M235 SET ²¦ÊÖËõ
-static const char* BOSHOU_SHUIPING_DOWN_OFF = "000508EB0000";  //M235 RST ²¦ÊÖËõ
+static const char* BOSHOU_SHUIPING_DOWN_ON = "000508EBFF00";  //M235 SET ²¦ÊÖË®Æ½Ëõ
+static const char* BOSHOU_SHUIPING_DOWN_OFF = "000508EB0000";  //M235 RST ²¦ÊÖË®Æ½Ëõ
+
+//	´µÆøÆø¸×ÉÏÉı
+static const char* WIND_UP_ON = "000508EEFF00";  //M238 SET ´µÆøÆø¸×ÉÏÉı
+static const char* WIND_UP_OFF = "000508EE0000";  //M238 RST ´µÆøÆø¸×ÉÏÉı
+
+//	´µÆøÆø¸×ÏÂ½µ
+static const char* WIND_DOWN_ON = "000508EFFF00";  //M239 SET ´µÆøÆø¸×ÏÂ½µ
+static const char* WIND_DOWN_OFF = "000508EF0000";  //M239 RST ´µÆøÆø¸×ÏÂ½µ
 
 
 
@@ -173,6 +188,14 @@ static const char* FORWARD_OFF = "010508AD0000";  //M173 RST Ö±ÏßÄ£×éÇ°½ø
 static const char* BACKWARD_ON = "010508AEFF00";  //M174 SET Ö±ÏßÄ£×éºóÍË
 static const char* BACKWARD_OFF = "010508AE0000";  //M174 RST Ö±ÏßÄ£×éºóÍË
 
+//	Ö±ÏßÄ£×é2Ç°½ø
+static const char* FORWARD_2_ON = "010508ABFF00";  //M171 SET Ö±ÏßÄ£×éÇ°½ø
+static const char* FORWARD_2_OFF = "010508AB0000";  //M171 RST Ö±ÏßÄ£×éÇ°½ø
+
+//	Ö±ÏßÄ£×é2ºóÍË
+static const char* BACKWARD_2_ON = "010508ACFF00";  //M172 SET Ö±ÏßÄ£×éºóÍË
+static const char* BACKWARD_2_OFF = "010508AC0000";  //M172 RST Ö±ÏßÄ£×éºóÍË
+
 //	Å×¹âµç»úĞı×ª
 static const char* PAOGUANG_ROTATE_START_ON = "010508AFFF00";  //M175 SET Å×¹âµç»úĞı×ª
 static const char* PAOGUANG_ROTATE_START_OFF = "010508AF0000";  //M175 RST Å×¹âµç»úĞı×ª
@@ -181,10 +204,20 @@ static const char* PAOGUANG_ROTATE_START_OFF = "010508AF0000";  //M175 RST Å×¹âµ
 static const char* PAOGUANG_ROTATE_STOP_ON = "010508B0FF00";  //M176 SET Å×¹âµç»úÍ£Ö¹
 static const char* PAOGUANG_ROTATE_STOP_OFF = "010508B00000";  //M176 RST Å×¹âµç»úÍ£Ö¹
 
-//	¶ÁD200-D205,  
+//	¶ÁD200-D208,  
 //	·µ»ØµÄD200µÄ16Î»Êı¾İ´ú±íÖ±ÏßÄ£×éµÄ¾àÀë.	(µ¥Î»:0.1mm),
 //	·µ»ØµÄD202µÄ16Î»Êı¾İ´ú±íÅ×¹âÊ±¼ä.	(µ¥Î»:100ms)
-static const char* READ_TIME_AND_DISTANCE = "010310C80006";  //  ¶ÁD200-D206,  *·µ»ØµÄD200(10C8)µÄ32Î»Êı¾İ´ú±íÖ±ÏßÄ£×éµÄ¾àÀë.(µ¥Î»:0.1mm)		*·µ»ØµÄD204µÄ16Î»Êı¾İ´ú±íÅ×¹âÊ±¼ä.(µ¥Î»:100ms)
+//	·µ»ØµÄD208µÄ16Î»Êı¾İ´ú±íÖ±ÏßÄ£×éµÄ¾àÀë.	(µ¥Î»:0.1mm)
+static const char* READ_TIME_AND_DISTANCE = "010310C80009";  //  ¶ÁD200-D208,  *·µ»ØµÄD200(10C8)µÄ16Î»Êı¾İ´ú±íÖ±ÏßÄ£×éµÄ¾àÀë.(µ¥Î»:0.1mm)		*·µ»ØµÄD204µÄ16Î»Êı¾İ´ú±íÅ×¹âÊ±¼ä.(µ¥Î»:100ms)	   *·µ»ØµÄD208(10d0)µÄ16Î»Êı¾İ´ú±íÖ±ÏßÄ£×é2µÄ¾àÀë.(µ¥Î»:0.1mm)	
+
+//	¾àÀëÉèÖÃ,D200(10C8) (µ¥Î»:0.1mm)
+static const char* SET_DISTANCE = "010610C8";  //¾àÀëÉèÖÃ,D200(10C8) (µ¥Î»:0.1mm)
+
+//	Ê±¼äÉèÖÃ,D204(10CC) µ¥Î»:100ms
+static const char* SET_TIME = "010610CC";  //Ê±¼äÉèÖÃ,D204(10CC) µ¥Î»:100ms
+
+//	¾àÀëÉèÖÃ,D208(10D0) (µ¥Î»:0.1mm)
+static const char* SET_DISTANCE_2 = "010610D0";  //¾àÀëÉèÖÃ,D208(10D) (µ¥Î»:0.1mm)
 
 //	×Ô¶¯Ä£Ê½(µçÆ½ĞÅºÅ),M115ÖÃ1Îª×Ô¶¯
 static const char* AUTO_MODE = "01050873FF00";  //×Ô¶¯Ä£Ê½(µçÆ½ĞÅºÅ),M115ÖÃ1Îª×Ô¶¯
@@ -198,14 +231,6 @@ static const char* AUTO_START = "01050874FF00";  //×Ô¶¯Ä£Ê½Æô¶¯(µçÆ½ĞÅºÅ),M116ÖÃ
 //	×Ô¶¯Ä£Ê½Í£Ö¹(µçÆ½ĞÅºÅ),M116ÖÃÎª0
 static const char* AUTO_STOP = "010508740000";  //×Ô¶¯Ä£Ê½Í£Ö¹(µçÆ½ĞÅºÅ),M116ÖÃÎª0
 
-//	¾àÀëÉèÖÃ,D200(10C8) (µ¥Î»:0.1mm)
-static const char* SET_DISTANCE = "010610C8";  //¾àÀëÉèÖÃ,D200(10C8) (µ¥Î»:0.1mm)
-
-//	Ê±¼äÉèÖÃ,D204(10CC) µ¥Î»:100ms
-static const char* SET_TIME = "010610CC";  //Ê±¼äÉèÖÃ,D204(10CC) µ¥Î»:100ms
-
-
-
 
 //	¼ì²âÍê³ÉĞÅºÅ,M177
 static const char* DETECT_END_ON = "010508B1FF00";  //M177 SET ¼ì²âÍê³ÉĞÅºÅ
@@ -216,5 +241,15 @@ static const char* RESULT_GODD = "010610F00010";  //Ê±¼äÉèÖÃ,D240(10F0) 1ºÏ¸ñ
 
 //	¼ì²â½á¹ûBAD,D240(10F0)
 static const char* RESULT_BAD = "010610F00020";  //Ê±¼äÉèÖÃ,D240(10F0) 0²»ºÏ¸ñ
+
+
+
+//	»»ÏòÆ÷±£»¤Éì
+static const char* PROTECT_UP_ON = "01050896FF00";  //M150 SET »»ÏòÆ÷±£»¤Éì
+static const char* PROTECT_UP_OFF = "010508960000";  //M150 RST »»ÏòÆ÷±£»¤Éì
+
+//	»»ÏòÆ÷±£»¤Ëõ
+static const char* PROTECT_DOWN_ON = "01050897FF00";  //M151 SET »»ÏòÆ÷±£»¤Ëõ
+static const char* PROTECT_DOWN_OFF = "010508970000";  //M151 RST »»ÏòÆ÷±£»¤Ëõ
 
 #endif

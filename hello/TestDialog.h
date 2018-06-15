@@ -50,6 +50,8 @@ public slots:
 	void OnBoShouDown();	//拨手缩
 	void OnBoShouShiPingUp();	//拨手左
 	void OnBoShouShiPingDown();	//拨手右
+	void OnProtectUp();	//换向器保护升
+	void OnProtectDown();	//换向器保护缩
 
 	void OnVisionUp();	//视觉升
 	void OnVisionDown();	//视觉降
@@ -65,10 +67,15 @@ public slots:
 	//单步
 	void OnForward();
 	void OnBackWard();
+	void OnForward_2();
+	void OnBackWard_2();
 	void OnRotateStepStart();
 	void OnRotateStepStop();
+	void OnWindUp();
+	void OnWindDown();
 
 	void OnDistanceConfirm(); //距离设置
+	void OnDistanceConfirm_2(); //模组2距离设置
 	void OnTimeConfirm();	//时间设置
 
 	void OnDetectEnd();	//检测结束

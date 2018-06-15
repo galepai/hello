@@ -128,6 +128,15 @@
     <ClCompile Include="CameraThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_PylonCameraThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_PylonCameraThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="PylonCameraThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="hello.h">
@@ -176,6 +185,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="CameraThread.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PylonCameraThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

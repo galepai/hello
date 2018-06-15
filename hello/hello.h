@@ -10,6 +10,7 @@
 #include "Func.h"
 #include "TestDialog.h"
 #include "CameraThread.h"
+#include "PylonCameraThread.h"
 
 using namespace HalconCpp;
 
@@ -82,6 +83,9 @@ signals:
 public:
 	Camera_Thread* m_camera_thread1;
 	Camera_Thread* m_camera_thread2;
+	
+	PylonCamera_Thread* m_Pylon_camera_thread1;
+	PylonCamera_Thread* m_Pylon_camera_thread2;
 };
 
 #endif // HELLO_H
