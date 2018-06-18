@@ -560,7 +560,7 @@ void hello::OnTest()
 	connect(m_Pylon_camera_thread1, SIGNAL(finished()), m_Pylon_camera_thread1, SLOT(deleteLater()));
 	m_Pylon_camera_thread1->start();
 
-	m_Pylon_camera_thread2 = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler2, this);
+	/*m_Pylon_camera_thread2 = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler2, this);
 	m_Pylon_camera_thread2->setSaveDatePath(value.toString());
 	m_Pylon_camera_thread2->setSaveImageDirName("Camera2");
 	m_Pylon_camera_thread2->setAalConfigureName("Camera2");
@@ -568,7 +568,7 @@ void hello::OnTest()
 	connect(m_Pylon_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
 	connect(m_Pylon_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
 	connect(m_Pylon_camera_thread2, SIGNAL(finished()), m_Pylon_camera_thread2, SLOT(deleteLater()));
-	m_Pylon_camera_thread2->start();
+	m_Pylon_camera_thread2->start();*/
 
 }
 

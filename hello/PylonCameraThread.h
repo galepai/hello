@@ -13,6 +13,7 @@
 #include <QMutex>
 #include <HalconCpp.h>
 #include <pylon/PylonIncludes.h>
+#include <pylon/gige/BaslerGigEInstantCamera.h>
 using namespace Pylon;
 using namespace HalconCpp;
 
@@ -62,7 +63,7 @@ signals:
 private:
 	QString m_CameraId;
 	ConnectionType m_connectionType;
-	CInstantCamera m_camera;
+	CBaslerGigEInstantCamera m_camera;
 	bool m_bIsStop;
 	QString m_SaveDatePath, m_SaveImageDirName, m_ConfigureName;
 	int m_image_index, m_MaxNum;

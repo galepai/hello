@@ -3,6 +3,130 @@
 #include <QTime>
 #include "Func.h"
 #include "ConstParam.h"
+#include "pylon/PylonGUIIncludes.h"
+
+
+class CHardwareTriggerConfiguration : public Pylon::CConfigurationEventHandler
+{
+public:
+	void OnOpened(Pylon::CBaslerGigEInstantCamera& camera)
+	{
+		try
+		{
+
+			// Get the camera control object.
+			//INodeMap &nodemap = camera.GetNodeMap();
+		
+			//
+			////Get camera device information.
+			//qDebug() << endl << "Camera Device Information" << endl
+			//	<< "=========================";
+			//qDebug() << "Vendor					: "
+			//	<< CStringPtr(nodemap.GetNode("DeviceVendorName"))->GetValue();
+			//qDebug() << "Model					: "
+			//	<< CStringPtr(nodemap.GetNode("DeviceModelName"))->GetValue();
+			//qDebug() << "Firmware version		: "
+			//	<< CStringPtr(nodemap.GetNode("DeviceFirmwareVersion"))->GetValue();
+			//qDebug() << "Using Device FullInfo	: "
+			//	<< camera.GetDeviceInfo().GetFullName();
+
+			//// Camera settings.
+			//qDebug() << endl << "Camera Device Settings" << endl
+			//	<< "======================" << endl;
+
+			//CIntegerPtr Width(nodemap.GetNode("Width"));
+			//CIntegerPtr Height(nodemap.GetNode("Height"));
+			//CIntegerPtr ExposureTimeRaw(nodemap.GetNode("ExposureTimeRaw"));
+			//CFloatPtr	AcquisitionLineRateAbs(nodemap.GetNode("AcquisitionLineRateAbs"));
+			//CEnumerationPtr TriggerSelector(nodemap.GetNode("TriggerSelector"));
+			//CEnumerationPtr TriggerMode(nodemap.GetNode("TriggerMode"));
+			//CEnumerationPtr	TriggerSource(nodemap.GetNode("TriggerSource"));
+			//CEnumerationPtr TriggerActivation(nodemap.GetNode("TriggerActivation"));
+
+			//if (IsWritable(Width))
+			//{
+			//	Width->SetValue(2048);
+			//}
+			//
+			//if (IsWritable(Height))
+			//{
+			//	Height->SetValue(10000);
+			//}
+
+			//if (IsWritable(ExposureTimeRaw))
+			//{
+			//	ExposureTimeRaw->SetValue(760);
+			//}
+
+			//if (IsWritable(AcquisitionLineRateAbs))
+			//{
+			//	AcquisitionLineRateAbs->SetValue(10000.0);
+			//}
+
+			//if (IsWritable(TriggerSelector))
+			//{
+			//	TriggerSelector->FromString("FrameStart");
+			//}
+
+			//if (IsWritable(TriggerMode))
+			//{
+			//	TriggerMode->FromString("On");
+			//}
+
+			//if (IsWritable(TriggerSource))
+			//{
+			//	TriggerSource->FromString("Line1");
+			//}
+
+			//if (IsWritable(TriggerActivation))
+			//{
+			//	TriggerActivation->FromString("RisingEdge");
+			//}
+			//
+			//qDebug() << "Width					: " << Width->GetValue();
+			//qDebug() << "Height					: " << Height->GetValue();
+			//qDebug() << "ExposureTimeRaw			: " << ExposureTimeRaw->GetValue();
+			//qDebug() << "AcquisitionLineRateAbs	: " << AcquisitionLineRateAbs->GetValue();
+			//qDebug() << "TriggerSelector			: " << TriggerSelector->ToString();
+			//qDebug() << "TriggerMode				: " << TriggerMode->ToString();
+			//qDebug() << "TriggerSource			: " << TriggerSource->ToString();
+			//qDebug() << "TriggerActivation		: " << TriggerActivation->ToString();
+			//qDebug() << "======================" << endl;
+
+			qDebug() << camera.DeviceManufacturerInfo.ToString();
+			qDebug() << camera.DeviceModelName.ToString();
+			qDebug() << camera.DeviceFirmwareVersion.ToString();
+			qDebug() << camera.DeviceVendorName.ToString();
+			qDebug() << camera.DeviceID.ToString();
+
+			camera.Width.SetValue(2048);
+			camera.Height.SetValue(10000);
+			camera.ExposureTimeRaw.SetValue(760);
+			camera.AcquisitionLineRateAbs.SetValue(10000.0);
+			camera.TriggerSelector.FromString("FrameStart");
+			camera.TriggerMode.FromString("On");
+			camera.TriggerSource.FromString("Line1");
+			camera.TriggerActivation.FromString("RisingEdge");
+
+			qDebug() << camera.Width.GetValue();
+			qDebug() << camera.Height.GetValue();
+			qDebug() << camera.ExposureTimeRaw.GetValue();
+			qDebug() << camera.AcquisitionLineRateAbs.GetValue();
+			qDebug() << camera.TriggerSelector.ToString();
+			qDebug() << camera.TriggerMode.ToString();
+			qDebug() << camera.TriggerSource.ToString();
+			qDebug() << camera.TriggerActivation.ToString();
+
+			qDebug() << "CHardwareTriggerConfiguration Run Thread : " << QThread::currentThreadId();
+			
+		}
+		catch (const GenericException& e)
+		{
+			throw RUNTIME_EXCEPTION("Could not apply configuration. const GenericException caught in OnOpened method msg=%hs", e.what());
+		}
+	}
+};
+
 
 
 QStringList PylonCamera_Thread::m_CameraIdlist;
@@ -55,6 +179,10 @@ void PylonCamera_Thread::run()
 			//	}
 			//}
 			
+
+			//m_camera.WaitForFrameTriggerReady(5000);
+			//m_camera.ExecuteSoftwareTrigger();
+		
 			//if (m_camera.IsGrabbing())
 			if (m_camera.GrabOne(5000, ptrGrabResult))
 			{
@@ -66,6 +194,7 @@ void PylonCamera_Thread::run()
 					qDebug() << "SizeX: " << ptrGrabResult->GetWidth();
 					qDebug() << "SizeY: " << ptrGrabResult->GetHeight();
 					const uint8_t* pImageBuffer = (uint8_t *)ptrGrabResult->GetBuffer();
+					DisplayImage(1, ptrGrabResult);
 					qDebug() << m_CameraId << "	:	" << pImageBuffer;
 					qDebug() << "Gray value of first pixel: " << (uint32_t)pImageBuffer[0];
 					qDebug() << "========================="  << endl;
@@ -105,15 +234,13 @@ void PylonCamera_Thread::run()
 	m_camera.Close();
 	m_camera.DetachDevice();
 
-	// Releases all pylon resources. 
-	PylonTerminate();
-	
-	
 }
 
 PylonCamera_Thread::~PylonCamera_Thread()
 {
-	//m_CameraIdlist.removeAll(m_CameraId);
+	m_CameraIdlist.removeAll(m_CameraId);
+	// Releases all pylon resources. 
+	PylonTerminate();
 }
 
 bool PylonCamera_Thread::IsExistCameraId(QString cameraId)
@@ -147,62 +274,62 @@ bool PylonCamera_Thread::OpenCamera()
 
 			try
 			{
+				//m_camera.Attach(CTlFactory::GetInstance().CreateFirstDevice());
 				m_camera.Attach(CTlFactory::GetInstance().CreateDevice(m_CameraId.toStdString().c_str()));
-			
-				using namespace GenApi;
-				INodeMap& nodemap = m_camera.GetNodeMap();
 				
-				m_camera.Open();
-				
-				 //Get camera device information.
-				qDebug() << endl << "Camera Device Information" << endl
-					<< "=========================";
-				qDebug() << "Vendor					: "
-					<< CStringPtr(nodemap.GetNode("DeviceVendorName"))->GetValue();
-				qDebug() << "Model					: "
-					<< CStringPtr(nodemap.GetNode("DeviceModelName"))->GetValue();
-				qDebug() << "Firmware version		: "
-					<< CStringPtr(nodemap.GetNode("DeviceFirmwareVersion"))->GetValue();
-				qDebug() << "Using Device FullInfo	: " 
-					<< m_camera.GetDeviceInfo().GetFullName();
+				m_camera.RegisterConfiguration(new CHardwareTriggerConfiguration, RegistrationMode_ReplaceAll, Cleanup_Delete);
 
+				//using namespace GenApi;
+				//INodeMap& nodemap = m_camera.GetNodeMap();
+				// //Get camera device information.
+				//qDebug() << endl << "Camera Device Information" << endl
+				//	<< "=========================";
+				//qDebug() << "Vendor					: "
+				//	<< CStringPtr(nodemap.GetNode("DeviceVendorName"))->GetValue();
+				//qDebug() << "Model					: "
+				//	<< CStringPtr(nodemap.GetNode("DeviceModelName"))->GetValue();
+				//qDebug() << "Firmware version		: "
+				//	<< CStringPtr(nodemap.GetNode("DeviceFirmwareVersion"))->GetValue();
+				//qDebug() << "Using Device FullInfo	: " 
+				//	<< m_camera.GetDeviceInfo().GetFullName();
 
-				// Camera settings.
-				qDebug() << endl << "Camera Device Settings" << endl
-					<< "======================" << endl;
+				//// Camera settings.
+				//qDebug() << endl << "Camera Device Settings" << endl
+				//	<< "======================" << endl;
 
-				CIntegerPtr Width(nodemap.GetNode("Width"));
-				CIntegerPtr Height(nodemap.GetNode("Height"));
-				CIntegerPtr ExposureTimeRaw(nodemap.GetNode("ExposureTimeRaw"));
-				CFloatPtr	AcquisitionLineRateAbs(nodemap.GetNode("AcquisitionLineRateAbs"));
-				CEnumerationPtr TriggerSelector(nodemap.GetNode("TriggerSelector"));
-				CEnumerationPtr TriggerMode(nodemap.GetNode("TriggerMode"));
-				CEnumerationPtr	TriggerSource(nodemap.GetNode("TriggerSource"));
-				CEnumerationPtr TriggerActivation(nodemap.GetNode("TriggerActivation"));
+				//CIntegerPtr Width(nodemap.GetNode("Width"));
+				//CIntegerPtr Height(nodemap.GetNode("Height"));
+				//CIntegerPtr ExposureTimeRaw(nodemap.GetNode("ExposureTimeRaw"));
+				//CFloatPtr	AcquisitionLineRateAbs(nodemap.GetNode("AcquisitionLineRateAbs"));
+				//CEnumerationPtr TriggerSelector(nodemap.GetNode("TriggerSelector"));
+				//CEnumerationPtr TriggerMode(nodemap.GetNode("TriggerMode"));
+				//CEnumerationPtr	TriggerSource(nodemap.GetNode("TriggerSource"));
+				//CEnumerationPtr TriggerActivation(nodemap.GetNode("TriggerActivation"));
 			
-				Width->SetValue(2048);
-				Height->SetValue(10000);
-				ExposureTimeRaw->SetValue(760);
-				AcquisitionLineRateAbs->SetValue(10000.0);
-				TriggerSelector->FromString("FrameStart");
-				TriggerMode->FromString("Off");
-				TriggerSource->FromString("Line1");
-				TriggerActivation->FromString("RisingEdge");
+				//Width->SetValue(2048);
+				//Height->SetValue(10000);
+				//ExposureTimeRaw->SetValue(760);
+				//AcquisitionLineRateAbs->SetValue(10000.0);
+				//TriggerSelector->FromString("FrameStart");
+				//TriggerMode->FromString("Off");
+				//TriggerSource->FromString("Line1");
+				//TriggerActivation->FromString("RisingEdge");
 			
 
-				qDebug() << "Width					: " << Width->GetValue();
-				qDebug() << "Height					: " << Height->GetValue();
-				qDebug() << "ExposureTimeRaw			: " << ExposureTimeRaw->GetValue();
-				qDebug() << "AcquisitionLineRateAbs	: " << AcquisitionLineRateAbs->GetValue();
-				qDebug() << "TriggerSelector			: " << TriggerSelector->ToString();
-				qDebug() << "TriggerMode				: " << TriggerMode->ToString();
-				qDebug() << "TriggerSource			: " << TriggerSource->ToString();
-				qDebug() << "TriggerActivation		: " << TriggerActivation->ToString();
+				//qDebug() << "Width					: " << Width->GetValue();
+				//qDebug() << "Height					: " << Height->GetValue();
+				//qDebug() << "ExposureTimeRaw			: " << ExposureTimeRaw->GetValue();
+				//qDebug() << "AcquisitionLineRateAbs	: " << AcquisitionLineRateAbs->GetValue();
+				//qDebug() << "TriggerSelector			: " << TriggerSelector->ToString();
+				//qDebug() << "TriggerMode				: " << TriggerMode->ToString();
+				//qDebug() << "TriggerSource			: " << TriggerSource->ToString();
+				//qDebug() << "TriggerActivation		: " << TriggerActivation->ToString();
 
-				qDebug() << "======================" << endl;
+				//qDebug() << "======================" << endl;
 				// The parameter MaxNumBuffer can be used to control the count of buffers
 				// allocated for grabbing. The default value of this parameter is 10.
 				m_camera.MaxNumBuffer = 3;
+				m_camera.Open();
 
 			}
 			catch (const GenericException &e)
@@ -292,3 +419,4 @@ void PylonCamera_Thread::QueueSaveImage(const HObject& Image,int maxnum)
 		m_image_index++;
 	}
 }
+
