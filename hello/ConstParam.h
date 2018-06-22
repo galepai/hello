@@ -13,7 +13,8 @@ static const char* AreaCameraId = "[0] USB3_CMOS_8.8M(1)";
 static const char* AreaCameraId2 = "[0] USB3_CMOS_1.3M_M(2)";
 static const char* LineCameraId_Basler1= "0030531d42b0_Basler_raL204848gm";	//192.168.2.7
 static const char* LineCameraId_Basler2 = "003053255252_Basler_raL204848gm";	//192.168.3.7
-//static const char* LineCameraId = "00010dc2ae11_TeledyneDALSA_LineaM20487um";
+static const char* LineCameraId_Dalsa1 = "00010dc2ad7a_TeledyneDALSA_LineaM20487um";	//192.168.4.7
+static const char* LineCameraId_Dalsa2 = "00010dc2ae11_TeledyneDALSA_LineaM20487um";	//192.168.5.7
 
 static const char* LineCameraId_Pylon_Basler1 = "Basler raL2048-48gm#0030531D42B0#192.168.2.7:3956";	//192.168.2.7
 static const char* LineCameraId_Pylon_Basler2 = "Basler raL2048-48gm#003053255252#192.168.3.7:3956";	//192.168.3.7

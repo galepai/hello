@@ -77,12 +77,12 @@ TestDialog::TestDialog(QWidget *parent) :
 	ReadConfigure("config.ini", "Port", "DataBits", value);
 	int DataBits = value.toInt();
 
-	//设置默认查询队列
+	//设置默认查询队列模式
 	Delta_Thread::setQueryMode(Delta_Thread::QueryMode::DefalutQuene);
 	Delta_Thread::AddDefaultQueueInfo(READ_X_INPUT);	//读X00-X87
 	Delta_Thread::AddDefaultQueueInfo(READ_Y_OUTPUT);	//读Y00-Y67
 
-	//设置默认查询队列
+	//设置单次查询模式
 	//Delta_Thread::setQueryMode(Delta_Thread::QueryMode::OneQuery);
 
 
@@ -473,7 +473,6 @@ void TestDialog::paintEvent(QPaintEvent *event)
 	}
 	
 	QPointF y_origin(350, 550);
-
 	if (m_Y_States.size() != 0 && m_Y_States.size()%8 == 0)
 	{
 		for (int row = 0; row < m_Y_States.size()/8; row++)
@@ -487,6 +486,28 @@ void TestDialog::paintEvent(QPaintEvent *event)
 				else
 					PaintCirle(painter, QPointF(y_origin.x() + column*(radius + distance),
 					y_origin.y() + row*(radius + distance)),
+					radius, QPen(QColor(255, 90, 90), 2), QColor(255, 45, 35));
+			}
+		}
+	}
+
+
+	radius = 10;
+	distance = 30;
+	QPointF origin_status(78, 750);
+	if (m_origin_States.size() != 0 && m_origin_States.size() % 12 == 0)
+	{
+		for (int row = 0; row < m_origin_States.size() / 12; row++)
+		{
+			for (int column = 0; column < 12; column++)
+			{
+				if (m_origin_States[row * 12 + column])
+					PaintCirle(painter, QPointF(origin_status.x() + column*(radius + distance),
+					origin_status.y() + row*(radius + distance)),
+					radius, QPen(QColor(0, 255, 90), 2), QColor(35, 255, 125));
+				else
+					PaintCirle(painter, QPointF(origin_status.x() + column*(radius + distance),
+					origin_status.y() + row*(radius + distance)),
 					radius, QPen(QColor(255, 90, 90), 2), QColor(255, 45, 35));
 			}
 		}
@@ -516,7 +537,51 @@ void TestDialog::readyDataSlot(QByteArray str)
 
 		if (function_code == "02")
 		{
+			
 			m_X_States = Parse_Delta_Ascii(str.toStdString());
+
+			//原点状态
+			m_origin_States.clear();
+			if (m_X_States.size() > 70)
+			{
+				bool flag = true;
+				m_origin_States.push_back(m_X_States[8]);
+				m_origin_States.push_back(m_X_States[9]);
+				m_origin_States.push_back(m_X_States[29]);
+				m_origin_States.push_back(m_X_States[62]);
+				m_origin_States.push_back(m_X_States[31]);
+				m_origin_States.push_back(m_X_States[33]);
+				m_origin_States.push_back(m_X_States[40]);
+				m_origin_States.push_back(m_X_States[41]);
+				m_origin_States.push_back(m_X_States[57]);
+				m_origin_States.push_back(m_X_States[58]);
+				m_origin_States.push_back(m_X_States[61]);
+
+				m_origin_States.push_back(m_X_States[12]);
+				m_origin_States.push_back(m_X_States[13]);
+				m_origin_States.push_back(m_X_States[19]);
+				m_origin_States.push_back(m_X_States[21]);
+				m_origin_States.push_back(m_X_States[23]);
+				m_origin_States.push_back(m_X_States[25]);
+
+				for (int index = m_origin_States.size() - 6; index < m_origin_States.size() - 1; index++)
+				{
+					if (!m_origin_States[index])
+					{
+						flag = false;
+						break;
+					}
+					
+				}
+				for (int index = 0; index < 6; index++)
+				{
+					m_origin_States.pop_back();
+				}
+
+				m_origin_States.push_back(flag);
+
+			}
+		
 		}
 			
 		if (function_code == "03")

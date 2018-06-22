@@ -5,118 +5,44 @@
 #include "ConstParam.h"
 #include "pylon/PylonGUIIncludes.h"
 
+QMutex PylonCamera_Thread::m_mutex;
+QStringList PylonCamera_Thread::m_CameraIdlist;
+
 
 class CHardwareTriggerConfiguration : public Pylon::CConfigurationEventHandler
 {
 public:
-	void OnOpened(Pylon::CBaslerGigEInstantCamera& camera)
+	void OnOpened(Pylon::CInstantCamera& camera)
 	{
 		try
 		{
+			CBaslerGigEInstantCamera* _pCamera = static_cast<CBaslerGigEInstantCamera*>(&camera);
 
-			// Get the camera control object.
-			//INodeMap &nodemap = camera.GetNodeMap();
-		
-			//
-			////Get camera device information.
-			//qDebug() << endl << "Camera Device Information" << endl
-			//	<< "=========================";
-			//qDebug() << "Vendor					: "
-			//	<< CStringPtr(nodemap.GetNode("DeviceVendorName"))->GetValue();
-			//qDebug() << "Model					: "
-			//	<< CStringPtr(nodemap.GetNode("DeviceModelName"))->GetValue();
-			//qDebug() << "Firmware version		: "
-			//	<< CStringPtr(nodemap.GetNode("DeviceFirmwareVersion"))->GetValue();
-			//qDebug() << "Using Device FullInfo	: "
-			//	<< camera.GetDeviceInfo().GetFullName();
+			qDebug() << endl << "==========================================";
+			qDebug() << _pCamera->DeviceVendorName.ToString();
+			qDebug() << _pCamera->DeviceModelName.ToString();
+			qDebug() << _pCamera->DeviceFirmwareVersion.ToString();
+			qDebug() << _pCamera->DeviceVendorName.ToString();
+			qDebug() << _pCamera->DeviceID.ToString();
 
-			//// Camera settings.
-			//qDebug() << endl << "Camera Device Settings" << endl
-			//	<< "======================" << endl;
+			_pCamera->Width.SetValue(2048);
+			_pCamera->Height.SetValue(10000);
+			_pCamera->ExposureTimeRaw.SetValue(760);
+			_pCamera->AcquisitionLineRateAbs.SetValue(10000.0);
+			_pCamera->TriggerSelector.FromString("FrameStart");
+			_pCamera->TriggerMode.FromString("On");
+			_pCamera->TriggerSource.FromString("Line1");
+			_pCamera->TriggerActivation.FromString("RisingEdge");
 
-			//CIntegerPtr Width(nodemap.GetNode("Width"));
-			//CIntegerPtr Height(nodemap.GetNode("Height"));
-			//CIntegerPtr ExposureTimeRaw(nodemap.GetNode("ExposureTimeRaw"));
-			//CFloatPtr	AcquisitionLineRateAbs(nodemap.GetNode("AcquisitionLineRateAbs"));
-			//CEnumerationPtr TriggerSelector(nodemap.GetNode("TriggerSelector"));
-			//CEnumerationPtr TriggerMode(nodemap.GetNode("TriggerMode"));
-			//CEnumerationPtr	TriggerSource(nodemap.GetNode("TriggerSource"));
-			//CEnumerationPtr TriggerActivation(nodemap.GetNode("TriggerActivation"));
-
-			//if (IsWritable(Width))
-			//{
-			//	Width->SetValue(2048);
-			//}
-			//
-			//if (IsWritable(Height))
-			//{
-			//	Height->SetValue(10000);
-			//}
-
-			//if (IsWritable(ExposureTimeRaw))
-			//{
-			//	ExposureTimeRaw->SetValue(760);
-			//}
-
-			//if (IsWritable(AcquisitionLineRateAbs))
-			//{
-			//	AcquisitionLineRateAbs->SetValue(10000.0);
-			//}
-
-			//if (IsWritable(TriggerSelector))
-			//{
-			//	TriggerSelector->FromString("FrameStart");
-			//}
-
-			//if (IsWritable(TriggerMode))
-			//{
-			//	TriggerMode->FromString("On");
-			//}
-
-			//if (IsWritable(TriggerSource))
-			//{
-			//	TriggerSource->FromString("Line1");
-			//}
-
-			//if (IsWritable(TriggerActivation))
-			//{
-			//	TriggerActivation->FromString("RisingEdge");
-			//}
-			//
-			//qDebug() << "Width					: " << Width->GetValue();
-			//qDebug() << "Height					: " << Height->GetValue();
-			//qDebug() << "ExposureTimeRaw			: " << ExposureTimeRaw->GetValue();
-			//qDebug() << "AcquisitionLineRateAbs	: " << AcquisitionLineRateAbs->GetValue();
-			//qDebug() << "TriggerSelector			: " << TriggerSelector->ToString();
-			//qDebug() << "TriggerMode				: " << TriggerMode->ToString();
-			//qDebug() << "TriggerSource			: " << TriggerSource->ToString();
-			//qDebug() << "TriggerActivation		: " << TriggerActivation->ToString();
-			//qDebug() << "======================" << endl;
-
-			qDebug() << camera.DeviceManufacturerInfo.ToString();
-			qDebug() << camera.DeviceModelName.ToString();
-			qDebug() << camera.DeviceFirmwareVersion.ToString();
-			qDebug() << camera.DeviceVendorName.ToString();
-			qDebug() << camera.DeviceID.ToString();
-
-			camera.Width.SetValue(2048);
-			camera.Height.SetValue(10000);
-			camera.ExposureTimeRaw.SetValue(760);
-			camera.AcquisitionLineRateAbs.SetValue(10000.0);
-			camera.TriggerSelector.FromString("FrameStart");
-			camera.TriggerMode.FromString("On");
-			camera.TriggerSource.FromString("Line1");
-			camera.TriggerActivation.FromString("RisingEdge");
-
-			qDebug() << camera.Width.GetValue();
-			qDebug() << camera.Height.GetValue();
-			qDebug() << camera.ExposureTimeRaw.GetValue();
-			qDebug() << camera.AcquisitionLineRateAbs.GetValue();
-			qDebug() << camera.TriggerSelector.ToString();
-			qDebug() << camera.TriggerMode.ToString();
-			qDebug() << camera.TriggerSource.ToString();
-			qDebug() << camera.TriggerActivation.ToString();
-
+			qDebug() << _pCamera->Width.GetValue();
+			qDebug() << _pCamera->Height.GetValue();
+			qDebug() << _pCamera->ExposureTimeRaw.GetValue();
+			qDebug() << _pCamera->AcquisitionLineRateAbs.GetValue();
+			qDebug() << _pCamera->TriggerSelector.ToString();
+			qDebug() << _pCamera->TriggerMode.ToString();
+			qDebug() << _pCamera->TriggerSource.ToString();
+			qDebug() << _pCamera->TriggerActivation.ToString();
+			qDebug() << "==========================================" << endl;
 			qDebug() << "CHardwareTriggerConfiguration Run Thread : " << QThread::currentThreadId();
 			
 		}
@@ -127,10 +53,6 @@ public:
 	}
 };
 
-
-
-QStringList PylonCamera_Thread::m_CameraIdlist;
-
 PylonCamera_Thread::PylonCamera_Thread(ConnectionType connection_type,QString CameraId, QObject *parent)
 	: m_connectionType(connection_type),m_CameraId(CameraId),QThread(parent)
 {
@@ -140,6 +62,7 @@ PylonCamera_Thread::PylonCamera_Thread(ConnectionType connection_type,QString Ca
 
 void PylonCamera_Thread::run()
 {
+	qDebug() << "PylonCamera_Thread Run Thread : " << QThread::currentThreadId();
 
 	if (!OpenCamera())
 		return;
@@ -147,19 +70,24 @@ void PylonCamera_Thread::run()
 	m_bIsStop = false;
 	HImage Image;
 	QTime time;
+	
+	//m_camera.StartGrabbing();  //配合WaitForFrameTriggerReady版本
 	while (!m_bIsStop)
 	{
 		try{
-			time.start();
+			//time.start();
 			qDebug() << endl << m_CameraId << " ready cap.... ";
 
-			//m_camera.StartGrabbing();
 			CGrabResultPtr ptrGrabResult;
 
-			//if (m_camera.WaitForFrameTriggerReady(5000))
+			
+			//if (m_camera.IsGrabbing())
 			//{
+			//	m_camera.WaitForFrameTriggerReady(5000);
+			//	m_camera.ExecuteSoftwareTrigger();
+			//	time.start();
 			//	m_camera.RetrieveResult(5000, ptrGrabResult);
-
+			//	qDebug() << m_CameraId << " all time: " << time.elapsed() / 1000.0;
 			//	if (ptrGrabResult->GrabSucceeded())
 			//	{
 			//		// Access the image data.
@@ -170,8 +98,12 @@ void PylonCamera_Thread::run()
 			//		const uint8_t* pImageBuffer = (uint8_t *)ptrGrabResult->GetBuffer();
 			//		qDebug() << "Gray value of first pixel: " << (uint32_t)pImageBuffer[0];
 			//		qDebug() << "=========================" << endl;
+			//		m_mutex.lock();
 			//		GenImage1(&Image, "byte", (int)ptrGrabResult->GetWidth(), (int)ptrGrabResult->GetHeight(), (Hlong)pImageBuffer);
-
+			//		m_mutex.unlock();
+			//		signal_image(&Image);
+			//		QueueSaveImage(Image, m_MaxNum);
+			//		//qDebug() << m_CameraId << " all time: " << time.elapsed() / 1000.0;
 			//	}
 			//	else
 			//	{
@@ -179,11 +111,7 @@ void PylonCamera_Thread::run()
 			//	}
 			//}
 			
-
-			//m_camera.WaitForFrameTriggerReady(5000);
-			//m_camera.ExecuteSoftwareTrigger();
 		
-			//if (m_camera.IsGrabbing())
 			if (m_camera.GrabOne(5000, ptrGrabResult))
 			{
 				if (ptrGrabResult->GrabSucceeded())
@@ -194,11 +122,17 @@ void PylonCamera_Thread::run()
 					qDebug() << "SizeX: " << ptrGrabResult->GetWidth();
 					qDebug() << "SizeY: " << ptrGrabResult->GetHeight();
 					const uint8_t* pImageBuffer = (uint8_t *)ptrGrabResult->GetBuffer();
-					DisplayImage(1, ptrGrabResult);
-					qDebug() << m_CameraId << "	:	" << pImageBuffer;
-					qDebug() << "Gray value of first pixel: " << (uint32_t)pImageBuffer[0];
+					//qDebug() << m_CameraId << "	:	" << pImageBuffer;
+					//qDebug() << "Gray value of first pixel: " << (uint32_t)pImageBuffer[0];
 					qDebug() << "========================="  << endl;
+
+					m_mutex.lock();
 					GenImage1(&Image, "byte", (int)ptrGrabResult->GetWidth(), (int)ptrGrabResult->GetHeight(), (Hlong)pImageBuffer);
+					m_mutex.unlock();
+
+					signal_image(&Image);
+					QueueSaveImage(Image, m_MaxNum);
+					//qDebug() << m_CameraId << " all time: " << time.elapsed() / 1000.0;
 
 				}
 				else
@@ -207,10 +141,7 @@ void PylonCamera_Thread::run()
 				}
 			}
 		
-
-			signal_image(&Image);
-			QueueSaveImage(Image, m_MaxNum);
-			qDebug() << m_CameraId<<" all time: " << time.elapsed() / 1000.0;
+			
 		}
 		catch (HException& e)
 		{
@@ -257,14 +188,12 @@ QString PylonCamera_Thread::CameraId() const
 bool PylonCamera_Thread::OpenCamera()
 {
 
-	/*uint c_countOfImagesToGrab = 5;
-	uint c_maxCamerasToUse = 2;*/
 	try{
 		switch (m_connectionType)
 		{
 		case PylonCamera_Thread::DirectShow:
 			
-		
+			return false;
 			break;
 
 		case PylonCamera_Thread::GigEVision:
@@ -276,7 +205,6 @@ bool PylonCamera_Thread::OpenCamera()
 			{
 				//m_camera.Attach(CTlFactory::GetInstance().CreateFirstDevice());
 				m_camera.Attach(CTlFactory::GetInstance().CreateDevice(m_CameraId.toStdString().c_str()));
-				
 				m_camera.RegisterConfiguration(new CHardwareTriggerConfiguration, RegistrationMode_ReplaceAll, Cleanup_Delete);
 
 				//using namespace GenApi;
@@ -292,11 +220,9 @@ bool PylonCamera_Thread::OpenCamera()
 				//	<< CStringPtr(nodemap.GetNode("DeviceFirmwareVersion"))->GetValue();
 				//qDebug() << "Using Device FullInfo	: " 
 				//	<< m_camera.GetDeviceInfo().GetFullName();
-
 				//// Camera settings.
 				//qDebug() << endl << "Camera Device Settings" << endl
 				//	<< "======================" << endl;
-
 				//CIntegerPtr Width(nodemap.GetNode("Width"));
 				//CIntegerPtr Height(nodemap.GetNode("Height"));
 				//CIntegerPtr ExposureTimeRaw(nodemap.GetNode("ExposureTimeRaw"));
@@ -304,8 +230,7 @@ bool PylonCamera_Thread::OpenCamera()
 				//CEnumerationPtr TriggerSelector(nodemap.GetNode("TriggerSelector"));
 				//CEnumerationPtr TriggerMode(nodemap.GetNode("TriggerMode"));
 				//CEnumerationPtr	TriggerSource(nodemap.GetNode("TriggerSource"));
-				//CEnumerationPtr TriggerActivation(nodemap.GetNode("TriggerActivation"));
-			
+				//CEnumerationPtr TriggerActivation(nodemap.GetNode("TriggerActivation"));	
 				//Width->SetValue(2048);
 				//Height->SetValue(10000);
 				//ExposureTimeRaw->SetValue(760);
@@ -314,8 +239,6 @@ bool PylonCamera_Thread::OpenCamera()
 				//TriggerMode->FromString("Off");
 				//TriggerSource->FromString("Line1");
 				//TriggerActivation->FromString("RisingEdge");
-			
-
 				//qDebug() << "Width					: " << Width->GetValue();
 				//qDebug() << "Height					: " << Height->GetValue();
 				//qDebug() << "ExposureTimeRaw			: " << ExposureTimeRaw->GetValue();
@@ -324,12 +247,13 @@ bool PylonCamera_Thread::OpenCamera()
 				//qDebug() << "TriggerMode				: " << TriggerMode->ToString();
 				//qDebug() << "TriggerSource			: " << TriggerSource->ToString();
 				//qDebug() << "TriggerActivation		: " << TriggerActivation->ToString();
-
 				//qDebug() << "======================" << endl;
 				// The parameter MaxNumBuffer can be used to control the count of buffers
 				// allocated for grabbing. The default value of this parameter is 10.
+
 				m_camera.MaxNumBuffer = 3;
 				m_camera.Open();
+			
 
 			}
 			catch (const GenericException &e)
@@ -337,8 +261,9 @@ bool PylonCamera_Thread::OpenCamera()
 					// Error handling.
 					qDebug() << "An exception occurred." << endl
 						<< e.GetDescription() << endl;
-					//m_camera.Close();
-					//m_camera.DetachDevice();
+					
+					m_camera.DetachDevice();
+					m_camera.Close();
 
 					return false;
 			}
@@ -352,14 +277,6 @@ bool PylonCamera_Thread::OpenCamera()
 
 		return true;
 	}
-	//catch (HException& e)
-	//{
-	//	//emit signal_error(e.ErrorMessage().Text());
-
-	//	QString eror = e.ErrorMessage().Text();
-	//	emit signal_error(G2U("不能获取相机，请检测相机ID是否正确"));
-	//	return false;
-	//}
 	catch (GenICam::AccessException& e)
 	{
 		QString  error = e.GetDescription();

@@ -22,18 +22,24 @@ void HandlePicThread::run()
 	if (m_Image.Key() != 0)
 	{
 		bool isbad = false;
-		
-		HObject Region;
-		Threshold(m_Image, &Region, 0, 10);
-		SetDraw(m_WindowHandle, "margin");
-		SetColor(m_WindowHandle, "red");
-		DispObj(Region, m_WindowHandle);
+		try
+		{
+			HObject Region;
+			Threshold(m_Image, &Region, 5, 200);
+			SetDraw(m_WindowHandle, "margin");
+			SetColor(m_WindowHandle, "red");
+			DispObj(Region, m_WindowHandle);
 
-		/*if ()
-		{*/
+			/*if ()
+			{*/
 			isbad = true;
-		//}
-		emit resultReady(isbad);
+			//}
+			emit resultReady(isbad);
+		}
+		catch (HException& e)
+		{
+			QString error = e.ErrorMessage().Text();
+		}
 	}
 		
 }

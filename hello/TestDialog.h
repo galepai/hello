@@ -22,7 +22,8 @@ private:
 	Ui::TestDialog *ui;
 	QTimer* m_pTimer;
 	std::vector<bool> m_Y_States;
-	std::vector<bool> m_X_States;
+	std::vector<bool> m_X_States; 
+	std::vector<bool> m_origin_States;
 	std::vector<ushort> m_D_Register;
 
 	virtual void paintEvent(QPaintEvent *event);
