@@ -363,3 +363,11 @@ bool CreateImagetDir()
 		return false;
 	}
 }
+
+bool isCorrectImage(HalconCpp::HImage& image, double threshold_gray)
+{
+	HalconCpp::HTuple mean_gray;
+	HalconCpp::GrayFeatures(image, image, "mean", &mean_gray);
+
+	return mean_gray > threshold_gray;
+}

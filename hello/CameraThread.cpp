@@ -28,6 +28,8 @@ void Camera_Thread::run()
 	m_bIsStop = false;
 	HImage Image;
 	QTime time;
+	HTuple mean_gray;
+	HObject Rectangle;
 	while (!m_bIsStop)
 	{
 		try{
@@ -42,11 +44,14 @@ void Camera_Thread::run()
 			qDebug() << "SizeY: " << (int)Image.Height();
 			qDebug() << "=========================" << endl;
 
-			//GrabImageAsync(&Image, hv_AcqHandle, -1);
-			signal_image(&Image);
-			//DispColor(Image, m_WindowHandle);
-			QueueSaveImage(Image, m_MaxNum);
-			//qDebug() << m_CameraId<<" all time: " << time.elapsed() / 1000.0;
+			if (isCorrectImage(Image,3.0))
+			{
+				signal_image(&Image);
+				//DispColor(Image, m_WindowHandle);
+				QueueSaveImage(Image, m_MaxNum);
+				//qDebug() << m_CameraId<<" all time: " << time.elapsed() / 1000.0;
+			}
+			
 		}
 		catch (HException& e)
 		{
@@ -119,7 +124,7 @@ bool Camera_Thread::OpenCamera()
 			else if (m_CameraId.contains("DALSA"))
 			{
 				m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
-				m_pGrabber->SetFramegrabberParam("ExposureTime", 76.0);
+				m_pGrabber->SetFramegrabberParam("ExposureTime", 80.0);
 				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
 				m_pGrabber->SetFramegrabberParam("TriggerMode", "On");
 				m_pGrabber->SetFramegrabberParam("TriggerSource", "Line1");

@@ -12,6 +12,7 @@
 #include <QVariant>
 #include <QFile>
 #include <QTextStream>
+#include <HalconCpp.h>
 
 #define G2U(s) ( QTextCodec::codecForName("GBK")->toUnicode(s) )	//QT中显示中文，使用方法 G2U("中文")
 #define U2G(s) ( QTextCodec::codecForName("GBK")->fromUnicode(s) )
@@ -19,6 +20,10 @@
 #define HSCROLL_HEIGHT_RightPic(height) ui.scrollAreaWidgetContentsRight->setMinimumHeight(height)	//显示右边区域高度，用于显示出滚动条
 #define HSCROLL_HEIGHT_LeftPic(height) ui.scrollAreaWidgetContentsLeft->setMinimumHeight(height)	//显示左边区域高度，用于显示出滚动条
 #define HSCROLL_HEIGHT_MiddlePic(height) ui.scrollAreaWidgetContentsMiddle->setMinimumHeight(height)	//显示中间区域高度，用于显示出滚动条
+
+#define VSCROLL_WIDTH_RightPic(width) ui.scrollAreaWidgetContentsRight->setMinimumWidth(width)	//显示右边区域宽度，用于显示出滚动条
+#define VSCROLL_WIDTH_LeftPic(width) ui.scrollAreaWidgetContentsLeft->setMinimumWidth(width)	//显示左边区域宽度，用于显示出滚动条
+#define VSCROLL_WIDTH_MiddlePic(width) ui.scrollAreaWidgetContentsMiddle->setMinimumWidth(width)	//显示中间区域宽度，用于显示出滚动条
 
 //#define HIDDLE_DIALOG_BUTTON setWindowFlags(Qt::ToolTip);	//隐藏标题栏，比如最小化，最大化、关闭按钮
 #define HIDDLE_DIALOG_BUTTON setWindowFlags(Qt::SplashScreen);	//隐藏标题栏，比如最小化，最大化、关闭按钮
@@ -55,6 +60,7 @@ std::vector<ushort> Parse_Delta_Ascii_03(const std::string& data);	//Delta接收信
 
 bool CreateImagetDir();
 
+bool isCorrectImage(HalconCpp::HImage& image, double threshold_gray);
 
 
 enum LocationView

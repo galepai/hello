@@ -9,6 +9,7 @@
 #include "ComDialog.h"
 #include "DeltaThread.h"
 #include "ConstParam.h"
+#include "ConfigureDialog.h"
 
 
 
@@ -189,7 +190,10 @@ void hello::OnShutDown()
 
 void hello::OnConfigure()
 {
-	ConfigureDlg Dlg(this);
+	/*ConfigureDlg Dlg(this);
+	Dlg.exec();*/
+
+	ConfigureDialog Dlg(this);
 	Dlg.exec();
 }
 
@@ -383,6 +387,7 @@ void hello::SetPicViewScroll(int width, int height, LocationView location)
 		if (scaleY > scaleX)
 		{
 			HSCROLL_HEIGHT_RightPic(4000);
+			ui.scrollAreaWidgetContentsRight->setMinimumWidth(850);
 		}
 		else
 		{
@@ -393,6 +398,7 @@ void hello::SetPicViewScroll(int width, int height, LocationView location)
 		if (scaleY > scaleX)
 		{
 			HSCROLL_HEIGHT_LeftPic(4000);
+			ui.scrollAreaWidgetContentsLeft->setMinimumWidth(850);
 		}
 		else
 		{
@@ -403,6 +409,7 @@ void hello::SetPicViewScroll(int width, int height, LocationView location)
 		if (scaleY > scaleX)
 		{
 			HSCROLL_HEIGHT_MiddlePic(4000);
+			ui.scrollAreaWidgetContentsMiddle->setMinimumWidth(850);
 		}
 		else
 		{
