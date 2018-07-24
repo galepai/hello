@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QGroupBox>
 #include <QMessageBox>
+#include "Widgets\widget.h"
 
 ConfigureDialog::ConfigureDialog(QWidget *parent) :
     QDialog(parent),
@@ -35,7 +36,9 @@ ConfigureDialog::ConfigureDialog(QWidget *parent) :
 
 
 	ui->stackedWidget->addWidget(&configSerial);
-	
+	ui->stackedWidget->addWidget(new Widget);
+
+	connect(ui->listWidget, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
 
 	HIDDLE_DIALOG_BUTTON
 }
@@ -45,6 +48,10 @@ ConfigureDialog::~ConfigureDialog()
     delete ui;
 }
 
+void ConfigureDialog::currentRowChanged(int currentRow)
+{
+	ui->stackedWidget->setCurrentIndex(currentRow);
+}
 
 ConfigSerial::ConfigSerial(QWidget *parent) :
 	QWidget(parent)

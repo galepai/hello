@@ -1,22 +1,24 @@
-#ifndef HANDLE_PIC_THREAD_H
-#define HANDLE_PIC_THREAD_H
+#ifndef PIC_THREAD_MIDDLE_H
+#define PIC_THREAD_MIDDLE_H
 
 #include <QThread>
 #include <QDebug>
+#include "ConstParam.h"
 #include <HalconCpp.h>
 using namespace HalconCpp;
 
-class HandlePicThread : public QThread
+class PicThreadMiddle : public QThread
 {
 	Q_OBJECT
 
 public:
-	explicit HandlePicThread(QObject *parent = 0)
+	explicit PicThreadMiddle(QObject *parent = 0)
 		: QThread(parent)
 	{
 		//qDebug() << "Worker Thread : " << QThread::currentThreadId();
 	}
 
+	void OnHandle(HTuple WindowHandle);
 
 	HImage m_Image;
 	HTuple m_WindowHandle;
@@ -25,7 +27,7 @@ protected:
 	virtual void run() Q_DECL_OVERRIDE;
 
 signals:
-	void resultReady(bool bIsBad);
+	void resultReady(int bIsBad);
 
 
 

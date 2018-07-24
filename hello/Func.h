@@ -80,4 +80,16 @@ struct Delta_Ascii_Info
 	short End_Address_Low;
 	short Other_Info;
 };
+
+struct Detect_Result
+{
+	bool isLeftEnd;
+	bool isLeftBad;
+	bool isMiddleEnd;
+	bool isMiddleBad;
+	bool isRightEnd;
+	bool isRightBad;
+	bool isBad;
+};
+
 #endif // FUNC_H

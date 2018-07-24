@@ -30,7 +30,8 @@ public:
 			_pCamera->ExposureTimeRaw.SetValue(760);
 			_pCamera->AcquisitionLineRateAbs.SetValue(10000.0);
 			_pCamera->TriggerSelector.FromString("FrameStart");
-			_pCamera->TriggerMode.FromString("On");
+			//_pCamera->TriggerMode.FromString("On");
+			_pCamera->TriggerMode.FromString("Off");
 			_pCamera->TriggerSource.FromString("Line1");
 			_pCamera->TriggerActivation.FromString("RisingEdge");
 
@@ -130,8 +131,12 @@ void PylonCamera_Thread::run()
 					GenImage1(&Image, "byte", (int)ptrGrabResult->GetWidth(), (int)ptrGrabResult->GetHeight(), (Hlong)pImageBuffer);
 					m_mutex.unlock();
 
-					signal_image(&Image);
-					QueueSaveImage(Image, m_MaxNum);
+				//	if (isCorrectImage(Image, 5))
+				//	{
+						signal_image(&Image);
+						QueueSaveImage(Image, m_MaxNum);
+				//	}
+					
 					//qDebug() << m_CameraId << " all time: " << time.elapsed() / 1000.0;
 
 				}
@@ -306,20 +311,21 @@ void PylonCamera_Thread::QueueSaveImage(const HObject& Image,int maxnum)
 {
 	//QTime time;
 	
-	if (CreateImagetDir())
-	{
-		QVariant value;
-		ReadConfigure("config.ini", "Config", "ImagePath1", value);
-		setSaveDatePath(value.toString());
-	}
-	
+	//if (CreateImagetDir())
+	//{
+	//	QVariant value;
+	//	ReadConfigure("config.ini", "Config", "ImagePath1", value);
+	//	setSaveDatePath(value.toString());
+	//}
+	//
 
 	if (m_image_index <= maxnum)
 	{
 		
-		QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
+		//QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
+		QString saveImagePath = QString("images/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
 		//time.start();
-		WriteImage(Image, "bmp", 0, saveImagePath.toStdString().c_str());
+		WriteImage(Image, "jpg", 0, saveImagePath.toStdString().c_str());
 	//	qDebug() << "save time: " << time.elapsed() / 1000.0;
 
 		m_image_index++;
@@ -327,8 +333,9 @@ void PylonCamera_Thread::QueueSaveImage(const HObject& Image,int maxnum)
 	else
 	{
 		m_image_index = 1;
-		QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
-		WriteImage(Image, "bmp", 0, saveImagePath.toStdString().c_str());
+		//QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
+		QString saveImagePath = QString("images/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
+		WriteImage(Image, "jpg", 0, saveImagePath.toStdString().c_str());
 
 		//QString saveAalPath = QString(m_SaveDatePath + "/aal/%1.aal").arg(m_image_index, 4, 10, QChar('0'));
 		//WriteConfigure(saveAalPath, "Info", m_ConfigureName, saveImagePath + ".bmp");

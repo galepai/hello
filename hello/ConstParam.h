@@ -23,6 +23,14 @@ static const char* LineCameraId_Pylon_Basler2 = "Basler raL2048-48gm#00305325525
 //"Basler raL2048-48gm#003053255252#192.168.3.7:3956"
 
 
+static const int LeftGood		= 0x10;
+static const int LeftBad = 0x11;
+static const int MiddleGood = 0x20;
+static const int MiddleBad = 0x21;
+static const int RightGood = 0x30;
+static const int RightBad = 0x31;
+static const int AllGood = 0x60;
+
 
 
 //	抓手水平左移

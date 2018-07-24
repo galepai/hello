@@ -33,6 +33,15 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Header Files\Widgets">
+      <UniqueIdentifier>{ba7b2723-1707-4959-9ad2-72b866980322}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Widgets">
+      <UniqueIdentifier>{8ca9543c-be40-489b-9a04-992c87a96f3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Form Files\Widgets">
+      <UniqueIdentifier>{9af197a9-7d3a-4d9f-bbae-5cf483552a52}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -63,15 +72,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Func.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_HandlePicThread.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_HandlePicThread.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="HandlePicThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_configuredlg.cpp">
@@ -146,6 +146,42 @@
     <ClCompile Include="ConfigureDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_PicThreadLeft.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_PicThreadLeft.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="PicThreadLeft.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_PicThreadRight.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_PicThreadRight.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="PicThreadRight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PicThreadMiddle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_PicThreadMiddle.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_PicThreadMiddle.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_widget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_widget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\widget.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="hello.h">
@@ -161,9 +197,6 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="aboutdialog.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="HandlePicThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="configuredlg.ui">
@@ -205,6 +238,21 @@
     <CustomBuild Include="ConfigureDialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="PicThreadLeft.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PicThreadRight.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PicThreadMiddle.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Widgets\widget.ui">
+      <Filter>Form Files\Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Widgets\widget.h">
+      <Filter>Header Files\Widgets</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_hello.h">
@@ -238,6 +286,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_ConfigureDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_widget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

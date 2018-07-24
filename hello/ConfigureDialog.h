@@ -19,6 +19,7 @@ public:
 private slots:
 	void SavePortToIni();
 
+
 private:
 	QComboBox* PortComboBox;
 	QComboBox* BaudComboBox;
@@ -41,6 +42,9 @@ public:
 private:
     Ui::ConfigureDialog *ui;
 	ConfigSerial configSerial;
+
+private slots:
+	void currentRowChanged(int currentRow);
 };
 
 

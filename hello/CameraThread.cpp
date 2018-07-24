@@ -44,13 +44,13 @@ void Camera_Thread::run()
 			qDebug() << "SizeY: " << (int)Image.Height();
 			qDebug() << "=========================" << endl;
 
-			if (isCorrectImage(Image,3.0))
-			{
+			//if (isCorrectImage(Image,3.0))
+			//{
 				signal_image(&Image);
 				//DispColor(Image, m_WindowHandle);
 				QueueSaveImage(Image, m_MaxNum);
 				//qDebug() << m_CameraId<<" all time: " << time.elapsed() / 1000.0;
-			}
+			//}
 			
 		}
 		catch (HException& e)
@@ -123,7 +123,7 @@ bool Camera_Thread::OpenCamera()
 			}
 			else if (m_CameraId.contains("DALSA"))
 			{
-				m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
+				/*m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
 				m_pGrabber->SetFramegrabberParam("ExposureTime", 80.0);
 				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
 				m_pGrabber->SetFramegrabberParam("TriggerMode", "On");
@@ -133,22 +133,22 @@ bool Camera_Thread::OpenCamera()
 				m_pGrabber->SetFramegrabberParam("LineFormat", "SingleEnded");
 				m_pGrabber->SetFramegrabberParam("lineDetectionLevel", "Threshold_for_5V");
 				m_pGrabber->SetFramegrabberParam("Height", 10000);
-				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);
+				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);*/
 
-			/*	m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
-				m_pGrabber->SetFramegrabberParam("ExposureTime", 50.0);*/
-				//m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
-				//m_pGrabber->SetFramegrabberParam("TriggerMode", "Off");
+				m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
+				m_pGrabber->SetFramegrabberParam("ExposureTime", 50.0);
+				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
+				m_pGrabber->SetFramegrabberParam("TriggerMode", "Off");
 				/*m_pGrabber->SetFramegrabberParam("TriggerSource", "Line1");
 				m_pGrabber->SetFramegrabberParam("TriggerActivation", "RisingEdge");
 				m_pGrabber->SetFramegrabberParam("LineSelector", "Line1");
 				m_pGrabber->SetFramegrabberParam("LineFormat", "SingleEnded");
 				m_pGrabber->SetFramegrabberParam("lineDetectionLevel", "Threshold_for_5V");*/
-			/*	m_pGrabber->SetFramegrabberParam("Height", 10000);
-				m_pGrabber->SetFramegrabberParam("grab_timeout", -1);*/
+				m_pGrabber->SetFramegrabberParam("Height", 10000);
+				m_pGrabber->SetFramegrabberParam("grab_timeout", -1);
 			}
 
-			m_pGrabber->GrabImageStart(-1);
+			//m_pGrabber->GrabImageStart(-1);
 
 			break;
 
@@ -193,18 +193,19 @@ void Camera_Thread::QueueSaveImage(const HObject& Image,int maxnum)
 {
 	//QTime time;
 	
-	if (CreateImagetDir())
-	{
-		QVariant value;
-		ReadConfigure("config.ini", "Config", "ImagePath1", value);
-		setSaveDatePath(value.toString());
-	}
+	//if (CreateImagetDir())
+	//{
+	//	QVariant value;
+	//	ReadConfigure("config.ini", "Config", "ImagePath1", value);
+	//	setSaveDatePath(value.toString());
+	//}
 	
 
 	if (m_image_index <= maxnum)
 	{
 		
-		QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
+		//QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
+		QString saveImagePath = QString("images/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
 		//time.start();
 		WriteImage(Image, "bmp", 0, saveImagePath.toStdString().c_str());
 	//	qDebug() << "save time: " << time.elapsed() / 1000.0;
@@ -214,7 +215,8 @@ void Camera_Thread::QueueSaveImage(const HObject& Image,int maxnum)
 	else
 	{
 		m_image_index = 1;
-		QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
+		//QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
+		QString saveImagePath = QString("images/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
 		WriteImage(Image, "bmp", 0, saveImagePath.toStdString().c_str());
 
 		//QString saveAalPath = QString(m_SaveDatePath + "/aal/%1.aal").arg(m_image_index, 4, 10, QChar('0'));

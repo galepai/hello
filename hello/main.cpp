@@ -6,7 +6,8 @@
 #include <QElapsedTimer>
 #include "Func.h"
 #include <QTime>
-//#define STARTLOGO
+
+#define STARTLOGO
 
 
 bool CreaImagetDir();
@@ -28,16 +29,16 @@ int main(int argc, char *argv[])
 	screen->show();
 	screen->showMessage(G2U("初始化..."), Qt::AlignTop | Qt::AlignLeft, Qt::black);
 	
-	screen->showMessage(G2U("检查影像文件夹是否存在..."), Qt::AlignTop | Qt::AlignLeft, Qt::black);
+	/*screen->showMessage(G2U("检查影像文件夹是否存在..."), Qt::AlignTop | Qt::AlignLeft, Qt::black);
 	if(CreateImagetDir())
 		screen->showMessage(G2U("创建影像文件夹成功"), Qt::AlignTop | Qt::AlignLeft, Qt::black);
 	else
-		screen->showMessage(G2U("影像文件夹存在"), Qt::AlignTop | Qt::AlignLeft, Qt::black);
+		screen->showMessage(G2U("影像文件夹存在"), Qt::AlignTop | Qt::AlignLeft, Qt::black);*/
 
 
 
 #ifdef STARTLOGO 
-	int delayTime = 5;
+	int delayTime = 3;
 	QElapsedTimer timer;
 	timer.start();
 	while (timer.elapsed() < (delayTime * 1000))

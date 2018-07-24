@@ -82,6 +82,8 @@ protected:
 
 signals:
 	void emitdata(QByteArray receiveData);
+	void error(QString error);
+	void bool_error(bool error);
 };
 
 #endif

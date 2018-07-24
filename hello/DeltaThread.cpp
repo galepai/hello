@@ -163,6 +163,8 @@ void Delta_Thread::run()
 	if (!m_SerialPort->open(QSerialPort::ReadWrite))
 	{
 		qDebug() << "Com open error,please check Com setting! ";
+		emit error(G2U("未能正确打开PLC的串口,请检测串口设置!"));
+		emit bool_error(false);
 		delete m_SerialPort;
 		m_SerialPort = nullptr;
 		return;

@@ -5,7 +5,6 @@
 #include <QStandardItemModel>
 #include "ui_hello.h"
 #include "HalconCpp.h"
-#include "HandlePicThread.h"
 #include "HalconCpp.h"
 #include "Func.h"
 #include "TestDialog.h"
@@ -27,6 +26,8 @@ public:
 		QStandardItem* item0, QStandardItem* item1, QStandardItem* item2, QStandardItem* item3,
 		const QBrush& textcolor, int RowHeight = 20);
 	void SetRightTableView();
+
+	bool OpenSerial();
 
 	//*********图像处理线程**************/
 	void HandleImageThread(HImage& ima, LocationView view);
@@ -52,7 +53,7 @@ public slots:
 	void OnStop();
 
 	//
-	void handleResults(bool is_bad);
+	void handleResults(int is_bad);
 	void readyDataSlot(QByteArray str);
 	void TableSrolltoBottom();
 	void receiveLeftImage(void* image);
@@ -61,6 +62,7 @@ public slots:
 	void receiveError(QString error);
 
 private:
+	void OnClearCameraThread();	//清理相机线程
 	void FullScreenShow();	//全屏显示
 	void DispPic(HImage& path, LocationView location);	//显示图片在指定位置视图
 	const HalconCpp::HTuple GetViewWindowHandle(LocationView location);	//返回指定视图的窗口Handle（Halcon显示图片用）
@@ -73,9 +75,9 @@ private:
 	Ui::helloClass ui;
 	HalconCpp::HTuple m_LeftWindowHandle, m_MiddleWindowHandle, m_RightWindowHandle;	//左、中、右视图的窗口Handle（Halcon显示图片用）
 	QString m_Title;
-	HandlePicThread *m_pHandlePicThread;
+	//HandlePicThread *m_pHandlePicThread;
 	HImage m_Image;
-	bool m_bIsBad;
+	int m_bIsBad;
 
 signals:
 	void ReadyLoop();
