@@ -55,6 +55,7 @@ protected:
 signals:
 	void signal_image(void* pimage);
 	void signal_error(QString error);
+	void grab_correct_image(int num);
 
 private:
 	QString m_CameraId;

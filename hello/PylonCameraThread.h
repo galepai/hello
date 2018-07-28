@@ -37,6 +37,7 @@ public:
 	void setSaveImageNum(int MaxNum = 50){ m_MaxNum = MaxNum; };
 	void setSaveImageDirName(const QString& path);
 	void setAalConfigureName(const QString& str){m_ConfigureName = str; };
+	//void setHardTriger(bool enable = false){ m_isHardTriger = enable; };
 
 	void stop();
 
@@ -59,6 +60,7 @@ protected:
 signals:
 	void signal_image(void* pimage);
 	void signal_error(QString error);
+	void grab_correct_image(int num);
 
 private:
 	QString m_CameraId;
@@ -67,6 +69,7 @@ private:
 	bool m_bIsStop;
 	QString m_SaveDatePath, m_SaveImageDirName, m_ConfigureName;
 	int m_image_index, m_MaxNum;
+	//bool m_isHardTriger;
 };
 
 #endif

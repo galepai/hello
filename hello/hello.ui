@@ -24,9 +24,6 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
       <item>
        <widget class="QScrollArea" name="scrollArea_Left">
         <property name="sizePolicy">
@@ -43,7 +40,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>274</width>
+           <width>244</width>
            <height>343</height>
           </rect>
          </property>
@@ -81,7 +78,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>185</width>
+           <width>245</width>
            <height>343</height>
           </rect>
          </property>
@@ -119,7 +116,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>274</width>
+           <width>244</width>
            <height>343</height>
           </rect>
          </property>
@@ -172,8 +169,8 @@
           <rect>
            <x>140</x>
            <y>30</y>
-           <width>75</width>
-           <height>41</height>
+           <width>81</width>
+           <height>61</height>
           </rect>
          </property>
          <property name="font">
@@ -192,9 +189,9 @@
          <property name="geometry">
           <rect>
            <x>140</x>
-           <y>80</y>
-           <width>75</width>
-           <height>41</height>
+           <y>150</y>
+           <width>81</width>
+           <height>61</height>
           </rect>
          </property>
          <property name="font">
@@ -207,48 +204,6 @@
          </property>
          <property name="text">
           <string>停止</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="btn_reset">
-         <property name="geometry">
-          <rect>
-           <x>140</x>
-           <y>130</y>
-           <width>75</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>故障复位</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="btn_urgent_stop">
-         <property name="geometry">
-          <rect>
-           <x>140</x>
-           <y>180</y>
-           <width>75</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>急停</string>
          </property>
         </widget>
         <widget class="QSlider" name="verticalSlider_mode">
@@ -270,217 +225,34 @@
           <enum>Qt::Vertical</enum>
          </property>
         </widget>
-        <widget class="QLineEdit" name="lineEdit">
+        <widget class="QLineEdit" name="lineEdit_allNum">
          <property name="geometry">
           <rect>
-           <x>155</x>
-           <y>250</y>
+           <x>140</x>
+           <y>310</y>
            <width>70</width>
            <height>30</height>
           </rect>
          </property>
-        </widget>
-        <widget class="QLineEdit" name="lineEdit_2">
-         <property name="geometry">
-          <rect>
-           <x>155</x>
-           <y>300</y>
-           <width>70</width>
-           <height>30</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="lineEdit_3">
-         <property name="geometry">
-          <rect>
-           <x>155</x>
-           <y>350</y>
-           <width>70</width>
-           <height>30</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="lineEdit_4">
-         <property name="geometry">
-          <rect>
-           <x>155</x>
-           <y>400</y>
-           <width>70</width>
-           <height>30</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="lineEdit_5">
-         <property name="geometry">
-          <rect>
-           <x>155</x>
-           <y>450</y>
-           <width>70</width>
-           <height>30</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="lineEdit_6">
-         <property name="geometry">
-          <rect>
-           <x>155</x>
-           <y>550</y>
-           <width>70</width>
-           <height>30</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="lineEdit_7">
-         <property name="geometry">
-          <rect>
-           <x>155</x>
-           <y>500</y>
-           <width>70</width>
-           <height>30</height>
-          </rect>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
         <widget class="QLineEdit" name="lineEdit_8">
          <property name="geometry">
           <rect>
-           <x>155</x>
-           <y>600</y>
+           <x>140</x>
+           <y>360</y>
            <width>70</width>
            <height>30</height>
           </rect>
          </property>
         </widget>
-        <widget class="QLabel" name="label">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>250</y>
-           <width>151</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>前推模组1位移(mm):</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_2">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>300</y>
-           <width>151</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>前推模组2位移(mm):</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_3">
-         <property name="geometry">
-          <rect>
-           <x>40</x>
-           <y>350</y>
-           <width>100</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>抓手组1工位:</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_4">
-         <property name="geometry">
-          <rect>
-           <x>40</x>
-           <y>400</y>
-           <width>100</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>抓手组2工位:</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_5">
-         <property name="geometry">
-          <rect>
-           <x>40</x>
-           <y>450</y>
-           <width>100</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>抓手组3工位:</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_6">
-         <property name="geometry">
-          <rect>
-           <x>40</x>
-           <y>505</y>
-           <width>100</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>抓手组4工位:</string>
-         </property>
-        </widget>
         <widget class="QLabel" name="label_7">
          <property name="geometry">
           <rect>
-           <x>60</x>
-           <y>550</y>
+           <x>45</x>
+           <y>310</y>
            <width>75</width>
            <height>30</height>
           </rect>
@@ -500,8 +272,8 @@
         <widget class="QLabel" name="label_8">
          <property name="geometry">
           <rect>
-           <x>60</x>
-           <y>600</y>
+           <x>45</x>
+           <y>360</y>
            <width>75</width>
            <height>30</height>
           </rect>
@@ -581,6 +353,27 @@
           <string>调试界面</string>
          </property>
         </widget>
+        <widget class="QPushButton" name="btn_detect_end">
+         <property name="geometry">
+          <rect>
+           <x>90</x>
+           <y>580</y>
+           <width>75</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>微软雅黑</family>
+           <pointsize>11</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>检测完毕</string>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -595,25 +388,6 @@
           <height>100</height>
          </size>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTableView" name="tableView_right">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="showGrid">
-         <bool>false</bool>
-        </property>
-        <attribute name="horizontalHeaderVisible">
-         <bool>true</bool>
-        </attribute>
-        <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
        </widget>
       </item>
      </layout>

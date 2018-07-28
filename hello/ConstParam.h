@@ -242,8 +242,9 @@ static const char* AUTO_STOP = "010508740000";  //◊‘∂Øƒ£ ΩÕ£÷π(µÁ∆Ω–≈∫≈),M116÷√Œ
 
 
 //	ºÏ≤‚ÕÍ≥…–≈∫≈,M177
-static const char* DETECT_END_ON = "010508B1FF00";  //M177 SET ºÏ≤‚ÕÍ≥…–≈∫≈
-static const char* DETECT_END_OFF = "010508B10000";  //M177 RST ºÏ≤‚ÕÍ≥…–≈∫≈
+static const char* DETECT_END_ON = "010508B1FF00";  //M77 SET ºÏ≤‚ÕÍ≥…–≈∫≈
+static const char* DETECT_END_OFF = "010508B10000";  //M77 RST ºÏ≤‚ÕÍ≥…–≈∫≈
+
 
 //	ºÏ≤‚Ω·π˚GOOD,D240(10F0) 
 static const char* RESULT_GODD = "010610F00010";  // ±º‰…Ë÷√,D240(10F0) 1∫œ∏Ò

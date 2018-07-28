@@ -2,7 +2,6 @@
 #define HELLO_H
 
 #include <QtWidgets/QMainWindow>
-#include <QStandardItemModel>
 #include "ui_hello.h"
 #include "HalconCpp.h"
 #include "HalconCpp.h"
@@ -21,12 +20,7 @@ public:
 	hello(QWidget *parent = 0);
 	~hello();
 
-	bool getIsBadStatu(){ return m_bIsBad; };
-	void AddItemToTableView(QTableView* view, QStandardItemModel* model, 
-		QStandardItem* item0, QStandardItem* item1, QStandardItem* item2, QStandardItem* item3,
-		const QBrush& textcolor, int RowHeight = 20);
-	void SetRightTableView();
-
+	//bool getIsBadStatu(){ return m_AllResult; };
 	bool OpenSerial();
 
 	//*********图像处理线程**************/
@@ -51,15 +45,16 @@ public slots:
 	void ChangeMode(int mode);
 	void OnStart();
 	void OnStop();
+	void OnDetectEnd();
 
 	//
 	void handleResults(int is_bad);
 	void readyDataSlot(QByteArray str);
-	void TableSrolltoBottom();
 	void receiveLeftImage(void* image);
 	void receiveMiddleImage(void* image);
 	void receiveRightImage(void* image);
 	void receiveError(QString error);
+	void receiveCorrectImage(int value);
 
 private:
 	void OnClearCameraThread();	//清理相机线程
@@ -69,15 +64,13 @@ private:
 	void SetOpenWindowHandle(HImage& Image, HTuple* pWindowHandle, LocationView location);	//指定显示窗口的句柄
 	void SetPicViewScroll(int width, int height, LocationView location); //指定视图的滚动条长度
 
-	QStandardItemModel* Right_dataModel;
 
 private:
 	Ui::helloClass ui;
 	HalconCpp::HTuple m_LeftWindowHandle, m_MiddleWindowHandle, m_RightWindowHandle;	//左、中、右视图的窗口Handle（Halcon显示图片用）
 	QString m_Title;
-	//HandlePicThread *m_pHandlePicThread;
 	HImage m_Image;
-	int m_bIsBad;
+	int m_AllResult;
 
 signals:
 	void ReadyLoop();

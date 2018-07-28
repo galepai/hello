@@ -19,6 +19,7 @@ void PicThreadRight::run()
 
 			OnHandle(m_WindowHandle);
 
+
 			qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
 			if (qrand() % 3)
 			{

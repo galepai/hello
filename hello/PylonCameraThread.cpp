@@ -4,6 +4,7 @@
 #include "Func.h"
 #include "ConstParam.h"
 #include "pylon/PylonGUIIncludes.h"
+#include "DeltaThread.h"
 
 QMutex PylonCamera_Thread::m_mutex;
 QStringList PylonCamera_Thread::m_CameraIdlist;
@@ -12,6 +13,7 @@ QStringList PylonCamera_Thread::m_CameraIdlist;
 class CHardwareTriggerConfiguration : public Pylon::CConfigurationEventHandler
 {
 public:
+	//explicit CHardwareTriggerConfiguration(bool isHardwareTrigger);
 	void OnOpened(Pylon::CInstantCamera& camera)
 	{
 		try
@@ -30,10 +32,12 @@ public:
 			_pCamera->ExposureTimeRaw.SetValue(760);
 			_pCamera->AcquisitionLineRateAbs.SetValue(10000.0);
 			_pCamera->TriggerSelector.FromString("FrameStart");
-			//_pCamera->TriggerMode.FromString("On");
-			_pCamera->TriggerMode.FromString("Off");
+			_pCamera->TriggerMode.FromString("On");
+			//_pCamera->TriggerMode.FromString("Off");
 			_pCamera->TriggerSource.FromString("Line1");
-			_pCamera->TriggerActivation.FromString("RisingEdge");
+			//_pCamera->TriggerActivation.FromString("RisingEdge");
+			_pCamera->TriggerActivation.FromString("LevelHigh");
+			_pCamera->LineDebouncerTimeAbs.SetValue(1.0);
 
 			qDebug() << _pCamera->Width.GetValue();
 			qDebug() << _pCamera->Height.GetValue();
@@ -131,13 +135,18 @@ void PylonCamera_Thread::run()
 					GenImage1(&Image, "byte", (int)ptrGrabResult->GetWidth(), (int)ptrGrabResult->GetHeight(), (Hlong)pImageBuffer);
 					m_mutex.unlock();
 
-				//	if (isCorrectImage(Image, 5))
-				//	{
+					if (isCorrectImage(Image, 5))
+					{
+						
+						emit grab_correct_image(1);
 						signal_image(&Image);
 						QueueSaveImage(Image, m_MaxNum);
-				//	}
+
+						Sleep(500);
+					}
 					
 					//qDebug() << m_CameraId << " all time: " << time.elapsed() / 1000.0;
+					Sleep(500);
 
 				}
 				else

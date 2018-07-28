@@ -367,8 +367,9 @@ void TestDialog::OnTimeConfirm()	//时间设置
 
 void TestDialog::OnDetectEnd()	//检测结束
 {
-	Delta_Thread::AddOneQueueInfo(DETECT_END_ON); 
-	Delta_Thread::AddOneQueueInfo(DETECT_END_OFF);
+	Delta_Thread::AddOneQueryInfo(DETECT_END_ON);
+	Delta_Thread::AddOneQueryInfo(DETECT_END_OFF);
+
 }
 
 void TestDialog::OnResultGood()	//检测结果合格

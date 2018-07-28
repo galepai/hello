@@ -34,21 +34,16 @@ hello::hello(QWidget *parent)
 	connect(ui.ShutDown, SIGNAL(triggered()), this, SLOT(OnShutDown()));
 	connect(ui.Configure2, SIGNAL(triggered()), this, SLOT(OnTest()));
 	//右端界面对应功能
-	connect(ui.btn_debug, SIGNAL(clicked()), this, SLOT(DebugDialog()));
+	connect(ui.btn_debug, SIGNAL(clicked()), this, SLOT(DebugDialog())); 
 	connect(ui.btn_start, SIGNAL(clicked()), this, SLOT(OnStart()));
 	connect(ui.btn_stop, SIGNAL(clicked()), this, SLOT(OnStop()));
+	connect(ui.btn_detect_end, SIGNAL(clicked()), this, SLOT(OnDetectEnd()));
 	connect(ui.verticalSlider_mode, SIGNAL(valueChanged(int)), this, SLOT(ChangeMode(int)));
 	ui.btn_debug->setEnabled(false);
 	ui.btn_stop->setEnabled(false);
 
 	WriteCurrenDateTime("config.ini", "Config", "OpenProgramTime");  //不支持中文写入配置文件
 	
-	SetRightTableView();
-
-	//定时刷新列表滚动条至底部
-	QTimer* timer = new QTimer(this);
-	QObject::connect(timer, SIGNAL(timeout()), this, SLOT(TableSrolltoBottom()));
-	timer->start(100);
 	
 	//HIDDLE_DIALOG_BUTTON
 	FullScreenShow();	//全屏显示
@@ -58,7 +53,7 @@ hello::hello(QWidget *parent)
 	m_Pylon_camera_thread1 = nullptr;
 	m_Pylon_camera_thread2 = nullptr;
 
-	m_bIsBad = 0;
+	m_AllResult = 0;
 	
 	//std::string str = ":00030C03E8000000000000003200005B\r\n";
 	std::string str = ":00030C043F00000000000000320";
@@ -74,33 +69,6 @@ void hello::FullScreenShow()
 	setContentsMargins(0, 0, 0, 0);
 }
 
-//设置右视图内容
-void hello::SetRightTableView()
-{
-	Right_dataModel = new QStandardItemModel();
-	ui.tableView_right->setModel(Right_dataModel);  //绑定数据模型
-	ui.tableView_right->setShowGrid(false);
-
-	//设置列表头
-	QStringList labels = (G2U("时间,对象名,报警类型,报警事件,当前值,界限值,报警描述")).simplified().split(",");
-	Right_dataModel->setHorizontalHeaderLabels(labels);
-
-	ui.tableView_right->setColumnWidth(0, 150);
-	ui.tableView_right->setColumnWidth(1, 80);
-	ui.tableView_right->setColumnWidth(2, 80);
-	ui.tableView_right->setColumnWidth(3, 80);
-	ui.tableView_right->setColumnWidth(4, 80);
-	ui.tableView_right->setColumnWidth(5, 80);
-}
-
-//列表滚动条至底部
-void hello::TableSrolltoBottom()
-{
-		
-	if (!ui.tableView_right->hasFocus())
-		ui.tableView_right->scrollToBottom();
-
-}
 
 hello::~hello()
 {
@@ -134,12 +102,21 @@ void hello::OnOneHandle()
 
 void hello::OnShutDown()
 {
-	QMessageBox::StandardButton reply;
-	reply = QMessageBox::question(this, G2U("系统"), G2U("确认退出系统"));
-	if (reply == QMessageBox::StandardButton::Yes)
+	if (!ui.btn_stop->isEnabled())
 	{
-		OnClearCameraThread();
-		qApp->quit();
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(this, G2U("系统"), G2U("确认退出系统"));
+		if (reply == QMessageBox::StandardButton::Yes)
+		{
+			//OnClearCameraThread();
+			qApp->quit();
+		}
+	}
+	else
+	{
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::information(this, G2U("提示"), G2U("请先停止系统,请点击右侧的'停止''按钮"));
+
 	}
 	
 }
@@ -213,7 +190,7 @@ void hello::OnLineRun()
 	int baud = Value.toInt();
 	statusBar()->showMessage(port + "," + Value.toString());
 
-	OnTest();
+	//OnTest();
 
 
 }
@@ -223,51 +200,6 @@ void hello::readyDataSlot(QByteArray str)
 {	
 	//qDebug() << "MainSlot Thread : " << QThread::currentThreadId();
 	statusBar()->showMessage(str);	
-	QDateTime curTime;
-	if (Right_dataModel->rowCount() == 100)
-	{
-		Right_dataModel->setData(Right_dataModel->index(0, 0), curTime.currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
-		Right_dataModel->setData(Right_dataModel->index(0, 1), QString(str));
-		Right_dataModel->sort(0, Qt::AscendingOrder);
-	
-	}
-	else
-	{
-		AddItemToTableView(ui.tableView_right, Right_dataModel,
-			new QStandardItem(curTime.currentDateTime().toString("yyyy-MM-dd hh:mm:ss")),
-			new QStandardItem(QString(str)),
-			new QStandardItem(G2U("上限警报")),
-			new QStandardItem(G2U("报警结束")),
-			QColor(0, 0, 0));
-	}
-	
-}
-
-//添加信息至表，自动增行
-void hello::AddItemToTableView(QTableView* view, QStandardItemModel* model, QStandardItem* item0, QStandardItem* item1, QStandardItem* item2, QStandardItem* item3, const QBrush& textcolor, int RowHeight)
-{
-	int Row = model->rowCount();
-
-	model->setItem(Row, 0, item0);
-	model->item(Row, 0)->setTextAlignment(Qt::AlignCenter);	//设置数据居中显示
-	model->item(Row, 0)->setForeground(textcolor); //设置数据显示颜色
-
-	model->setItem(Row, 1, item1);
-	model->item(Row, 1)->setTextAlignment(Qt::AlignCenter);	
-	model->item(Row, 1)->setForeground(textcolor); 
-
-	model->setItem(Row, 2, item2);
-	model->item(Row, 2)->setTextAlignment(Qt::AlignCenter);	
-	model->item(Row, 2)->setForeground(textcolor); 
-
-	model->setItem(Row, 3, item3);
-	model->item(Row, 3)->setTextAlignment(Qt::AlignCenter);	
-	model->item(Row, 3)->setForeground(textcolor); 
-
-	view->setRowHeight(Row, RowHeight);
-
-	model->sort(0, Qt::AscendingOrder);
-
 }
 
 void hello::OnOpen()
@@ -446,38 +378,74 @@ void hello::DebugDialog()
 
 //启动
 void hello::OnStart()
-{/*
-	ui.btn_start->setEnabled(false);
-	QVariant value;
-	ReadConfigure("config.ini", "Port", "Port", value);
-	QString PortName = value.toString();
-	ReadConfigure("config.ini", "Port", "Baud", value);
-	int Baud = value.toInt();
-	ReadConfigure("config.ini", "Port", "DataBits", value);
-	int DataBits = value.toInt();
-
-	//设置默认查询队列
-	Delta_Thread::setQueryMode(Delta_Thread::QueryMode::DefalutQuene);
-	/*Delta_Thread::AddDefaultQueueInfo("00050500FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050501FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050502FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050503FF00");
-	Delta_Thread::AddDefaultQueueInfo("00050504FF00");*/
-	Delta_Thread::AddDefaultQueueInfo("000105000028");	//读X00-X47
-	Delta_Thread::AddDefaultQueueInfo("000204000028");	//读Y00-Y47
-	/*
-	if (!Delta_Thread::GetSerialPort())
+{
+	if (OpenSerial())
 	{
-		Delta_Thread* thread = new Delta_Thread;
-		thread->InitSerialPortInfo(PortName.toStdString().c_str(), Baud, QSerialPort::Parity::EvenParity, QSerialPort::DataBits(DataBits));
-		connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-		connect(thread, SIGNAL(emitdata(QByteArray)), this, SLOT(readyDataSlot(QByteArray)));
-		thread->start();
+
+		//QVariant value;
+		//ReadConfigure("config.ini", "Config", "ImagePath1", value);
+
+
+		/*-----Halcon Version------------*/
+		//m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCamera880Id, this);
+		//m_camera_thread1->setSaveDatePath(value.toString());
+		//m_camera_thread1->setSaveImageDirName("Camera1");
+		//m_camera_thread1->setAalConfigureName("Camera1");
+		//m_camera_thread1->setSaveImageNum(50);
+		//connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
+		//connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+		//connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
+		//m_camera_thread1->start();
+
+		/*m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Basler1, this);
+		m_camera_thread1->setSaveDatePath(value.toString());
+		m_camera_thread1->setSaveImageDirName("Camera1");
+		m_camera_thread1->setAalConfigureName("Camera1");
+		m_camera_thread1->setSaveImageNum(50);
+		connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
+		connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+		connect(m_camera_thread1, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+		connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
+		m_camera_thread1->start();*/
+
+		m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa2, this);
+		//m_camera_thread2->setSaveDatePath(value.toString());
+		m_camera_thread2->setSaveImageDirName("Camera3");
+		m_camera_thread2->setAalConfigureName("Camera3");
+		m_camera_thread2->setSaveImageNum(50);
+		connect(m_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveMiddleImage(void*)));
+		connect(m_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+		connect(m_camera_thread2, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+		connect(m_camera_thread2, SIGNAL(finished()), m_camera_thread2, SLOT(deleteLater()));
+		m_camera_thread2->start();
+
+		/*-----Pylon Version------------*/
+		//m_Pylon_camera_thread1 = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler1, this);
+		//m_Pylon_camera_thread1->setSaveDatePath(value.toString());
+		//m_Pylon_camera_thread1->setSaveImageDirName("Camera1");
+		//m_Pylon_camera_thread1->setAalConfigureName("Camera1");
+		//m_Pylon_camera_thread1->setSaveImageNum(50);
+		//connect(m_Pylon_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
+		//connect(m_Pylon_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+		//connect(m_Pylon_camera_thread1, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+		//connect(m_Pylon_camera_thread1, SIGNAL(finished()), m_Pylon_camera_thread1, SLOT(deleteLater()));
+		//m_Pylon_camera_thread1->start();
+
+		//m_Pylon_camera_thread2 = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler2, this);
+		////m_Pylon_camera_thread2->setSaveDatePath(value.toString());
+		//m_Pylon_camera_thread2->setSaveImageDirName("Camera2");
+		//m_Pylon_camera_thread2->setAalConfigureName("Camera2");
+		//m_Pylon_camera_thread2->setSaveImageNum(50);
+		//connect(m_Pylon_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
+		//connect(m_Pylon_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+		//connect(m_Pylon_camera_thread2, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+		//connect(m_Pylon_camera_thread2, SIGNAL(finished()), m_Pylon_camera_thread2, SLOT(deleteLater()));
+		//m_Pylon_camera_thread2->start();
+
+		ui.btn_start->setEnabled(false);
 		ui.btn_stop->setEnabled(true);
-		ui.btn_debug->setEnabled(false);
-		ui.verticalSlider_mode->setEnabled(false);
 	}
-	*/
+
 }
 
 //停止
@@ -485,10 +453,24 @@ void hello::OnStop()
 {
 	Delta_Thread::StopRun(true);
 
+	ui.verticalSlider_mode->setEnabled(true);
+	OnClearCameraThread();
+
 	ui.btn_start->setEnabled(true);
 	ui.btn_stop->setEnabled(false);
-	ui.verticalSlider_mode->setEnabled(true);
+	
 }
+
+//检测完成信号
+void hello::OnDetectEnd()
+{
+	if (Delta_Thread::GetSerialPort())
+	{
+		Delta_Thread::AddOneQueryInfo(DETECT_END_ON);
+		Delta_Thread::AddOneQueryInfo(DETECT_END_OFF);
+	}		
+}
+
 
 //模式切换
 void hello::ChangeMode(int mode)
@@ -536,69 +518,28 @@ void hello::receiveError(QString error)
 	reply = QMessageBox::warning(this, G2U("错误"), error);
 }
 
+//收到正确图片数,检测完成
+void hello::receiveCorrectImage(int value)
+{
+	static int imageNum = 0;
+	imageNum += value;
+
+	if (imageNum == 1)
+	{
+		static int Num = 0;
+		Delta_Thread::AddOneQueryInfo(DETECT_END_ON);
+		Delta_Thread::AddOneQueryInfo(DETECT_END_OFF);
+
+		imageNum = 0;
+		qDebug() << "Send M177:				" << ++Num;
+		ui.lineEdit_allNum->setText(QString("%1").arg(Num));
+	}
+
+}
+
 void hello::OnTest()
 {
-	//if (OpenSerial())
-	//{
-
-		QVariant value;
-		ReadConfigure("config.ini", "Config", "ImagePath1", value);
-
-	
-		/*-----Halcon Version------------*/
-		//m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCamera880Id, this);
-		//m_camera_thread1->setSaveDatePath(value.toString());
-		//m_camera_thread1->setSaveImageDirName("Camera1");
-		//m_camera_thread1->setAalConfigureName("Camera1");
-		//m_camera_thread1->setSaveImageNum(50);
-		//connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
-		//connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		//connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
-		//m_camera_thread1->start();
-
-		/*m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Basler1, this);
-		m_camera_thread1->setSaveDatePath(value.toString());
-		m_camera_thread1->setSaveImageDirName("Camera1");
-		m_camera_thread1->setAalConfigureName("Camera1");
-		m_camera_thread1->setSaveImageNum(50);
-		connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
-		connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
-		m_camera_thread1->start();*/
-
-		m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa2, this);
-		m_camera_thread2->setSaveDatePath(value.toString());
-		m_camera_thread2->setSaveImageDirName("Camera3");
-		m_camera_thread2->setAalConfigureName("Camera3");
-		m_camera_thread2->setSaveImageNum(50);
-		connect(m_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveMiddleImage(void*)));
-		connect(m_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		connect(m_camera_thread2, SIGNAL(finished()), m_camera_thread2, SLOT(deleteLater()));
-		m_camera_thread2->start();
-
-		/*-----Pylon Version------------*/
-		/*m_Pylon_camera_thread1 = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler1, this);
-		m_Pylon_camera_thread1->setSaveDatePath(value.toString());
-		m_Pylon_camera_thread1->setSaveImageDirName("Camera1");
-		m_Pylon_camera_thread1->setAalConfigureName("Camera1");
-		m_Pylon_camera_thread1->setSaveImageNum(50);
-		connect(m_Pylon_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
-		connect(m_Pylon_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		connect(m_Pylon_camera_thread1, SIGNAL(finished()), m_Pylon_camera_thread1, SLOT(deleteLater()));
-		m_Pylon_camera_thread1->start();*/
-
-		m_Pylon_camera_thread2 = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler2, this);
-		m_Pylon_camera_thread2->setSaveDatePath(value.toString());
-		m_Pylon_camera_thread2->setSaveImageDirName("Camera2");
-		m_Pylon_camera_thread2->setAalConfigureName("Camera2");
-		m_Pylon_camera_thread2->setSaveImageNum(50);
-		connect(m_Pylon_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
-		connect(m_Pylon_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		connect(m_Pylon_camera_thread2, SIGNAL(finished()), m_Pylon_camera_thread2, SLOT(deleteLater()));
-		m_Pylon_camera_thread2->start();
-
-	//}
-
+	OnStart();
 }
 
 bool hello::OpenSerial()
@@ -614,7 +555,7 @@ bool hello::OpenSerial()
 	int DataBits = value.toInt();
 
 	//Delta_Thread::setQueryMode(Delta_Thread::QueryMode::DefalutQuene);
-	//Delta_Thread::AddDefaultQueueInfo(READ_X_INPUT);	//读X00-X87
+	//Delta_Thread::AddDefaultQueueInfo(READ_X_INPUT);	//读X00-X07
 	//Delta_Thread::AddDefaultQueueInfo(READ_Y_OUTPUT);	//读Y00-Y67
 
 	//设置单次查询模式
@@ -681,10 +622,13 @@ void hello::HandleImageThread(HImage& ima, LocationView view)
 }
 
 //得到线程的信号,并判断检测结果,发送给PLC
-void hello::handleResults(int is_bad)
+void hello::handleResults(int singleResult)
 {
-	m_bIsBad += is_bad;
-	if (m_bIsBad >= AllGood)
+
+	static int i = 0;
+	m_AllResult += singleResult;
+
+	/*if (m_bIsBad >= AllGood)
 	{
 		Delta_Thread::AddOneQueueInfo(DETECT_END_ON);
 		Delta_Thread::AddOneQueueInfo(DETECT_END_OFF);
@@ -702,7 +646,34 @@ void hello::handleResults(int is_bad)
 		m_bIsBad = 0;
 
 		return;
+	}*/
+
+	if (m_AllResult >= MiddleGood)
+	{
+		//Delta_Thread::AddOneQueryInfo(DETECT_END_ON);
+		//Delta_Thread::AddOneQueryInfo(DETECT_END_OFF);
+		i++;
+		qDebug() << "Image num:				"<<  i;
+
+		if (m_AllResult == MiddleGood)
+		{
+			Sleep(30);
+			Delta_Thread::AddOneQueryInfo(RESULT_GODD);
+			qDebug() << "Send Good!!!	";
+		}
+		else
+		{
+			Sleep(30);
+			Delta_Thread::AddOneQueryInfo(RESULT_BAD);
+			qDebug() << "Send Bad!!!	";
+		}
+
+		qDebug() << "All Detect Result:	" << m_AllResult;
+		singleResult = 0;
+
+		return;
 	}
-	qDebug() << "Detect is_bad:	" << is_bad;
-	qDebug() << "Detect Result:	" << m_bIsBad;
+
+	qDebug() << "Detect is_bad:	" << singleResult;
+	qDebug() << "Detect Result:	" << m_AllResult;
 }

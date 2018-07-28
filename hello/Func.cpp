@@ -368,6 +368,7 @@ bool isCorrectImage(HalconCpp::HImage& image, double threshold_gray)
 {
 	HalconCpp::HTuple mean_gray;
 	HalconCpp::GrayFeatures(image, image, "mean", &mean_gray);
-
+	qDebug() << "mean gray:		" << mean_gray.D();
+	//WriteImage(image, "bmp", 0, "c:/lastest.bmp");
 	return mean_gray > threshold_gray;
 }

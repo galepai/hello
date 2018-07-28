@@ -100,6 +100,7 @@ void Delta_Thread::AddOneQueueInfo(const std::string& data)
 	m_mutex_WriteData.unlock();
 }
 
+
 //void Delta_Thread::AddDefaultQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
 //{
 //	QMutexLocker locker(&m_mutex);
@@ -269,7 +270,7 @@ int Delta_Thread::writeData(const char *data, int size)
 				break;
 		}
 	}
-	//qDebug() << "Thread22 writeFunc Thread : " << QThread::currentThreadId();
+	qDebug() << "Send to Plc data:	 " << data;
 	return len;
 
 }
