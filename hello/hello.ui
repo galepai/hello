@@ -40,11 +40,23 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>244</width>
+           <width>245</width>
            <height>343</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QGraphicsView" name="LeftPicView">
             <property name="sizePolicy">
@@ -83,10 +95,75 @@
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QGraphicsView" name="MiddlePicView">
             <property name="styleSheet">
              <string notr="true">background-color: rgb(0, 0, 0);</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QScrollArea" name="scrollArea_SecondRight">
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContentsSecondRight">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>246</width>
+           <height>343</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QGraphicsView" name="SecondRightPicView">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(0, 0, 0);</string>
+            </property>
+            <property name="resizeAnchor">
+             <enum>QGraphicsView::NoAnchor</enum>
             </property>
            </widget>
           </item>
@@ -116,7 +193,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>244</width>
+           <width>245</width>
            <height>343</height>
           </rect>
          </property>
@@ -127,6 +204,18 @@
           </size>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QGraphicsView" name="RightPicView">
             <property name="sizePolicy">
@@ -153,229 +242,6 @@
         </widget>
        </widget>
       </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox_module">
-        <property name="minimumSize">
-         <size>
-          <width>250</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="title">
-         <string/>
-        </property>
-        <widget class="QPushButton" name="btn_start">
-         <property name="geometry">
-          <rect>
-           <x>140</x>
-           <y>30</y>
-           <width>81</width>
-           <height>61</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>启动</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="btn_stop">
-         <property name="geometry">
-          <rect>
-           <x>140</x>
-           <y>150</y>
-           <width>81</width>
-           <height>61</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>停止</string>
-         </property>
-        </widget>
-        <widget class="QSlider" name="verticalSlider_mode">
-         <property name="geometry">
-          <rect>
-           <x>40</x>
-           <y>60</y>
-           <width>31</width>
-           <height>71</height>
-          </rect>
-         </property>
-         <property name="maximum">
-          <number>1</number>
-         </property>
-         <property name="value">
-          <number>1</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="lineEdit_allNum">
-         <property name="geometry">
-          <rect>
-           <x>140</x>
-           <y>310</y>
-           <width>70</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="lineEdit_8">
-         <property name="geometry">
-          <rect>
-           <x>140</x>
-           <y>360</y>
-           <width>70</width>
-           <height>30</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_7">
-         <property name="geometry">
-          <rect>
-           <x>45</x>
-           <y>310</y>
-           <width>75</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>检测总数:</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_8">
-         <property name="geometry">
-          <rect>
-           <x>45</x>
-           <y>360</y>
-           <width>75</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>不良品数:</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_9">
-         <property name="geometry">
-          <rect>
-           <x>30</x>
-           <y>130</y>
-           <width>71</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>调试模式</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_10">
-         <property name="geometry">
-          <rect>
-           <x>30</x>
-           <y>20</y>
-           <width>71</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>工作模式</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="btn_debug">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>180</y>
-           <width>81</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>调试界面</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="btn_detect_end">
-         <property name="geometry">
-          <rect>
-           <x>90</x>
-           <y>580</y>
-           <width>75</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>微软雅黑</family>
-           <pointsize>11</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>检测完毕</string>
-         </property>
-        </widget>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
@@ -385,9 +251,133 @@
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>100</height>
+          <height>70</height>
          </size>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="minimumSize">
+         <size>
+          <width>350</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <widget class="QLCDNumber" name="lcdNumber_good">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>20</y>
+           <width>64</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 0, 255);</string>
+         </property>
+         <property name="segmentStyle">
+          <enum>QLCDNumber::Flat</enum>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lcdNumber_bad">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>20</y>
+           <width>64</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 0, 0);</string>
+         </property>
+         <property name="segmentStyle">
+          <enum>QLCDNumber::Flat</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>30</y>
+           <width>54</width>
+           <height>12</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Aharoni</family>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>良品:</string>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lcdNumber_total">
+         <property name="geometry">
+          <rect>
+           <x>280</x>
+           <y>20</y>
+           <width>64</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="segmentStyle">
+          <enum>QLCDNumber::Flat</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_2">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>30</y>
+           <width>54</width>
+           <height>12</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Aharoni</family>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>不良品:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_3">
+         <property name="geometry">
+          <rect>
+           <x>250</x>
+           <y>30</y>
+           <width>54</width>
+           <height>12</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Aharoni</family>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>总数:</string>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -421,6 +411,7 @@
      <string>功能</string>
     </property>
     <addaction name="OnLRC"/>
+    <addaction name="OnDeltaDebug"/>
    </widget>
    <addaction name="menu_2"/>
    <addaction name="menu"/>
@@ -592,6 +583,11 @@
   <action name="OnLRC">
    <property name="text">
     <string>LRC</string>
+   </property>
+  </action>
+  <action name="OnDeltaDebug">
+   <property name="text">
+    <string>调试</string>
    </property>
   </action>
  </widget>

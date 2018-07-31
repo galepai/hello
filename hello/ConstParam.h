@@ -11,25 +11,27 @@
 static const char* AreaCamera880Id = "[0] USB3_CMOS_8.8M(2)";
 static const char* AreaCameraId = "[0] USB3_CMOS_8.8M(1)";
 static const char* AreaCameraId2 = "[0] USB3_CMOS_1.3M_M(2)";
-static const char* LineCameraId_Basler1= "0030531d42b0_Basler_raL204848gm";	//192.168.2.7
-static const char* LineCameraId_Basler2 = "003053255252_Basler_raL204848gm";	//192.168.3.7
-static const char* LineCameraId_Dalsa1 = "00010dc2ad7a_TeledyneDALSA_LineaM20487um";	//192.168.4.7
-static const char* LineCameraId_Dalsa2 = "00010dc2ae11_TeledyneDALSA_LineaM20487um";	//192.168.5.7
+static const char* LineCameraId_Basler_10_Clock= "0030531d42b0_Basler_raL204848gm";	//192.168.2.7
+static const char* LineCameraId_Basler_2_Clock = "003053255252_Basler_raL204848gm";	//192.168.3.7
+static const char* LineCameraId_Dalsa_7_Clock = "00010dc2ad7a_TeledyneDALSA_LineaM20487um";	//192.168.4.7
+static const char* LineCameraId_Dalsa_11_Clock = "00010dc2ae11_TeledyneDALSA_LineaM20487um";	//192.168.5.7
 
-static const char* LineCameraId_Pylon_Basler1 = "Basler raL2048-48gm#0030531D42B0#192.168.2.7:3956";	//192.168.2.7
-static const char* LineCameraId_Pylon_Basler2 = "Basler raL2048-48gm#003053255252#192.168.3.7:3956";	//192.168.3.7
+static const char* LineCameraId_Pylon_Basler_10_Clock = "Basler raL2048-48gm#0030531D42B0#192.168.2.7:3956";	//192.168.2.7
+static const char* LineCameraId_Pylon_Basler_2_Clock = "Basler raL2048-48gm#003053255252#192.168.3.7:3956";	//192.168.3.7
 //m_camera.Attach(CTlFactory::GetInstance().CreateDevice("Basler raL2048-48gm#0030531D42B0#192.168.2.7:3956"));
 //"Basler raL2048-48gm#0030531D42B0#192.168.2.7:3956"
 //"Basler raL2048-48gm#003053255252#192.168.3.7:3956"
 
 
-static const int LeftGood		= 0x10;
-static const int LeftBad = 0x11;
-static const int MiddleGood = 0x20;
-static const int MiddleBad = 0x21;
-static const int RightGood = 0x30;
-static const int RightBad = 0x31;
-static const int AllGood = 0x60;
+static const int LeftGood			= 0x10;
+static const int LeftBad			= 0x11;
+static const int MiddleGood			= 0x20;
+static const int MiddleBad			= 0x21;
+static const int SecondRightGood	= 0x30;
+static const int SecondRightBad		= 0x31;
+static const int RightGood			= 0x40;
+static const int RightBad			= 0x41;
+static const int AllGood			= 0xA0;
 
 
 
@@ -166,7 +168,9 @@ static const char* WIND_DOWN_OFF = "000508EF0000";  //M239 RST 吹气气缸下降
 /***********************************************/
 
 static const char* READ_X_INPUT = "010204000048";  //读X00-X87
-static const char* READ_Y_OUTPUT = "010105000028";  //读Y00-Y67
+static const char* READ_Y_OUTPUT = "010105000038";  //读Y00-Y67  
+static const char* READ_Y61_OUTPUT = "010105300008";  //读Y60-Y67  
+static const char* RESET_Y61 = "010505310000";  //置Y61为0  
 
 
 //	直线模组前进(自动),自动定时抛光

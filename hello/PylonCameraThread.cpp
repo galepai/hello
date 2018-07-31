@@ -128,25 +128,25 @@ void PylonCamera_Thread::run()
 					qDebug() << "SizeY: " << ptrGrabResult->GetHeight();
 					const uint8_t* pImageBuffer = (uint8_t *)ptrGrabResult->GetBuffer();
 					//qDebug() << m_CameraId << "	:	" << pImageBuffer;
-					//qDebug() << "Gray value of first pixel: " << (uint32_t)pImageBuffer[0];
+					
 					qDebug() << "========================="  << endl;
 
 					m_mutex.lock();
 					GenImage1(&Image, "byte", (int)ptrGrabResult->GetWidth(), (int)ptrGrabResult->GetHeight(), (Hlong)pImageBuffer);
 					m_mutex.unlock();
 
-					if (isCorrectImage(Image, 5))
+					if (isCorrectImage(Image, 15.0))
 					{
 						
 						emit grab_correct_image(1);
-						signal_image(&Image);
+						emit signal_image(&Image);
 						QueueSaveImage(Image, m_MaxNum);
 
 						Sleep(500);
 					}
 					
 					//qDebug() << m_CameraId << " all time: " << time.elapsed() / 1000.0;
-					Sleep(500);
+					Sleep(300);
 
 				}
 				else

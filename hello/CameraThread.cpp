@@ -45,7 +45,7 @@ void Camera_Thread::run()
 			qDebug() << "SizeY: " << (int)Image.Height();
 			qDebug() << "=========================" << endl;
 
-			if (isCorrectImage(Image,3.0))
+			if (isCorrectImage(Image,15))
 			{
 				emit grab_correct_image(1);
 				emit signal_image(&Image);
@@ -55,7 +55,7 @@ void Camera_Thread::run()
 
 				Sleep(500);
 			}
-			Sleep(500);
+			//Sleep(500);
 		}
 		catch (HException& e)
 		{
@@ -149,17 +149,17 @@ bool Camera_Thread::OpenCamera()
 				m_pGrabber->SetFramegrabberParam("LineSelector", "Line1");
 				m_pGrabber->SetFramegrabberParam("LineFormat", "SingleEnded");
 				m_pGrabber->SetFramegrabberParam("lineDetectionLevel", "Threshold_for_5V");
-				m_pGrabber->SetFramegrabberParam("lineDebouncingPeriod", 100);
+				m_pGrabber->SetFramegrabberParam("lineDebouncingPeriod", 200);
 				m_pGrabber->SetFramegrabberParam("Height", 10000);
 				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);
 
 
-			/*	m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
-				m_pGrabber->SetFramegrabberParam("ExposureTime", 50.0);
-				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
+				/*m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
+				m_pGrabber->SetFramegrabberParam("ExposureTime", 70.0);
+				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameActive");
 				m_pGrabber->SetFramegrabberParam("TriggerMode", "Off");
 				m_pGrabber->SetFramegrabberParam("Height", 10000);
-				m_pGrabber->SetFramegrabberParam("grab_timeout", -1);*/
+				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);*/
 			}
 
 			//m_pGrabber->GrabImageStart(-1);

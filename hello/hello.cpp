@@ -13,6 +13,7 @@
 #include "PicThreadMiddle.h"
 #include "PicThreadLeft.h"
 #include "PicThreadRight.h"
+#include "PicThreadSecondRight.h"
 
 
 
@@ -21,26 +22,22 @@ hello::hello(QWidget *parent)
 {
 	ui.setupUi(this);
 
-	m_LeftWindowHandle = m_MiddleWindowHandle = m_RightWindowHandle = 0;
+	m_LeftWindowHandle = m_MiddleWindowHandle = m_RightWindowHandle = m_SecondRightWindowHandle = 0;
 	// 菜单栏对应功能
 	connect(ui.About, &QAction::triggered, this, &hello::OnAbout);
 	connect(ui.OnLRC, &QAction::triggered, this, &hello::OnLRC);
+	connect(ui.OnDeltaDebug, &QAction::triggered, this, &hello::DebugDialog);
 	//工具栏对应功能
 	connect(ui.Open, &QAction::triggered, this, &hello::OnOpen);
 	connect(ui.OnRun, &QAction::triggered, this, &hello::OnOneHandle);
-	connect(ui.OnLineRun, SIGNAL(triggered()), this, SLOT(OnLineRun()));
+	connect(ui.OnLineRun, SIGNAL(triggered()), this, SLOT(OnStart()));
 	connect(ui.OnStop, SIGNAL(triggered()), this, SLOT(OnStop()));
 	connect(ui.Configure, SIGNAL(triggered()), this, SLOT(OnConfigure()));
 	connect(ui.ShutDown, SIGNAL(triggered()), this, SLOT(OnShutDown()));
 	connect(ui.Configure2, SIGNAL(triggered()), this, SLOT(OnTest()));
-	//右端界面对应功能
-	connect(ui.btn_debug, SIGNAL(clicked()), this, SLOT(DebugDialog())); 
-	connect(ui.btn_start, SIGNAL(clicked()), this, SLOT(OnStart()));
-	connect(ui.btn_stop, SIGNAL(clicked()), this, SLOT(OnStop()));
-	connect(ui.btn_detect_end, SIGNAL(clicked()), this, SLOT(OnDetectEnd()));
-	connect(ui.verticalSlider_mode, SIGNAL(valueChanged(int)), this, SLOT(ChangeMode(int)));
-	ui.btn_debug->setEnabled(false);
-	ui.btn_stop->setEnabled(false);
+	
+	
+	ui.OnStop->setEnabled(false);
 
 	WriteCurrenDateTime("config.ini", "Config", "OpenProgramTime");  //不支持中文写入配置文件
 	
@@ -48,12 +45,14 @@ hello::hello(QWidget *parent)
 	//HIDDLE_DIALOG_BUTTON
 	FullScreenShow();	//全屏显示
 
-	m_camera_thread1 = nullptr;
-	m_camera_thread2 = nullptr;
-	m_Pylon_camera_thread1 = nullptr;
-	m_Pylon_camera_thread2 = nullptr;
+	m_camera_thread_7_Clock = nullptr;
+	m_camera_thread_11_Clock = nullptr;
+	m_Pylon_camera_thread_2_Clock = nullptr;
+	m_Pylon_camera_thread_10_Clock = nullptr;
 
 	m_AllResult = 0;
+	m_good = m_bad = m_total = 0;
+
 	
 	//std::string str = ":00030C03E8000000000000003200005B\r\n";
 	std::string str = ":00030C043F00000000000000320";
@@ -102,7 +101,7 @@ void hello::OnOneHandle()
 
 void hello::OnShutDown()
 {
-	if (!ui.btn_stop->isEnabled())
+	if (!ui.OnStop->isEnabled())
 	{
 		QMessageBox::StandardButton reply;
 		reply = QMessageBox::question(this, G2U("系统"), G2U("确认退出系统"));
@@ -123,51 +122,51 @@ void hello::OnShutDown()
 
 void hello::OnClearCameraThread()
 {
-	if (m_camera_thread1)
-		m_camera_thread1->stop();
+	if (m_camera_thread_7_Clock)
+		m_camera_thread_7_Clock->stop();
 
-	if (m_camera_thread2)
-		m_camera_thread2->stop();
+	if (m_camera_thread_11_Clock)
+		m_camera_thread_11_Clock->stop();
 
-	if (m_Pylon_camera_thread1)
-		m_Pylon_camera_thread1->stop();
+	if (m_Pylon_camera_thread_2_Clock)
+		m_Pylon_camera_thread_2_Clock->stop();
 
-	if (m_Pylon_camera_thread2)
-		m_Pylon_camera_thread2->stop();
+	if (m_Pylon_camera_thread_10_Clock)
+		m_Pylon_camera_thread_10_Clock->stop();
 
-	if (Camera_Thread::IsExistCameraId(LineCameraId_Dalsa1))
+	if (Camera_Thread::IsExistCameraId(LineCameraId_Dalsa_7_Clock))
 	{
-		if (m_camera_thread1->isRunning())
+		if (m_camera_thread_7_Clock->isRunning())
 		{
-			m_camera_thread1->stop();
-			m_camera_thread1->wait();
+			m_camera_thread_7_Clock->stop();
+			m_camera_thread_7_Clock->wait();
 		}
 	}
 
-	if (Camera_Thread::IsExistCameraId(LineCameraId_Dalsa2))
+	if (Camera_Thread::IsExistCameraId(LineCameraId_Dalsa_11_Clock))
 	{
-		if (m_camera_thread2->isRunning())
+		if (m_camera_thread_11_Clock->isRunning())
 		{
-			m_camera_thread2->stop();
-			m_camera_thread2->wait();
+			m_camera_thread_11_Clock->stop();
+			m_camera_thread_11_Clock->wait();
 		}
 	}
 
-	if (PylonCamera_Thread::IsExistCameraId(LineCameraId_Pylon_Basler1))
+	if (PylonCamera_Thread::IsExistCameraId(LineCameraId_Pylon_Basler_2_Clock))
 	{
-		if (m_Pylon_camera_thread1->isRunning())
+		if (m_Pylon_camera_thread_2_Clock->isRunning())
 		{
-			m_Pylon_camera_thread1->stop();
-			m_Pylon_camera_thread1->wait();
+			m_Pylon_camera_thread_2_Clock->stop();
+			m_Pylon_camera_thread_2_Clock->wait();
 		}
 	}
 
-	if (PylonCamera_Thread::IsExistCameraId(LineCameraId_Pylon_Basler2))
+	if (PylonCamera_Thread::IsExistCameraId(LineCameraId_Pylon_Basler_10_Clock))
 	{
-		if (m_Pylon_camera_thread2->isRunning())
+		if (m_Pylon_camera_thread_10_Clock->isRunning())
 		{
-			m_Pylon_camera_thread2->stop();
-			m_Pylon_camera_thread2->wait();
+			m_Pylon_camera_thread_10_Clock->stop();
+			m_Pylon_camera_thread_10_Clock->wait();
 		}
 	}
 }
@@ -183,14 +182,14 @@ void hello::OnConfigure()
 
 void hello::OnLineRun()
 {
-	QVariant Value;
+	/*QVariant Value;
 	ReadConfigure("config.ini", "Port", "Port", Value);
 	QString port = Value.toString();
 	ReadConfigure("config.ini", "Port", "Baud", Value);
 	int baud = Value.toInt();
-	statusBar()->showMessage(port + "," + Value.toString());
+	statusBar()->showMessage(port + "," + Value.toString());*/
 
-	//OnTest();
+	OnTest();
 
 
 }
@@ -200,6 +199,8 @@ void hello::readyDataSlot(QByteArray str)
 {	
 	//qDebug() << "MainSlot Thread : " << QThread::currentThreadId();
 	statusBar()->showMessage(str);	
+
+	
 }
 
 void hello::OnOpen()
@@ -229,7 +230,7 @@ void hello::OnOpen()
 			(path.contains(".bmp") || path.contains(".jpg")))
 		{
 			ReadImage(&m_Image, path.toLocal8Bit().constData());
-			DispPic(m_Image, RightView);
+			DispPic(m_Image, SecondRightView);
 		}
 	}
 	
@@ -245,6 +246,10 @@ void hello::DispPic(HImage& Image, LocationView location)
 	{
 		case RightView:
 			pWindowHandle = &m_RightWindowHandle;;
+			break;
+
+		case SecondRightView:
+			pWindowHandle = &m_SecondRightWindowHandle;;
 			break;
 
 		case LeftView:
@@ -295,15 +300,19 @@ void hello::SetOpenWindowHandle(HImage& Image, HTuple* pWindowHandle, LocationVi
 	switch (location)
 	{
 	case RightView:
-		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.RightPicView->winId(), pWindowHandle);
+		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 2000, (long)ui.RightPicView->winId(), pWindowHandle);
+		break;
+
+	case SecondRightView:
+		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 2000, (long)ui.SecondRightPicView->winId(), pWindowHandle);
 		break;
 
 	case LeftView:
-		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.LeftPicView->winId(), pWindowHandle);
+		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 2000, (long)ui.LeftPicView->winId(), pWindowHandle);
 		break;
 
 	case MiddleView:
-		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 4000, (long)ui.MiddlePicView->winId(), pWindowHandle);
+		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 2000, (long)ui.MiddlePicView->winId(), pWindowHandle);
 		break;
 	}
 }
@@ -312,14 +321,20 @@ void hello::SetOpenWindowHandle(HImage& Image, HTuple* pWindowHandle, LocationVi
 void hello::SetPicViewScroll(int width, int height, LocationView location)
 {
 	float scaleX = width / 1024.0;
-	float scaleY = height / 4000.0;
+	float scaleY = height / 2000;
 	switch (location)
 	{
+	case SecondRightView:
+		if (scaleY > scaleX)
+		{
+			HSCROLL_HEIGHT_SecondRightPic(2050);
+			VSCROLL_WIDTH_SecondRightPic(410);
+		}
 	case RightView:
 		if (scaleY > scaleX)
 		{
-			HSCROLL_HEIGHT_RightPic(4000);
-			ui.scrollAreaWidgetContentsRight->setMinimumWidth(850);
+			HSCROLL_HEIGHT_RightPic(2050);
+			VSCROLL_WIDTH_RightPic(410);
 		}
 		else
 		{
@@ -329,8 +344,8 @@ void hello::SetPicViewScroll(int width, int height, LocationView location)
 	case LeftView:
 		if (scaleY > scaleX)
 		{
-			HSCROLL_HEIGHT_LeftPic(4000);
-			ui.scrollAreaWidgetContentsLeft->setMinimumWidth(850);
+			HSCROLL_HEIGHT_LeftPic(2050);
+			VSCROLL_WIDTH_LeftPic(410);
 		}
 		else
 		{
@@ -340,8 +355,8 @@ void hello::SetPicViewScroll(int width, int height, LocationView location)
 	case MiddleView:
 		if (scaleY > scaleX)
 		{
-			HSCROLL_HEIGHT_MiddlePic(4000);
-			ui.scrollAreaWidgetContentsMiddle->setMinimumWidth(850);
+			HSCROLL_HEIGHT_MiddlePic(2050);
+			VSCROLL_WIDTH_MiddlePic(410);
 		}
 		else
 		{
@@ -362,6 +377,10 @@ const HalconCpp::HTuple hello::GetViewWindowHandle(LocationView location)
 	{
 		return m_MiddleWindowHandle;
 	}
+	else if (location == SecondRightView)
+	{
+		return m_SecondRightWindowHandle;
+	}
 	else
 	{
 		return m_LeftWindowHandle;
@@ -381,69 +400,62 @@ void hello::OnStart()
 {
 	if (OpenSerial())
 	{
-
-		//QVariant value;
-		//ReadConfigure("config.ini", "Config", "ImagePath1", value);
-
-
 		/*-----Halcon Version------------*/
 		//m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::DirectShow, AreaCamera880Id, this);
 		//m_camera_thread1->setSaveDatePath(value.toString());
 		//m_camera_thread1->setSaveImageDirName("Camera1");
 		//m_camera_thread1->setAalConfigureName("Camera1");
 		//m_camera_thread1->setSaveImageNum(50);
-		//connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
+		
 		//connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
 		//connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
 		//m_camera_thread1->start();
 
-		/*m_camera_thread1 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Basler1, this);
-		m_camera_thread1->setSaveDatePath(value.toString());
-		m_camera_thread1->setSaveImageDirName("Camera1");
-		m_camera_thread1->setAalConfigureName("Camera1");
-		m_camera_thread1->setSaveImageNum(50);
-		connect(m_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
-		connect(m_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		connect(m_camera_thread1, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
-		connect(m_camera_thread1, SIGNAL(finished()), m_camera_thread1, SLOT(deleteLater()));
-		m_camera_thread1->start();*/
+		/**	11点方向DALSA线扫	*/
+		m_camera_thread_11_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa_11_Clock, this);
+		m_camera_thread_11_Clock->setSaveImageDirName("Camera1");
+		m_camera_thread_11_Clock->setSaveImageNum(50);
+		connect(m_camera_thread_11_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+		connect(m_camera_thread_11_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+		connect(m_camera_thread_11_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));	//左视图显示
+		connect(m_camera_thread_11_Clock, SIGNAL(finished()), m_camera_thread_11_Clock, SLOT(deleteLater()));
+		m_camera_thread_11_Clock->start();
 
-		m_camera_thread2 = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa2, this);
-		//m_camera_thread2->setSaveDatePath(value.toString());
-		m_camera_thread2->setSaveImageDirName("Camera3");
-		m_camera_thread2->setAalConfigureName("Camera3");
-		m_camera_thread2->setSaveImageNum(50);
-		connect(m_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveMiddleImage(void*)));
-		connect(m_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		connect(m_camera_thread2, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
-		connect(m_camera_thread2, SIGNAL(finished()), m_camera_thread2, SLOT(deleteLater()));
-		m_camera_thread2->start();
+		/**	7点方向DALSA线扫	*/
+		m_camera_thread_7_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa_7_Clock, this);
+		m_camera_thread_7_Clock->setSaveImageDirName("Camera2");
+		m_camera_thread_7_Clock->setSaveImageNum(50);
+		connect(m_camera_thread_7_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+		connect(m_camera_thread_7_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+		connect(m_camera_thread_7_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveMiddleImage(void*)));	//中视图显示
+		connect(m_camera_thread_7_Clock, SIGNAL(finished()), m_camera_thread_7_Clock, SLOT(deleteLater()));
+		m_camera_thread_7_Clock->start();
+
 
 		/*-----Pylon Version------------*/
-		//m_Pylon_camera_thread1 = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler1, this);
-		//m_Pylon_camera_thread1->setSaveDatePath(value.toString());
-		//m_Pylon_camera_thread1->setSaveImageDirName("Camera1");
-		//m_Pylon_camera_thread1->setAalConfigureName("Camera1");
-		//m_Pylon_camera_thread1->setSaveImageNum(50);
-		//connect(m_Pylon_camera_thread1, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));
-		//connect(m_Pylon_camera_thread1, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		//connect(m_Pylon_camera_thread1, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
-		//connect(m_Pylon_camera_thread1, SIGNAL(finished()), m_Pylon_camera_thread1, SLOT(deleteLater()));
-		//m_Pylon_camera_thread1->start();
+		/**	10点方向Basler线扫	*/
+		m_Pylon_camera_thread_10_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_10_Clock, this);
+		m_Pylon_camera_thread_10_Clock->setSaveImageDirName("Camera3");
+		m_Pylon_camera_thread_10_Clock->setSaveImageNum(50);
+		connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+		connect(m_Pylon_camera_thread_10_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+		connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveSecondRightImage(void*)));	//右二视图显示
+		connect(m_Pylon_camera_thread_10_Clock, SIGNAL(finished()), m_Pylon_camera_thread_10_Clock, SLOT(deleteLater()));
+		m_Pylon_camera_thread_10_Clock->start();
 
-		//m_Pylon_camera_thread2 = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler2, this);
-		////m_Pylon_camera_thread2->setSaveDatePath(value.toString());
-		//m_Pylon_camera_thread2->setSaveImageDirName("Camera2");
-		//m_Pylon_camera_thread2->setAalConfigureName("Camera2");
-		//m_Pylon_camera_thread2->setSaveImageNum(50);
-		//connect(m_Pylon_camera_thread2, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));
-		//connect(m_Pylon_camera_thread2, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		//connect(m_Pylon_camera_thread2, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
-		//connect(m_Pylon_camera_thread2, SIGNAL(finished()), m_Pylon_camera_thread2, SLOT(deleteLater()));
-		//m_Pylon_camera_thread2->start();
+		/**	2点方向Basler线扫	*/
+		m_Pylon_camera_thread_2_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_2_Clock, this);
+		m_Pylon_camera_thread_2_Clock->setSaveImageDirName("Camera4");
+		m_Pylon_camera_thread_2_Clock->setSaveImageNum(50);
+		connect(m_Pylon_camera_thread_2_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+		connect(m_Pylon_camera_thread_2_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+		connect(m_Pylon_camera_thread_2_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));	//最右视图显示
+		connect(m_Pylon_camera_thread_2_Clock, SIGNAL(finished()), m_Pylon_camera_thread_2_Clock, SLOT(deleteLater()));
+		m_Pylon_camera_thread_2_Clock->start();
 
-		ui.btn_start->setEnabled(false);
-		ui.btn_stop->setEnabled(true);
+		/* Button State */
+		ui.OnLineRun->setEnabled(false);
+		ui.OnStop->setEnabled(true);
 	}
 
 }
@@ -453,12 +465,11 @@ void hello::OnStop()
 {
 	Delta_Thread::StopRun(true);
 
-	ui.verticalSlider_mode->setEnabled(true);
 	OnClearCameraThread();
 
-	ui.btn_start->setEnabled(true);
-	ui.btn_stop->setEnabled(false);
-	
+	ui.OnStop->setEnabled(false);
+	ui.OnLineRun->setEnabled(true);
+
 }
 
 //检测完成信号
@@ -470,23 +481,6 @@ void hello::OnDetectEnd()
 		Delta_Thread::AddOneQueryInfo(DETECT_END_OFF);
 	}		
 }
-
-
-//模式切换
-void hello::ChangeMode(int mode)
-{
-	if (mode == 1)
-	{
-		ui.btn_debug->setEnabled(false);
-		ui.btn_start->setEnabled(true);
-	}
-	else
-	{
-		ui.btn_debug->setEnabled(true);
-		ui.btn_start->setEnabled(false);
-	}
-}
-
 
 
 //******
@@ -503,6 +497,14 @@ void hello::receiveRightImage(void* image)
 	DispPic(ima, RightView);
 	HandleImageThread(ima, RightView);
 	
+}
+
+void hello::receiveSecondRightImage(void* image)
+{
+	HImage ima = *(HImage*)image;
+	DispPic(ima, SecondRightView);
+	HandleImageThread(ima, SecondRightView);
+
 }
 
 void hello::receiveMiddleImage(void* image)
@@ -524,22 +526,24 @@ void hello::receiveCorrectImage(int value)
 	static int imageNum = 0;
 	imageNum += value;
 
-	if (imageNum == 1)
+	if (imageNum == 1)  //收到1张图片
 	{
-		static int Num = 0;
-		Delta_Thread::AddOneQueryInfo(DETECT_END_ON);
-		Delta_Thread::AddOneQueryInfo(DETECT_END_OFF);
+		m_total++;
+		//Delta_Thread::AddOneQueryInfo(DETECT_END_ON);
+		//Delta_Thread::AddOneQueryInfo(DETECT_END_OFF);
+		OnDetectEnd();
 
 		imageNum = 0;
-		qDebug() << "Send M177:				" << ++Num;
-		ui.lineEdit_allNum->setText(QString("%1").arg(Num));
+		qDebug() << "Send M177:				" << m_total;
+
+		ui.lcdNumber_total->display(m_total);
 	}
 
 }
 
 void hello::OnTest()
 {
-	OnStart();
+	OnDetectEnd();
 }
 
 bool hello::OpenSerial()
@@ -604,6 +608,17 @@ void hello::HandleImageThread(HImage& ima, LocationView view)
 		}
 		break;
 
+	case SecondRightView:
+	{
+		PicThreadSecondRight* pPicThread = new PicThreadSecondRight(this);
+		pPicThread->m_Image = ima;
+		pPicThread->m_WindowHandle = GetViewWindowHandle(view);
+		connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
+		connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
+		pPicThread->start();
+	}
+	break;
+
 	case RightView:
 		{
 			PicThreadRight* pPicThread = new PicThreadRight(this);
@@ -624,8 +639,7 @@ void hello::HandleImageThread(HImage& ima, LocationView view)
 //得到线程的信号,并判断检测结果,发送给PLC
 void hello::handleResults(int singleResult)
 {
-
-	static int i = 0;
+	
 	m_AllResult += singleResult;
 
 	/*if (m_bIsBad >= AllGood)
@@ -648,28 +662,31 @@ void hello::handleResults(int singleResult)
 		return;
 	}*/
 
-	if (m_AllResult >= MiddleGood)
+	if (m_AllResult >= RightGood)
 	{
 		//Delta_Thread::AddOneQueryInfo(DETECT_END_ON);
 		//Delta_Thread::AddOneQueryInfo(DETECT_END_OFF);
-		i++;
-		qDebug() << "Image num:				"<<  i;
+		qDebug() << "Image num:				" << m_total;
 
-		if (m_AllResult == MiddleGood)
+		if (m_AllResult == RightGood)
 		{
 			Sleep(30);
+			m_good++;
 			Delta_Thread::AddOneQueryInfo(RESULT_GODD);
 			qDebug() << "Send Good!!!	";
+			ui.lcdNumber_good->display(m_good);
 		}
 		else
 		{
 			Sleep(30);
+			m_bad++;
 			Delta_Thread::AddOneQueryInfo(RESULT_BAD);
 			qDebug() << "Send Bad!!!	";
+			ui.lcdNumber_bad->display(m_bad);
 		}
 
 		qDebug() << "All Detect Result:	" << m_AllResult;
-		singleResult = 0;
+		m_AllResult = 0;
 
 		return;
 	}

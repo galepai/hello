@@ -17,10 +17,12 @@
 #define G2U(s) ( QTextCodec::codecForName("GBK")->toUnicode(s) )	//QT中显示中文，使用方法 G2U("中文")
 #define U2G(s) ( QTextCodec::codecForName("GBK")->fromUnicode(s) )
 
+#define HSCROLL_HEIGHT_SecondRightPic(height) ui.scrollAreaWidgetContentsSecondRight->setMinimumHeight(height)	//显示右二区域高度，用于显示出滚动条
 #define HSCROLL_HEIGHT_RightPic(height) ui.scrollAreaWidgetContentsRight->setMinimumHeight(height)	//显示右边区域高度，用于显示出滚动条
 #define HSCROLL_HEIGHT_LeftPic(height) ui.scrollAreaWidgetContentsLeft->setMinimumHeight(height)	//显示左边区域高度，用于显示出滚动条
 #define HSCROLL_HEIGHT_MiddlePic(height) ui.scrollAreaWidgetContentsMiddle->setMinimumHeight(height)	//显示中间区域高度，用于显示出滚动条
 
+#define VSCROLL_WIDTH_SecondRightPic(width) ui.scrollAreaWidgetContentsSecondRight->setMinimumWidth(width)	//显示右二区域宽度，用于显示出滚动条
 #define VSCROLL_WIDTH_RightPic(width) ui.scrollAreaWidgetContentsRight->setMinimumWidth(width)	//显示右边区域宽度，用于显示出滚动条
 #define VSCROLL_WIDTH_LeftPic(width) ui.scrollAreaWidgetContentsLeft->setMinimumWidth(width)	//显示左边区域宽度，用于显示出滚动条
 #define VSCROLL_WIDTH_MiddlePic(width) ui.scrollAreaWidgetContentsMiddle->setMinimumWidth(width)	//显示中间区域宽度，用于显示出滚动条
@@ -67,6 +69,7 @@ enum LocationView
 {
 	LeftView,
 	MiddleView,
+	SecondRightView,
 	RightView,
 };
 

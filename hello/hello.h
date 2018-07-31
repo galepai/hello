@@ -42,7 +42,6 @@ public slots:
 
 	/***********右端电气功能************/
 	void DebugDialog();
-	void ChangeMode(int mode);
 	void OnStart();
 	void OnStop();
 	void OnDetectEnd();
@@ -52,6 +51,7 @@ public slots:
 	void readyDataSlot(QByteArray str);
 	void receiveLeftImage(void* image);
 	void receiveMiddleImage(void* image);
+	void receiveSecondRightImage(void* image);
 	void receiveRightImage(void* image);
 	void receiveError(QString error);
 	void receiveCorrectImage(int value);
@@ -67,20 +67,21 @@ private:
 
 private:
 	Ui::helloClass ui;
-	HalconCpp::HTuple m_LeftWindowHandle, m_MiddleWindowHandle, m_RightWindowHandle;	//左、中、右视图的窗口Handle（Halcon显示图片用）
+	HalconCpp::HTuple m_LeftWindowHandle, m_MiddleWindowHandle, m_SecondRightWindowHandle, m_RightWindowHandle;	//左、中、右二、右视图的窗口Handle（Halcon显示图片用）
 	QString m_Title;
 	HImage m_Image;
 	int m_AllResult;
+	int m_good, m_bad, m_total;
 
 signals:
 	void ReadyLoop();
 
 public:
-	Camera_Thread* m_camera_thread1;
-	Camera_Thread* m_camera_thread2;
+	Camera_Thread* m_camera_thread_7_Clock;
+	Camera_Thread* m_camera_thread_11_Clock;
 	
-	PylonCamera_Thread* m_Pylon_camera_thread1;
-	PylonCamera_Thread* m_Pylon_camera_thread2;
+	PylonCamera_Thread* m_Pylon_camera_thread_2_Clock;
+	PylonCamera_Thread* m_Pylon_camera_thread_10_Clock;
 };
 
 #endif // HELLO_H

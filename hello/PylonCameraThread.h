@@ -36,7 +36,6 @@ public:
 	void setSaveDatePath(const QString& path);
 	void setSaveImageNum(int MaxNum = 50){ m_MaxNum = MaxNum; };
 	void setSaveImageDirName(const QString& path);
-	void setAalConfigureName(const QString& str){m_ConfigureName = str; };
 	//void setHardTriger(bool enable = false){ m_isHardTriger = enable; };
 
 	void stop();
@@ -67,7 +66,7 @@ private:
 	ConnectionType m_connectionType;
 	CBaslerGigEInstantCamera m_camera;
 	bool m_bIsStop;
-	QString m_SaveDatePath, m_SaveImageDirName, m_ConfigureName;
+	QString m_SaveDatePath, m_SaveImageDirName;
 	int m_image_index, m_MaxNum;
 	//bool m_isHardTriger;
 };

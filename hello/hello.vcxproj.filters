@@ -42,6 +42,18 @@
     <Filter Include="Form Files\Widgets">
       <UniqueIdentifier>{9af197a9-7d3a-4d9f-bbae-5cf483552a52}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ProcessImageThread">
+      <UniqueIdentifier>{b436688e-0933-4cbe-8ca1-77bb99631f8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CameraThread">
+      <UniqueIdentifier>{e4e62268-7fc1-4635-8a9f-6ae737721abe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ProcessImageThread">
+      <UniqueIdentifier>{849e4ce5-4f68-4c13-baa8-ba250a4dd355}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CameraThread">
+      <UniqueIdentifier>{496b30e7-459a-4705-8093-2504eea6a58f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -125,17 +137,11 @@
     <ClCompile Include="GeneratedFiles\Release\moc_CameraThread.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="CameraThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_PylonCameraThread.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_PylonCameraThread.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="PylonCameraThread.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_ConfigureDialog.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -152,20 +158,11 @@
     <ClCompile Include="GeneratedFiles\Release\moc_PicThreadLeft.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="PicThreadLeft.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_PicThreadRight.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_PicThreadRight.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="PicThreadRight.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PicThreadMiddle.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_PicThreadMiddle.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -181,6 +178,30 @@
     </ClCompile>
     <ClCompile Include="Widgets\widget.cpp">
       <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_PicThreadSecondRight.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_PicThreadSecondRight.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="PicThreadLeft.cpp">
+      <Filter>Source Files\ProcessImageThread</Filter>
+    </ClCompile>
+    <ClCompile Include="PicThreadMiddle.cpp">
+      <Filter>Source Files\ProcessImageThread</Filter>
+    </ClCompile>
+    <ClCompile Include="PicThreadRight.cpp">
+      <Filter>Source Files\ProcessImageThread</Filter>
+    </ClCompile>
+    <ClCompile Include="PicThreadSecondRight.cpp">
+      <Filter>Source Files\ProcessImageThread</Filter>
+    </ClCompile>
+    <ClCompile Include="PylonCameraThread.cpp">
+      <Filter>Source Files\CameraThread</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraThread.cpp">
+      <Filter>Source Files\CameraThread</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -226,25 +247,10 @@
     <CustomBuild Include="TestDialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="CameraThread.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="PylonCameraThread.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="ConfigureDialog.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="ConfigureDialog.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="PicThreadLeft.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="PicThreadRight.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="PicThreadMiddle.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Widgets\widget.ui">
@@ -252,6 +258,24 @@
     </CustomBuild>
     <CustomBuild Include="Widgets\widget.h">
       <Filter>Header Files\Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PicThreadLeft.h">
+      <Filter>Header Files\ProcessImageThread</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PicThreadMiddle.h">
+      <Filter>Header Files\ProcessImageThread</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PicThreadRight.h">
+      <Filter>Header Files\ProcessImageThread</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PicThreadSecondRight.h">
+      <Filter>Header Files\ProcessImageThread</Filter>
+    </CustomBuild>
+    <CustomBuild Include="CameraThread.h">
+      <Filter>Header Files\CameraThread</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PylonCameraThread.h">
+      <Filter>Header Files\CameraThread</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
