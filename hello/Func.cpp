@@ -7,6 +7,9 @@
 #include <bitset>
 #include <qdebug.h>
 
+QMutex mutex_Camera;
+QWaitCondition condition_Camera;
+
 //配置文件中写入当前时间 Use QSetting slower than QFile 
 void WriteCurrenDateTime(const QString& file, const QString& beginGroup, const QString& SetValueName)
 {

@@ -7,7 +7,7 @@
 #include "ConstParam.h"
 
 
-//QMutex Camera_Thread::m_mutex;
+QMutex Camera_Thread::m_mutex;
 //QMutex Camera_Thread::m_mutex_WriteData;
 //QWaitCondition Camera_Thread::m_waitWriteData;
 QStringList Camera_Thread::m_CameraIdlist;
@@ -16,6 +16,7 @@ Camera_Thread::Camera_Thread(ConnectionType connection_type,QString CameraId, QO
 	: m_connectionType(connection_type),m_CameraId(CameraId),QThread(parent)
 {
 	m_image_index = 1;
+	m_exposureTime = 30.0;
 	m_CameraIdlist.append(CameraId);
 	m_pGrabber = nullptr;
 }
@@ -25,17 +26,32 @@ void Camera_Thread::run()
 
 	if (!OpenCamera())
 		return;
+		
 
 	m_bIsStop = false;
 	HImage Image;
 	QTime time;
 	HTuple mean_gray;
 	HObject Rectangle;
+
+	bool first = true;
 	while (!m_bIsStop)
 	{
 		try{
 			//time.start();
 			qDebug() << m_CameraId << " ready cap.... ";
+
+			mutex_Camera.lock();
+			if (first){
+				emit ReadyOk(1);
+				first = false;
+			}
+			condition_Camera.wait(&mutex_Camera);
+			mutex_Camera.unlock();
+
+			if (m_bIsStop)
+				break;
+
 			Image = m_pGrabber->GrabImage();
 			//Image = m_pGrabber->GrabImageAsync(-1);
 
@@ -45,7 +61,7 @@ void Camera_Thread::run()
 			qDebug() << "SizeY: " << (int)Image.Height();
 			qDebug() << "=========================" << endl;
 
-			if (isCorrectImage(Image,15))
+			if (isCorrectImage(Image,0))
 			{
 				emit grab_correct_image(1);
 				emit signal_image(&Image);
@@ -53,7 +69,7 @@ void Camera_Thread::run()
 				QueueSaveImage(Image, m_MaxNum);
 				//qDebug() << m_CameraId<<" all time: " << time.elapsed() / 1000.0;
 
-				Sleep(500);
+				Sleep(10);
 			}
 			//Sleep(500);
 		}
@@ -110,8 +126,10 @@ bool Camera_Thread::OpenCamera()
 
 		case Camera_Thread::GigEVision:
 			qDebug() << "ready Open Cam....";
+			m_mutex.lock();
 			m_pGrabber->OpenFramegrabber("GigEVision", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
 				m_CameraId.toStdString().c_str(), 0, -1);
+			m_mutex.unlock();
 			qDebug() << "Open Cam OK";
 		
 			if (m_CameraId.contains("Basler"))
@@ -140,7 +158,7 @@ bool Camera_Thread::OpenCamera()
 				m_pGrabber->SetFramegrabberParam("Height", 10000);
 				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);*/
 
-				m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
+				/*m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
 				m_pGrabber->SetFramegrabberParam("ExposureTime", 70.0);
 				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameActive");
 				m_pGrabber->SetFramegrabberParam("TriggerMode", "On");
@@ -151,15 +169,14 @@ bool Camera_Thread::OpenCamera()
 				m_pGrabber->SetFramegrabberParam("lineDetectionLevel", "Threshold_for_5V");
 				m_pGrabber->SetFramegrabberParam("lineDebouncingPeriod", 200);
 				m_pGrabber->SetFramegrabberParam("Height", 10000);
-				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);
+				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);*/
 
-
-				/*m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
-				m_pGrabber->SetFramegrabberParam("ExposureTime", 70.0);
-				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameActive");
+				m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
+				m_pGrabber->SetFramegrabberParam("ExposureTime", m_exposureTime);
+				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
 				m_pGrabber->SetFramegrabberParam("TriggerMode", "Off");
 				m_pGrabber->SetFramegrabberParam("Height", 10000);
-				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);*/
+				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);
 			}
 
 			//m_pGrabber->GrabImageStart(-1);
@@ -178,6 +195,7 @@ bool Camera_Thread::OpenCamera()
 
 		QString eror = e.ErrorMessage().Text();
 		emit signal_error(G2U("不能获取相机，请检测相机ID是否正确"));
+		m_mutex.unlock();
 		return false;
 	}
 	catch (GenICam::AccessException& e)
@@ -221,7 +239,7 @@ void Camera_Thread::QueueSaveImage(const HObject& Image,int maxnum)
 		//QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
 		QString saveImagePath = QString("images/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
 		//time.start();
-		WriteImage(Image, "bmp", 0, saveImagePath.toStdString().c_str());
+		WriteImage(Image, "jpg", 0, saveImagePath.toStdString().c_str());
 	//	qDebug() << "save time: " << time.elapsed() / 1000.0;
 
 		m_image_index++;
@@ -231,7 +249,7 @@ void Camera_Thread::QueueSaveImage(const HObject& Image,int maxnum)
 		m_image_index = 1;
 		//QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
 		QString saveImagePath = QString("images/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
-		WriteImage(Image, "bmp", 0, saveImagePath.toStdString().c_str());
+		WriteImage(Image, "jpg", 0, saveImagePath.toStdString().c_str());
 
 		//QString saveAalPath = QString(m_SaveDatePath + "/aal/%1.aal").arg(m_image_index, 4, 10, QChar('0'));
 		//WriteConfigure(saveAalPath, "Info", m_ConfigureName, saveImagePath + ".bmp");

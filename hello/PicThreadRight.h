@@ -19,7 +19,7 @@ public:
 	}
 
 	void OnHandle(HTuple WindowHandle);
-
+	static int num;
 	HImage m_Image;
 	HTuple m_WindowHandle;
 

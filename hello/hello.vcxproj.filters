@@ -170,15 +170,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_PicThreadMiddle.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_widget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_widget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Widgets\widget.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_PicThreadSecondRight.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -202,6 +193,24 @@
     </ClCompile>
     <ClCompile Include="CameraThread.cpp">
       <Filter>Source Files\CameraThread</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_cameraWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_cameraWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\cameraWidget.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_serialWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_serialWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\serialWidget.cpp">
+      <Filter>Source Files\Widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -253,12 +262,6 @@
     <CustomBuild Include="ConfigureDialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="Widgets\widget.ui">
-      <Filter>Form Files\Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\widget.h">
-      <Filter>Header Files\Widgets</Filter>
-    </CustomBuild>
     <CustomBuild Include="PicThreadLeft.h">
       <Filter>Header Files\ProcessImageThread</Filter>
     </CustomBuild>
@@ -276,6 +279,18 @@
     </CustomBuild>
     <CustomBuild Include="PylonCameraThread.h">
       <Filter>Header Files\CameraThread</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Widgets\cameraWidget.ui">
+      <Filter>Form Files\Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Widgets\cameraWidget.h">
+      <Filter>Header Files\Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Widgets\serialWidget.ui">
+      <Filter>Form Files\Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Widgets\serialWidget.h">
+      <Filter>Header Files\Widgets</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -312,7 +327,10 @@
     <ClInclude Include="GeneratedFiles\ui_ConfigureDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_widget.h">
+    <ClInclude Include="GeneratedFiles\ui_cameraWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_serialWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

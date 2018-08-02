@@ -1,7 +1,8 @@
 #include "PicThreadMiddle.h"
 #include <QTime>
+#include "CHH.h"
 
-
+int PicThreadMiddle::num = 0;
 void PicThreadMiddle::run()
 {
 	//qDebug() << "Worker Run Thread : " << QThread::currentThreadId();
@@ -18,13 +19,20 @@ void PicThreadMiddle::run()
 
 			OnHandle(m_WindowHandle);
 
+			num++;
+			CHH::disp_message(m_WindowHandle, HTuple("number: ") + num, "image", 12, 12, "red", "true");
+
 			qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-			if (qrand() % 3)
+			if (qrand() % 7)
 			{
 				emit resultReady(MiddleGood);
+				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "red", "true");
 			}
 			else
+			{
 				emit resultReady(MiddleBad);
+				CHH::disp_message(m_WindowHandle, HTuple("Bad "), "image", 120, 12, "red", "true");
+			}
 		}
 		catch (HException& e)
 		{

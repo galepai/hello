@@ -32,6 +32,10 @@ public:
 	void setSaveDatePath(const QString& path);
 	void setSaveImageNum(int MaxNum = 50){ m_MaxNum = MaxNum; };
 	void setSaveImageDirName(const QString& path);
+	void SetExposureTime(float exposureTime)
+	{
+		m_exposureTime = exposureTime;
+	}
 
 	void stop();
 
@@ -52,6 +56,7 @@ protected:
 	
 
 signals:
+	void ReadyOk(int num);
 	void signal_image(void* pimage);
 	void signal_error(QString error);
 	void grab_correct_image(int num);
@@ -63,6 +68,7 @@ private:
 	bool m_bIsStop;
 	QString m_SaveDatePath, m_SaveImageDirName;
 	int m_image_index, m_MaxNum;
+	float m_exposureTime;
 };
 
 #endif

@@ -5,7 +5,8 @@
 #include <QLabel>
 #include <QGroupBox>
 #include <QMessageBox>
-#include "Widgets\widget.h"
+#include "Widgets\serialWidget.h"
+#include "Widgets\cameraWidget.h"
 
 ConfigureDialog::ConfigureDialog(QWidget *parent) :
     QDialog(parent),
@@ -30,13 +31,12 @@ ConfigureDialog::ConfigureDialog(QWidget *parent) :
 
 	QListWidgetItem *configButton2 = new QListWidgetItem(ui->listWidget);
 	configButton2->setIcon(QIcon(":/icon/Resources/icon/02.ico"));
-	configButton2->setText(G2U("串口设置"));
+	configButton2->setText(G2U("曝光设置"));
 	configButton2->setTextAlignment(Qt::AlignHCenter);
 	configButton2->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-
-	ui->stackedWidget->addWidget(&configSerial);
-	ui->stackedWidget->addWidget(new Widget);
+	ui->stackedWidget->addWidget(new serialWidget);
+	ui->stackedWidget->addWidget(new cameraWidget);
 
 	connect(ui->listWidget, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
 
@@ -62,7 +62,6 @@ ConfigSerial::ConfigSerial(QWidget *parent) :
 	DataBitsComboBox = new QComboBox();
 
 	CreateUi();
-
 	ReadIni();
 
 }
@@ -102,7 +101,6 @@ void ConfigSerial::SavePortToIni()
 		WriteConfigure("config.ini", "Port", "DataBits", DataBitsComboBox->currentText());
 		double time_End = (double)clock();
 
-		//qDebug() << (time_End - time_Start) / 1000.0 << "s";
 		QMessageBox::StandardButton reply;
 		reply = QMessageBox::information(this, G2U("信息"), G2U("串口信息成功写入配置文件"));
 	}

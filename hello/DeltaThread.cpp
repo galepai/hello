@@ -2,6 +2,7 @@
 #include "Func.h"
 #include <QMessageBox>
 #include <QTime>
+#include "ConstParam.h"
 
 QSerialPort* Delta_Thread::m_SerialPort = nullptr;
 std::atomic<std::string> Delta_Thread::m_write_string = "";
@@ -9,11 +10,17 @@ std::atomic<bool> Delta_Thread::m_bIsStop = false;
 std::queue<std::string> Delta_Thread::m_Add_Queue;
 std::queue<std::string> Delta_Thread::m_Default_Queue;
 bool Delta_Thread::m_bIsOneMode = false;
-int Delta_Thread::m_time_lag = 20;
+int Delta_Thread::m_time_lag = 30;
 Delta_Thread::QueryMode Delta_Thread::m_QueryMode = DefalutQuene;
 QMutex Delta_Thread::m_mutex;
 QMutex Delta_Thread::m_mutex_WriteData;
 QWaitCondition Delta_Thread::m_waitWriteData;
+
+void Delta_Thread::ClearDefaultQueue()
+{
+	
+}
+
 
 Delta_Thread::Delta_Thread(QObject *parent)
 	: QThread(parent)
@@ -61,6 +68,7 @@ void Delta_Thread::setWriteInfo(const std::string& Slave, const std::string& Fun
 
 void Delta_Thread::AddOneQueryInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
 {
+	Sleep(2);
 	QMutexLocker locker(&m_mutex);
 	m_Add_Queue.push(Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info));
 	m_QueryMode = OneQuery;
@@ -71,6 +79,7 @@ void Delta_Thread::AddOneQueryInfo(const std::string& Slave, const std::string& 
 
 void Delta_Thread::AddOneQueryInfo(const std::string& data)
 {
+	Sleep(2);
 	QMutexLocker locker(&m_mutex);
 	m_Add_Queue.push(Delta_Ascii_CR(data));
 	m_mutex_WriteData.lock();
@@ -81,6 +90,7 @@ void Delta_Thread::AddOneQueryInfo(const std::string& data)
 
 void Delta_Thread::AddOneQueueInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
 {
+	Sleep(2);
 	QMutexLocker locker(&m_mutex);
 	m_Add_Queue.push(Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info));
 	m_QueryMode = OneQueryToDefalutQuene;
@@ -91,6 +101,7 @@ void Delta_Thread::AddOneQueueInfo(const std::string& Slave, const std::string& 
 
 void Delta_Thread::AddOneQueueInfo(const std::string& data)
 {
+	Sleep(2);
 	QMutexLocker locker(&m_mutex);
 	m_Add_Queue.push(Delta_Ascii_CR(data));
 	m_mutex_WriteData.lock();
@@ -174,7 +185,7 @@ void Delta_Thread::run()
 	m_bIsStop = false;
 	while (!m_bIsStop)
 	{
-
+		static int tt = 0;
 		QTime time;
 		time.start();
 
@@ -208,7 +219,8 @@ void Delta_Thread::run()
 			case OneQueryToDefalutQuene:
 
 				m_write_string = m_Add_Queue.front();
-				m_Add_Queue.pop();
+				qDebug() << " OneQueryToDefalutQuene.:	" << m_write_string._My_val.c_str() << ++tt;
+				m_Add_Queue.pop();	
 				break;
 
 			case OneQuery:
@@ -244,7 +256,7 @@ void Delta_Thread::run()
 		if (m_bIsOneMode)
 			break;
 
-		qDebug() << time.elapsed() << "ms";
+		//qDebug() << time.elapsed() << "ms";
 	}
 
 	delete m_SerialPort;
@@ -270,7 +282,7 @@ int Delta_Thread::writeData(const char *data, int size)
 				break;
 		}
 	}
-	qDebug() << "Send to Plc data:	 " << data;
+	//qDebug() << "Send to Plc data:	 " << data;
 	return len;
 
 }
@@ -292,16 +304,53 @@ bool Delta_Thread::receiveData()
 			is_continue_recive = false;
 			m_SerialPort->clear();
 
-			if (m_QueryMode == OneQueryToDefalutQuene)
-			{
-					m_QueryMode = DefalutQuene;		
-			}
+			
 			if (m_total_data[0] == ':' && m_total_data[m_total_data.size() - 1] == '\n')
 			{
-				emit emitdata(m_total_data);
+				//qDebug() << m_total_data;
+				if (m_QueryMode == OneQueryToDefalutQuene)
+				{
+					if (m_Add_Queue.size() > 0)
+						qDebug() << "Add_Queue > 0................";
+					else
+					{
+						qDebug() << "Change DefalutQuene................";
+						m_QueryMode = DefalutQuene;
+						//qDebug() << m_total_data;
+					}
+
+				}
+
+				emit sendSerialData(m_total_data);
+				//std::string function_code = m_total_data.toStdString().substr(3, 2);
+				//if (function_code == "01")
+				//{
+				//	std::vector<bool> m_Y_States = Parse_Delta_Ascii(m_total_data.toStdString());
+				//	if (m_Y_States.size() == 8)
+				//	{
+				//		bool isStartGrab = m_Y_States[1];	//¶ÁÈ¡Y61µÄ×´Ì¬
+				//		//qDebug() << "pan duan Y61. ";
+				//		if (isStartGrab)
+				//		{
+				//			qDebug() << "data:	 " << m_total_data;
+				//			qDebug() << "ENTER IF. ";
+				//			static int num = 0;
+				//			m_Add_Queue.push(Delta_Ascii_CR(RESET_Y61));
+
+				//			m_QueryMode = OneQueryToDefalutQuene;
+
+				//			mutex_Camera.lock();
+				//			condition_Camera.wakeAll();
+				//			mutex_Camera.unlock();
+
+				//			qDebug() << "receive Y61: " << ++num;
+				//		}
+
+				//	}
+				//}
 			}
 			//Parse_Delta_Ascii(m_total_data.toStdString());
-			qDebug() << "recivedata : " << m_total_data;
+			//qDebug() << "recivedata : " << m_total_data;
 			m_total_data.clear();
 		}
 		else
@@ -322,7 +371,7 @@ bool Delta_Thread::receiveData()
 		if (m_QueryMode == OneQueryToDefalutQuene)
 			m_QueryMode = DefalutQuene;
 
-		emit emitdata(requestData);
+		emit sendSerialData(requestData);
 		qDebug() << "recivedata : " << requestData;
 		m_total_data.clear();	
 		is_continue_recive = false;
@@ -367,6 +416,10 @@ Delta_Thread::~Delta_Thread()
 	m_bIsStop = false;
 	std::queue<std::string> empty;
 	swap(empty, m_Add_Queue);
+
+	std::queue<std::string> empty2;
+	swap(empty, m_Default_Queue);
+
 	m_write_string._My_val.clear();
 	m_bIsOneMode = false;
 

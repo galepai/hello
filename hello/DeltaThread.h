@@ -53,6 +53,8 @@ public:
 	static void SetTimeLag(int ms);	//设置查询间隔时间
 	static QSerialPort* GetSerialPort();	//判断是否为空
 	static void setQueryMode(QueryMode query_mode);	//切换查询模式
+	static void ClearDefaultQueue();	//清空默认队伍
+	static void ClearOneQueue();	//清空查询队伍
 	
 	
 
@@ -81,7 +83,7 @@ protected:
 	static QWaitCondition m_waitWriteData;
 
 signals:
-	void emitdata(QByteArray receiveData);
+	void sendSerialData(QByteArray receiveData);
 	void error(QString error);
 	void bool_error(bool error);
 };

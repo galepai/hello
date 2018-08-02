@@ -23,6 +23,8 @@ public:
 	//bool getIsBadStatu(){ return m_AllResult; };
 	bool OpenSerial();
 
+	void wakeCamera();
+
 	//*********图像处理线程**************/
 	void HandleImageThread(HImage& ima, LocationView view);
 
@@ -48,13 +50,14 @@ public slots:
 
 	//
 	void handleResults(int is_bad);
-	void readyDataSlot(QByteArray str);
+	void receiveSerialData(QByteArray str);
 	void receiveLeftImage(void* image);
 	void receiveMiddleImage(void* image);
 	void receiveSecondRightImage(void* image);
 	void receiveRightImage(void* image);
 	void receiveError(QString error);
 	void receiveCorrectImage(int value);
+	void OnReadyOk(int num);
 
 private:
 	void OnClearCameraThread();	//清理相机线程

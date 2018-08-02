@@ -16,11 +16,14 @@ public:
 		: QThread(parent)
 	{
 		//qDebug() << "Worker Thread : " << QThread::currentThreadId();
+		
 	}
 
-
+	static int num;
 	HImage m_Image;
 	HTuple m_WindowHandle;
+
+	void OnHandle(HTuple WindowHandle);
 
 protected:
 	virtual void run() Q_DECL_OVERRIDE;

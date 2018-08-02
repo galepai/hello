@@ -12,8 +12,11 @@ QStringList PylonCamera_Thread::m_CameraIdlist;
 
 class CHardwareTriggerConfiguration : public Pylon::CConfigurationEventHandler
 {
+private:
+	int m_ExposureTime;
 public:
-	//explicit CHardwareTriggerConfiguration(bool isHardwareTrigger);
+	CHardwareTriggerConfiguration(int ExposureTime){ m_ExposureTime = ExposureTime; }
+
 	void OnOpened(Pylon::CInstantCamera& camera)
 	{
 		try
@@ -29,16 +32,18 @@ public:
 
 			_pCamera->Width.SetValue(2048);
 			_pCamera->Height.SetValue(10000);
-			_pCamera->ExposureTimeRaw.SetValue(760);
+			_pCamera->ExposureTimeRaw.SetValue(m_ExposureTime);
 			_pCamera->AcquisitionLineRateAbs.SetValue(10000.0);
 			_pCamera->TriggerSelector.FromString("FrameStart");
+#ifdef HARDTRIGGER
 			_pCamera->TriggerMode.FromString("On");
-			//_pCamera->TriggerMode.FromString("Off");
 			_pCamera->TriggerSource.FromString("Line1");
-			//_pCamera->TriggerActivation.FromString("RisingEdge");
 			_pCamera->TriggerActivation.FromString("LevelHigh");
 			_pCamera->LineDebouncerTimeAbs.SetValue(1.0);
-
+#else
+			_pCamera->TriggerMode.FromString("Off");
+#endif
+		
 			qDebug() << _pCamera->Width.GetValue();
 			qDebug() << _pCamera->Height.GetValue();
 			qDebug() << _pCamera->ExposureTimeRaw.GetValue();
@@ -62,20 +67,22 @@ PylonCamera_Thread::PylonCamera_Thread(ConnectionType connection_type,QString Ca
 	: m_connectionType(connection_type),m_CameraId(CameraId),QThread(parent)
 {
 	m_image_index = 1;
+	m_exposureTime = 200;
 	m_CameraIdlist.append(CameraId);
 }
 
 void PylonCamera_Thread::run()
 {
 	qDebug() << "PylonCamera_Thread Run Thread : " << QThread::currentThreadId();
-
+	
 	if (!OpenCamera())
 		return;
 
 	m_bIsStop = false;
 	HImage Image;
 	QTime time;
-	
+
+	bool first = true;
 	//m_camera.StartGrabbing();  //ÅäºÏWaitForFrameTriggerReady°æ±¾
 	while (!m_bIsStop)
 	{
@@ -99,7 +106,7 @@ void PylonCamera_Thread::run()
 			//		qDebug() << endl << "Grab Image Info";
 			//		qDebug() << "=========================";
 			//		qDebug() << "SizeX: " << ptrGrabResult->GetWidth();
-			//		qDebug() << "SizeY: " << ptrGrabResult->GetHeight();
+			//		qDebug() << "SizeY: " << ptrGrabResult->GetHeight();thread condition
 			//		const uint8_t* pImageBuffer = (uint8_t *)ptrGrabResult->GetBuffer();
 			//		qDebug() << "Gray value of first pixel: " << (uint32_t)pImageBuffer[0];
 			//		qDebug() << "=========================" << endl;
@@ -115,8 +122,18 @@ void PylonCamera_Thread::run()
 			//		qDebug() << "Error: " << ptrGrabResult->GetErrorCode() << " " << ptrGrabResult->GetErrorDescription() << endl;
 			//	}
 			//}
-			
 		
+			mutex_Camera.lock();
+			if (first){
+				emit ReadyOk(1);
+				first = false;
+			}
+			condition_Camera.wait(&mutex_Camera);
+			mutex_Camera.unlock();
+
+			if (m_bIsStop)
+				break;
+
 			if (m_camera.GrabOne(5000, ptrGrabResult))
 			{
 				if (ptrGrabResult->GrabSucceeded())
@@ -135,18 +152,18 @@ void PylonCamera_Thread::run()
 					GenImage1(&Image, "byte", (int)ptrGrabResult->GetWidth(), (int)ptrGrabResult->GetHeight(), (Hlong)pImageBuffer);
 					m_mutex.unlock();
 
-					if (isCorrectImage(Image, 15.0))
+					if (isCorrectImage(Image, 0.0))
 					{
 						
 						emit grab_correct_image(1);
 						emit signal_image(&Image);
 						QueueSaveImage(Image, m_MaxNum);
 
-						Sleep(500);
+						Sleep(10);
 					}
 					
 					//qDebug() << m_CameraId << " all time: " << time.elapsed() / 1000.0;
-					Sleep(300);
+					//Sleep(300);
 
 				}
 				else
@@ -174,6 +191,7 @@ void PylonCamera_Thread::run()
 			// Error handling.
 			qDebug() << "An exception occurred in run:" << endl
 				<< e.GetDescription() << endl;
+			emit signal_error(e.GetDescription());
 		}
 	}
 	m_camera.Close();
@@ -219,7 +237,7 @@ bool PylonCamera_Thread::OpenCamera()
 			{
 				//m_camera.Attach(CTlFactory::GetInstance().CreateFirstDevice());
 				m_camera.Attach(CTlFactory::GetInstance().CreateDevice(m_CameraId.toStdString().c_str()));
-				m_camera.RegisterConfiguration(new CHardwareTriggerConfiguration, RegistrationMode_ReplaceAll, Cleanup_Delete);
+				m_camera.RegisterConfiguration(new CHardwareTriggerConfiguration(m_exposureTime), RegistrationMode_ReplaceAll, Cleanup_Delete);
 
 				//using namespace GenApi;
 				//INodeMap& nodemap = m_camera.GetNodeMap();
@@ -275,7 +293,7 @@ bool PylonCamera_Thread::OpenCamera()
 					// Error handling.
 					qDebug() << "An exception occurred." << endl
 						<< e.GetDescription() << endl;
-					
+					emit signal_error(e.GetDescription());
 					m_camera.DetachDevice();
 					m_camera.Close();
 

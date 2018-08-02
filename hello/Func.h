@@ -12,7 +12,11 @@
 #include <QVariant>
 #include <QFile>
 #include <QTextStream>
+#include <QMutex>
+#include <QWaitCondition>
 #include <HalconCpp.h>
+
+//#define HARDTRIGGER
 
 #define G2U(s) ( QTextCodec::codecForName("GBK")->toUnicode(s) )	//QT中显示中文，使用方法 G2U("中文")
 #define U2G(s) ( QTextCodec::codecForName("GBK")->fromUnicode(s) )
@@ -94,5 +98,9 @@ struct Detect_Result
 	bool isRightBad;
 	bool isBad;
 };
+
+
+extern QMutex mutex_Camera;
+extern QWaitCondition condition_Camera;
 
 #endif // FUNC_H

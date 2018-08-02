@@ -171,6 +171,7 @@ static const char* READ_X_INPUT = "010204000048";  //读X00-X87
 static const char* READ_Y_OUTPUT = "010105000038";  //读Y00-Y67  
 static const char* READ_Y61_OUTPUT = "010105300008";  //读Y60-Y67  
 static const char* RESET_Y61 = "010505310000";  //置Y61为0  
+static const char* RESET_Y60 = "010505300000";  //置Y60为0 
 
 
 //	直线模组前进(自动),自动定时抛光
