@@ -23,7 +23,7 @@ void PicThreadMiddle::run()
 			CHH::disp_message(m_WindowHandle, HTuple("number: ") + num, "image", 12, 12, "red", "true");
 
 			qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-			if (qrand() % 7)
+			if (num % 3)
 			{
 				emit resultReady(MiddleGood);
 				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "red", "true");

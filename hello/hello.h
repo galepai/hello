@@ -23,10 +23,10 @@ public:
 	//bool getIsBadStatu(){ return m_AllResult; };
 	bool OpenSerial();
 
-	void wakeCamera();
+	void OnWakeCamera();
 
 	//*********图像处理线程**************/
-	void HandleImageThread(HImage& ima, LocationView view);
+	void OnHandleImageThread(HImage& ima, LocationView view);
 
 public slots:
 
@@ -35,7 +35,7 @@ public slots:
 	void OnAbout();
 
 	/***********工具栏功能************/
-	void OnOneHandle();
+	void OnOneHandle_AllPic();
 	void OnOpen();
 	void OnLineRun();
 	void OnConfigure();
@@ -72,9 +72,10 @@ private:
 	Ui::helloClass ui;
 	HalconCpp::HTuple m_LeftWindowHandle, m_MiddleWindowHandle, m_SecondRightWindowHandle, m_RightWindowHandle;	//左、中、右二、右视图的窗口Handle（Halcon显示图片用）
 	QString m_Title;
-	HImage m_Image;
+	HImage m_Image, m_LeftImage, m_MiddleImage, m_SecondRightImage, m_RightImage;
 	int m_AllResult;
 	int m_good, m_bad, m_total;
+	bool m_peviousProductDectectEnd;
 
 signals:
 	void ReadyLoop();

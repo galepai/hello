@@ -29,7 +29,7 @@ hello::hello(QWidget *parent)
 	connect(ui.OnDeltaDebug, &QAction::triggered, this, &hello::DebugDialog);
 	//工具栏对应功能
 	connect(ui.Open, &QAction::triggered, this, &hello::OnOpen);
-	connect(ui.OnRun, &QAction::triggered, this, &hello::OnOneHandle);
+	connect(ui.OnRun, &QAction::triggered, this, &hello::OnOneHandle_AllPic);
 	connect(ui.OnLineRun, SIGNAL(triggered()), this, SLOT(OnStart()));
 	connect(ui.OnStop, SIGNAL(triggered()), this, SLOT(OnStop()));
 	connect(ui.Configure, SIGNAL(triggered()), this, SLOT(OnConfigure()));
@@ -52,6 +52,8 @@ hello::hello(QWidget *parent)
 
 	m_AllResult = 0;
 	m_good = m_bad = m_total = 0;
+
+	m_peviousProductDectectEnd = true;
 
 	
 	//std::string str = ":00030C03E8000000000000003200005B\r\n";
@@ -86,17 +88,84 @@ void hello::OnLRC()
 	Dlg.exec();
 }
 
-//创建线程
-void hello::OnOneHandle()
+void hello::OnOpen()
 {
-	PicThreadMiddle* m_pHandlePicThread = new PicThreadMiddle(this);
-	m_pHandlePicThread->m_Image = m_Image;
-	m_pHandlePicThread->m_WindowHandle = GetViewWindowHandle(RightView);
 
-	connect(m_pHandlePicThread, SIGNAL(resultReady(bool)), this, SLOT(handleResults(bool)));
-	// 线程结束后，自动销毁
-	connect(m_pHandlePicThread, SIGNAL(finished()), m_pHandlePicThread, SLOT(deleteLater()));
-	m_pHandlePicThread->start();
+	QString path = QFileDialog::getOpenFileName(this, tr("Open Image"), "", tr("Image Files(*.jpg *.png *.bmp)"));
+
+	if (path.contains("camera1")
+		|| path.contains("camera2")
+		|| path.contains("camera3")
+		|| path.contains("camera4"))
+	{
+		int i = path.lastIndexOf('/');
+		QString ImageName = path.toStdString().substr(i, path.length() - 1).c_str();
+		QString tempPath = path.remove(ImageName);
+		i = tempPath.lastIndexOf('/');
+		QString upDir = tempPath.toStdString().substr(0, i + 1).c_str();
+
+		QString ImagePath = upDir + "/camera1" + ImageName;
+		ReadImage(&m_LeftImage, ImagePath.toLocal8Bit().constData());
+		DispPic(m_LeftImage, LeftView);
+
+		ImagePath = upDir + "camera2" + ImageName;
+		ReadImage(&m_MiddleImage, ImagePath.toLocal8Bit().constData());
+		DispPic(m_MiddleImage, MiddleView);
+
+		ImagePath = upDir + "camera3" + ImageName;
+		ReadImage(&m_SecondRightImage, ImagePath.toLocal8Bit().constData());
+		DispPic(m_SecondRightImage, SecondRightView);
+
+		ImagePath = upDir + "camera4" + ImageName;
+		ReadImage(&m_RightImage, ImagePath.toLocal8Bit().constData());
+		DispPic(m_RightImage, RightView);
+
+		statusBar()->showMessage(QString(G2U("单次检测图像: ")) + ImageName);
+	}
+	else
+	{
+		if (path.length() != 0 &&
+			(path.contains(".bmp") || path.contains(".jpg")))
+		{
+			ReadImage(&m_Image, path.toLocal8Bit().constData());
+			DispPic(m_Image, LeftView);
+			statusBar()->showMessage(path);
+		}
+	}
+
+	//OnWakeCamera();
+}
+
+//创建线程
+void hello::OnOneHandle_AllPic()
+{
+	if (m_LeftImage.Key() != 0)
+	{
+		DispPic(m_LeftImage, LeftView);
+		OnHandleImageThread(m_LeftImage, LeftView);
+	}
+		
+
+	if (m_MiddleImage.Key() != 0)
+	{
+		DispPic(m_MiddleImage, MiddleView);
+		OnHandleImageThread(m_MiddleImage, MiddleView);
+	}
+		
+
+	if (m_SecondRightImage.Key() != 0)
+	{
+		DispPic(m_SecondRightImage, SecondRightView);
+		OnHandleImageThread(m_SecondRightImage, SecondRightView);
+	}
+		
+
+	if (m_RightImage.Key() != 0)
+	{
+		DispPic(m_RightImage, RightView);
+		OnHandleImageThread(m_RightImage, RightView);
+	}
+		
 }
 
 void hello::OnShutDown()
@@ -114,7 +183,7 @@ void hello::OnShutDown()
 	else
 	{
 		QMessageBox::StandardButton reply;
-		reply = QMessageBox::information(this, G2U("提示"), G2U("请先停止系统,请点击右侧的'停止''按钮"));
+		reply = QMessageBox::information(this, G2U("提示"), G2U("请先停止系统,请点击左侧的'停止''按钮"));
 
 	}
 	
@@ -214,10 +283,14 @@ void hello::receiveSerialData(QByteArray str)
 				bool isStartGrab = m_Y_States[1];	//读取Y61的状态
 				if (isStartGrab)
 				{
-					Delta_Thread::AddOneQueueInfo(RESET_Y61);
-					Sleep(10);
-					wakeCamera();
-					qDebug() << "receive Y61: " << ++num;
+					if (m_peviousProductDectectEnd)
+					{
+						Delta_Thread::AddOneQueueInfo(RESET_Y61);
+						Sleep(10);
+						OnWakeCamera();
+						qDebug() << "receive Y61: " << ++num;
+					}
+					
 				}		
 			}
 		}
@@ -227,41 +300,7 @@ void hello::receiveSerialData(QByteArray str)
 	
 }
 
-void hello::OnOpen()
-{
-
-	/*QString path = QFileDialog::getOpenFileName(this, tr("Open Image"), "", tr("Image Files(*.jpg *.png *.bmp)"));
-
-	if (path.contains("camera1") || path.contains("camera2"))
-	{
-		int i =path.lastIndexOf('/');
-		QString ImageName = path.toStdString().substr(i, path.length() - 1).c_str();
-		QString tempPath = path.remove(ImageName);
-		i = tempPath.lastIndexOf('/');
-		QString DateName = tempPath.toStdString().substr(0, i+1).c_str();
-		
-		QString ImagePath = DateName + "camera1" + ImageName;
-		ReadImage(&m_Image, ImagePath.toLocal8Bit().constData());
-		DispPic(m_Image, LeftView);
-
-		ImagePath = DateName + "camera2" + ImageName;
-		ReadImage(&m_Image, ImagePath.toLocal8Bit().constData());
-		DispPic(m_Image, RightView);
-	}
-	else
-	{
-		if (path.length() != 0 &&
-			(path.contains(".bmp") || path.contains(".jpg")))
-		{
-			ReadImage(&m_Image, path.toLocal8Bit().constData());
-			DispPic(m_Image, SecondRightView);
-		}
-	}*/
-	
-	wakeCamera();
-}
-
-void hello::wakeCamera()
+void hello::OnWakeCamera()
 {
 	mutex_Camera.lock();
 	condition_Camera.wakeAll();
@@ -523,14 +562,14 @@ void hello::receiveLeftImage(void* image)
 {
 	HImage ima = *(HImage*)image;
 	DispPic(ima, LeftView);
-	HandleImageThread(ima, LeftView);
+	OnHandleImageThread(ima, LeftView);
 }
 
 void hello::receiveRightImage(void* image)
 {
 	HImage ima = *(HImage*)image;
 	DispPic(ima, RightView);
-	HandleImageThread(ima, RightView);
+	OnHandleImageThread(ima, RightView);
 	
 }
 
@@ -538,7 +577,7 @@ void hello::receiveSecondRightImage(void* image)
 {
 	HImage ima = *(HImage*)image;
 	DispPic(ima, SecondRightView);
-	HandleImageThread(ima, SecondRightView);
+	OnHandleImageThread(ima, SecondRightView);
 
 }
 
@@ -546,7 +585,7 @@ void hello::receiveMiddleImage(void* image)
 {
 	HImage ima = *(HImage*)image;
 	DispPic(ima, MiddleView);
-	HandleImageThread(ima, MiddleView);
+	OnHandleImageThread(ima, MiddleView);
 }
 
 void hello::receiveError(QString error)
@@ -614,7 +653,7 @@ bool hello::OpenSerial()
 
 }
 
-void hello::HandleImageThread(HImage& ima, LocationView view)
+void hello::OnHandleImageThread(HImage& ima, LocationView view)
 {
 	switch (view)
 	{
@@ -672,7 +711,8 @@ void hello::HandleImageThread(HImage& ima, LocationView view)
 //得到线程的信号,并判断检测结果,发送给PLC
 void hello::handleResults(int singleResult)
 {
-	
+	m_peviousProductDectectEnd = false;
+
 	m_AllResult += singleResult;
 
 	if (m_AllResult >= LeftGood + MiddleGood + SecondRightGood + RightGood)
@@ -699,6 +739,7 @@ void hello::handleResults(int singleResult)
 
 		qDebug() << "All Detect Result:	" << m_AllResult;
 		m_AllResult = 0;
+		m_peviousProductDectectEnd = true;
 
 		return;
 	}

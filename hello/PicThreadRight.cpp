@@ -26,7 +26,7 @@ void PicThreadRight::run()
 
 
 			qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-			if (qrand() % 3)
+			if (num % 3)
 			{
 				emit resultReady(RightGood);
 				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "red", "true");

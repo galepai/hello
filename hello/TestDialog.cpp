@@ -92,7 +92,7 @@ TestDialog::TestDialog(QWidget *parent) :
 		Delta_Thread* thread = new Delta_Thread;
 		thread->InitSerialPortInfo(PortName.toStdString().c_str(), Baud, QSerialPort::Parity::EvenParity, QSerialPort::DataBits(DataBits));
 		connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-		connect(thread, SIGNAL(emitdata(QByteArray)), this, SLOT(readyDataSlot(QByteArray)));
+		connect(thread, SIGNAL(sendSerialData(QByteArray)), this, SLOT(readyDataSlot(QByteArray)));
 		thread->start();
 	}
 		
