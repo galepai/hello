@@ -15,6 +15,11 @@ public:
 	explicit cameraWidget(QWidget *parent = 0);
 	~cameraWidget();
 
+	void ReadIni();
+
+public slots:
+	void SaveExposureToIni();
+
 private:
 	Ui::cameraWidget *ui;
 };

@@ -19,12 +19,15 @@ public:
 	}
 
 	void OnHandle(HTuple WindowHandle);
+	void SetModel(QString path){ m_ModelPath = path; }
+
 	static int num;
 	HImage m_Image;
 	HTuple m_WindowHandle;
 
 protected:
 	virtual void run() Q_DECL_OVERRIDE;
+	QString m_ModelPath;
 
 signals:
 	void resultReady(int bIsBad);

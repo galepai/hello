@@ -11,22 +11,22 @@ void PicThreadLeft::run()
 	{
 		try
 		{
-			HObject Region;
+			/*HObject Region;
 			Threshold(m_Image, &Region, 5, 200);
 			SetDraw(m_WindowHandle, "margin");
 			SetColor(m_WindowHandle, "red");
-			DispObj(Region, m_WindowHandle);
+			DispObj(Region, m_WindowHandle);*/
 
 			OnHandle(m_WindowHandle);
 			
 			num++;
-			CHH::disp_message(m_WindowHandle, HTuple("number: ") + num, "image", 12, 12, "red", "true");
+			CHH::disp_message(m_WindowHandle, HTuple("number: ") + num, "image", 12, 12, "black", "true");
 
 			qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
 			if (num % 3)
 			{
 				emit resultReady(LeftGood);
-				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "red", "true");
+				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "black", "true");
 			}
 			else
 			{

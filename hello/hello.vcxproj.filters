@@ -212,6 +212,9 @@
     <ClCompile Include="Widgets\serialWidget.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="CHH2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="hello.h">
@@ -332,6 +335,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_serialWidget.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CHH2.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

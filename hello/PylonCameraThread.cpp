@@ -134,6 +134,8 @@ void PylonCamera_Thread::run()
 			if (m_bIsStop)
 				break;
 
+			m_camera.ExposureTimeRaw.SetValue(m_exposureTime);
+			
 			if (m_camera.GrabOne(5000, ptrGrabResult))
 			{
 				if (ptrGrabResult->GrabSucceeded())
@@ -152,15 +154,15 @@ void PylonCamera_Thread::run()
 					GenImage1(&Image, "byte", (int)ptrGrabResult->GetWidth(), (int)ptrGrabResult->GetHeight(), (Hlong)pImageBuffer);
 					m_mutex.unlock();
 
-					if (isCorrectImage(Image, 0.0))
-					{
+					//if (isCorrectImage(Image, 0.0))
+					//{
 						
 						emit grab_correct_image(1);
 						emit signal_image(&Image);
 						QueueSaveImage(Image, m_MaxNum);
 
 						Sleep(10);
-					}
+					//}
 					
 					//qDebug() << m_CameraId << " all time: " << time.elapsed() / 1000.0;
 					//Sleep(300);
@@ -336,37 +338,18 @@ void PylonCamera_Thread::setSaveImageDirName(const QString& ImageDirName)
 
 void PylonCamera_Thread::QueueSaveImage(const HObject& Image,int maxnum)
 {
-	//QTime time;
-	
-	//if (CreateImagetDir())
-	//{
-	//	QVariant value;
-	//	ReadConfigure("config.ini", "Config", "ImagePath1", value);
-	//	setSaveDatePath(value.toString());
-	//}
-	//
 
 	if (m_image_index <= maxnum)
 	{
-		
-		//QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
-		QString saveImagePath = QString("images/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
-		//time.start();
-		WriteImage(Image, "jpg", 0, saveImagePath.toStdString().c_str());
-	//	qDebug() << "save time: " << time.elapsed() / 1000.0;
-
+		QString saveImagePath = QString("images/" + m_SaveImageDirName + "/" + m_SaveImageDirName + "_%1").arg(m_image_index, 4, 10, QChar('0'));
+		WriteImage(Image, "tiff", 0, saveImagePath.toStdString().c_str());
 		m_image_index++;
 	}
 	else
 	{
 		m_image_index = 1;
-		//QString saveImagePath = QString(m_SaveDatePath + "/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
-		QString saveImagePath = QString("images/" + m_SaveImageDirName + "/%1").arg(m_image_index, 4, 10, QChar('0'));
-		WriteImage(Image, "jpg", 0, saveImagePath.toStdString().c_str());
-
-		//QString saveAalPath = QString(m_SaveDatePath + "/aal/%1.aal").arg(m_image_index, 4, 10, QChar('0'));
-		//WriteConfigure(saveAalPath, "Info", m_ConfigureName, saveImagePath + ".bmp");
-
+		QString saveImagePath = QString("images/" + m_SaveImageDirName + "/"+ m_SaveImageDirName +"_%1").arg(m_image_index, 4, 10, QChar('0'));
+		WriteImage(Image, "tiff", 0, saveImagePath.toStdString().c_str());
 		m_image_index++;
 	}
 }

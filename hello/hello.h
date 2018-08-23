@@ -10,6 +10,7 @@
 #include "CameraThread.h"
 #include "PylonCameraThread.h"
 
+
 using namespace HalconCpp;
 
 class hello : public QMainWindow
@@ -24,6 +25,9 @@ public:
 	bool OpenSerial();
 
 	void OnWakeCamera();
+	void ReadExposure();
+	void setBottomModel(QString path){ m_BottomModel = path; }
+	QString bottomModel(){return m_BottomModel;}
 
 	//*********图像处理线程**************/
 	void OnHandleImageThread(HImage& ima, LocationView view);
@@ -59,6 +63,9 @@ public slots:
 	void receiveCorrectImage(int value);
 	void OnReadyOk(int num);
 
+	//
+	void OnSetExposure();
+
 private:
 	void OnClearCameraThread();	//清理相机线程
 	void FullScreenShow();	//全屏显示
@@ -66,6 +73,7 @@ private:
 	const HalconCpp::HTuple GetViewWindowHandle(LocationView location);	//返回指定视图的窗口Handle（Halcon显示图片用）
 	void SetOpenWindowHandle(HImage& Image, HTuple* pWindowHandle, LocationView location);	//指定显示窗口的句柄
 	void SetPicViewScroll(int width, int height, LocationView location); //指定视图的滚动条长度
+	void OnOpenCameras();	//打开相机
 
 
 private:
@@ -76,6 +84,8 @@ private:
 	int m_AllResult;
 	int m_good, m_bad, m_total;
 	bool m_peviousProductDectectEnd;
+	bool m_bIsOnLine; //打开相机时,选择是否与PLC联机
+	QString m_BottomModel;
 
 signals:
 	void ReadyLoop();
@@ -86,6 +96,7 @@ public:
 	
 	PylonCamera_Thread* m_Pylon_camera_thread_2_Clock;
 	PylonCamera_Thread* m_Pylon_camera_thread_10_Clock;
+
 };
 
 #endif // HELLO_H

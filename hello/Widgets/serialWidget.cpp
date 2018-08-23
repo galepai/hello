@@ -44,7 +44,7 @@ void serialWidget::ReadIni()
 void serialWidget::SavePortToIni()
 {
 
-	double time_Start = (double)clock();
+	//double time_Start = (double)clock();
 
 	if (ui->PortComboBox->currentText().length()
 		&& ui->BaudComboBox->currentText().length()
@@ -53,7 +53,7 @@ void serialWidget::SavePortToIni()
 		WriteConfigure("config.ini", "Port", "Port", ui->PortComboBox->currentText());
 		WriteConfigure("config.ini", "Port", "Baud", ui->BaudComboBox->currentText());
 		WriteConfigure("config.ini", "Port", "DataBits", ui->DataBitsComboBox->currentText());
-		double time_End = (double)clock();
+		//double time_End = (double)clock();
 
 		//qDebug() << (time_End - time_Start) / 1000.0 << "s";
 		QMessageBox::StandardButton reply;

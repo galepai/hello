@@ -30,7 +30,7 @@ ConfigureDialog::ConfigureDialog(QWidget *parent) :
 	configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
 	QListWidgetItem *configButton2 = new QListWidgetItem(ui->listWidget);
-	configButton2->setIcon(QIcon(":/icon/Resources/icon/02.ico"));
+	configButton2->setIcon(QIcon(":/icon/Resources/icon/03.ico"));
 	configButton2->setText(G2U("ÆØ¹âÉèÖÃ"));
 	configButton2->setTextAlignment(Qt::AlignHCenter);
 	configButton2->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);

@@ -1,6 +1,7 @@
 #include "PicThreadSecondRight.h"
 #include <QTime>
 #include "CHH.h"
+#include "CHH2.h"
 
 int PicThreadSecondRight::num = 0;
 void PicThreadSecondRight::run()
@@ -11,27 +12,31 @@ void PicThreadSecondRight::run()
 	{
 		try
 		{
-			HObject Region;
-			Threshold(m_Image, &Region, 5, 200);
-			SetDraw(m_WindowHandle, "margin");
-			SetColor(m_WindowHandle, "red");
-			DispObj(Region, m_WindowHandle);
+			HTuple hv_DownRow, hv_IsBad;
+			HObject ImageEmphasize;
+			CHH::PingJie(m_Image, &m_Image, 1080, 30, 3, 40, &hv_DownRow);
+			DispObj(m_Image, m_WindowHandle);
+			Emphasize(m_Image, &ImageEmphasize, 7, 101, 1);
 
-			OnHandle(m_WindowHandle);
+			CHH2::PengShang_Camera3(ImageEmphasize, m_Image, m_WindowHandle, &hv_IsBad);
+
 
 			num++;
-			CHH::disp_message(m_WindowHandle, HTuple("number: ") + num, "image", 12, 12, "red", "true");
+			CHH::disp_message(m_WindowHandle, HTuple("number: ") + num, "image", 12, 12, "black", "true");
 
 			qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
 			if (num % 3)
+			//if (!hv_IsBad.I())
 			{
 				emit resultReady(SecondRightGood);
-				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "red", "true");
+				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "black", "true");
 			}
 			else
 			{
 				emit resultReady(SecondRightBad);
 				CHH::disp_message(m_WindowHandle, HTuple("Bad "), "image", 120, 12, "red", "true");
+				QString saveImagePath = QString(QString("images/badImage/camera3/Camera3_") + "%1").arg(num, 4, 10, QChar('0'));
+				WriteImage(m_Image, "tiff", 0, saveImagePath.toStdString().c_str());
 			}
 				
 		}
@@ -45,19 +50,10 @@ void PicThreadSecondRight::run()
 
 void PicThreadSecondRight::OnHandle(HTuple WindowHandle)
 {
-	static int step = 1;
-	step++;
-
-	HObject circle;
-	int row = 100 + 50 * step;
-	if (row<2000)
-		GenCircle(&circle, 100 + 50 * step, 300, 100);
-	else
-	{
-		GenCircle(&circle, 100 + 50 * step, 300, 100);
-		step = 1;
-	}
-
-
-	DispObj(circle, WindowHandle);
+	HTuple hv_DownRow, hv_IsBad;
+	HObject ImageEmphasize;
+	CHH::PingJie(m_Image, &m_Image, 1080, 30, 3, 40, &hv_DownRow);
+	DispObj(m_Image, WindowHandle);
+	Emphasize(m_Image, &ImageEmphasize, 7, 101, 1);
+	CHH2::PengShang_Camera3(ImageEmphasize, m_Image, WindowHandle, &hv_IsBad);
 }

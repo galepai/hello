@@ -16,7 +16,6 @@
 #include "PicThreadSecondRight.h"
 
 
-
 hello::hello(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -41,7 +40,6 @@ hello::hello(QWidget *parent)
 
 	WriteCurrenDateTime("config.ini", "Config", "OpenProgramTime");  //不支持中文写入配置文件
 	
-	WriteConfigure("config.ini", "Camera_2_Clock", "Exposure", QString("%1").arg(760));
 	//HIDDLE_DIALOG_BUTTON
 	FullScreenShow();	//全屏显示
 
@@ -54,11 +52,14 @@ hello::hello(QWidget *parent)
 	m_good = m_bad = m_total = 0;
 
 	m_peviousProductDectectEnd = true;
-
 	
-	//std::string str = ":00030C03E8000000000000003200005B\r\n";
-	std::string str = ":00030C043F00000000000000320";
-	std::vector<ushort> X_Status = Parse_Delta_Ascii_03(str);
+
+	QVariant value;
+	ReadConfigure("config.ini", "Model", "BottomModel", value);
+	setBottomModel(value.toString());
+
+	ReadExposure();
+	connect(ui.pushButton_exposure, SIGNAL(clicked()), this, SLOT(OnSetExposure()));
 
 }
 
@@ -91,7 +92,7 @@ void hello::OnLRC()
 void hello::OnOpen()
 {
 
-	QString path = QFileDialog::getOpenFileName(this, tr("Open Image"), "", tr("Image Files(*.jpg *.png *.bmp)"));
+	QString path = QFileDialog::getOpenFileName(this, tr("Open Image"), "", tr("Image Files(*.jpg *.tif *.bmp)"));
 
 	if (path.contains("camera1")
 		|| path.contains("camera2")
@@ -99,24 +100,28 @@ void hello::OnOpen()
 		|| path.contains("camera4"))
 	{
 		int i = path.lastIndexOf('/');
-		QString ImageName = path.toStdString().substr(i, path.length() - 1).c_str();
+		QString ImageName = path.toStdString().substr(i, path.length() - 1).c_str(); 
 		QString tempPath = path.remove(ImageName);
 		i = tempPath.lastIndexOf('/');
 		QString upDir = tempPath.toStdString().substr(0, i + 1).c_str();
+		
+		i = ImageName.lastIndexOf('_');
+		ImageName = ImageName.toStdString().substr(i+1, ImageName.length() - 1).c_str();
 
-		QString ImagePath = upDir + "/camera1" + ImageName;
+
+		QString ImagePath = upDir + "camera1/Camera1_" + ImageName;
 		ReadImage(&m_LeftImage, ImagePath.toLocal8Bit().constData());
 		DispPic(m_LeftImage, LeftView);
 
-		ImagePath = upDir + "camera2" + ImageName;
+		ImagePath = upDir + "camera2/Camera2_" + ImageName;
 		ReadImage(&m_MiddleImage, ImagePath.toLocal8Bit().constData());
 		DispPic(m_MiddleImage, MiddleView);
 
-		ImagePath = upDir + "camera3" + ImageName;
+		ImagePath = upDir + "camera3/Camera3_" + ImageName;
 		ReadImage(&m_SecondRightImage, ImagePath.toLocal8Bit().constData());
 		DispPic(m_SecondRightImage, SecondRightView);
 
-		ImagePath = upDir + "camera4" + ImageName;
+		ImagePath = upDir + "camera4/Camera4_" + ImageName;
 		ReadImage(&m_RightImage, ImagePath.toLocal8Bit().constData());
 		DispPic(m_RightImage, RightView);
 
@@ -125,7 +130,7 @@ void hello::OnOpen()
 	else
 	{
 		if (path.length() != 0 &&
-			(path.contains(".bmp") || path.contains(".jpg")))
+			(path.contains(".bmp") || path.contains(".tif")))
 		{
 			ReadImage(&m_Image, path.toLocal8Bit().constData());
 			DispPic(m_Image, LeftView);
@@ -133,7 +138,7 @@ void hello::OnOpen()
 		}
 	}
 
-	//OnWakeCamera();
+	
 }
 
 //创建线程
@@ -462,62 +467,97 @@ void hello::DebugDialog()
 //启动
 void hello::OnStart()
 {
-	if (OpenSerial())
+	QVariant ModeValue;
+	ReadConfigure("config.ini", "Mode", "Connection", ModeValue);
+	if (ModeValue.toString() == "OnLine")
 	{
-		/*-----Halcon Version------------*/
-		/**	11点方向DALSA线扫	*/
-		m_camera_thread_11_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa_11_Clock, this);
-		m_camera_thread_11_Clock->setSaveImageDirName("Camera1");
-		m_camera_thread_11_Clock->setSaveImageNum(50);
-		m_camera_thread_11_Clock->SetExposureTime(70.0);
-		connect(m_camera_thread_11_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		connect(m_camera_thread_11_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
-		connect(m_camera_thread_11_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
-		connect(m_camera_thread_11_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));	//左视图显示
-		connect(m_camera_thread_11_Clock, SIGNAL(finished()), m_camera_thread_11_Clock, SLOT(deleteLater()));
-		m_camera_thread_11_Clock->start();
-
-		/**	7点方向DALSA线扫	*/
-		m_camera_thread_7_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa_7_Clock, this);
-		m_camera_thread_7_Clock->setSaveImageDirName("Camera2");
-		m_camera_thread_7_Clock->setSaveImageNum(50);
-		m_camera_thread_7_Clock->SetExposureTime(70.0);
-		connect(m_camera_thread_7_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		connect(m_camera_thread_7_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
-		connect(m_camera_thread_7_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
-		connect(m_camera_thread_7_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveMiddleImage(void*)));	//中视图显示
-		connect(m_camera_thread_7_Clock, SIGNAL(finished()), m_camera_thread_7_Clock, SLOT(deleteLater()));
-		m_camera_thread_7_Clock->start();
-
-
-		///*-----Pylon Version------------*/
-		/**	10点方向Basler线扫	*/
-		m_Pylon_camera_thread_10_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_10_Clock, this);
-		m_Pylon_camera_thread_10_Clock->setSaveImageDirName("Camera3");
-		m_Pylon_camera_thread_10_Clock->setSaveImageNum(50);
-		m_Pylon_camera_thread_10_Clock->SetExposureTime(760);
-		connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		connect(m_Pylon_camera_thread_10_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
-		connect(m_Pylon_camera_thread_10_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
-		connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveSecondRightImage(void*)));	//右二视图显示
-		connect(m_Pylon_camera_thread_10_Clock, SIGNAL(finished()), m_Pylon_camera_thread_10_Clock, SLOT(deleteLater()));
-		m_Pylon_camera_thread_10_Clock->start();
-
-		/**	2点方向Basler线扫	*/
-		m_Pylon_camera_thread_2_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_2_Clock, this);
-		m_Pylon_camera_thread_2_Clock->setSaveImageDirName("Camera4");
-		m_Pylon_camera_thread_2_Clock->setSaveImageNum(50);
-		m_Pylon_camera_thread_2_Clock->SetExposureTime(760);
-		connect(m_Pylon_camera_thread_2_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
-		connect(m_Pylon_camera_thread_2_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
-		connect(m_Pylon_camera_thread_2_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
-		connect(m_Pylon_camera_thread_2_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));	//最右视图显示
-		connect(m_Pylon_camera_thread_2_Clock, SIGNAL(finished()), m_Pylon_camera_thread_2_Clock, SLOT(deleteLater()));
-		m_Pylon_camera_thread_2_Clock->start();
-	
-		ui.OnLineRun->setEnabled(false);
+		m_bIsOnLine = true;
+	}
+	else
+	{
+		m_bIsOnLine = false;
 	}
 
+
+	if (m_bIsOnLine)
+	{
+		if (OpenSerial())
+		{
+			OnOpenCameras();
+		}
+	}
+	else
+	{
+		OnOpenCameras();
+	}
+
+
+	/*if (OpenSerial())
+	{
+		OnOpenCameras();
+	}*/
+
+}
+
+void hello::OnOpenCameras()
+{
+	QVariant ExposureValue;
+	/*-----Halcon Version------------*/
+	/**	11点方向DALSA线扫	*/
+	m_camera_thread_11_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa_11_Clock, this);
+	m_camera_thread_11_Clock->setSaveImageDirName("Camera1");
+	m_camera_thread_11_Clock->setSaveImageNum(50);
+	ReadConfigure("config.ini", "Camera_11_Clock", "Exposure", ExposureValue);
+	m_camera_thread_11_Clock->SetExposureTime(ExposureValue.toFloat());
+	connect(m_camera_thread_11_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_camera_thread_11_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
+	connect(m_camera_thread_11_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+	connect(m_camera_thread_11_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));	//左视图显示
+	connect(m_camera_thread_11_Clock, SIGNAL(finished()), m_camera_thread_11_Clock, SLOT(deleteLater()));
+	m_camera_thread_11_Clock->start();
+
+	/**	7点方向DALSA线扫	*/
+	m_camera_thread_7_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa_7_Clock, this);
+	m_camera_thread_7_Clock->setSaveImageDirName("Camera2");
+	m_camera_thread_7_Clock->setSaveImageNum(50);
+	ReadConfigure("config.ini", "Camera_07_Clock", "Exposure", ExposureValue);
+	m_camera_thread_7_Clock->SetExposureTime(ExposureValue.toFloat());
+	connect(m_camera_thread_7_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_camera_thread_7_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
+	connect(m_camera_thread_7_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+	connect(m_camera_thread_7_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveMiddleImage(void*)));	//中视图显示
+	connect(m_camera_thread_7_Clock, SIGNAL(finished()), m_camera_thread_7_Clock, SLOT(deleteLater()));
+	m_camera_thread_7_Clock->start();
+
+
+	///*-----Pylon Version------------*/
+	/**	10点方向Basler线扫	*/
+	m_Pylon_camera_thread_10_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_10_Clock, this);
+	m_Pylon_camera_thread_10_Clock->setSaveImageDirName("Camera3");
+	m_Pylon_camera_thread_10_Clock->setSaveImageNum(50);
+	ReadConfigure("config.ini", "Camera_10_Clock", "Exposure", ExposureValue);
+	m_Pylon_camera_thread_10_Clock->SetExposureTime(ExposureValue.toInt());
+	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
+	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveSecondRightImage(void*)));	//右二视图显示
+	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(finished()), m_Pylon_camera_thread_10_Clock, SLOT(deleteLater()));
+	m_Pylon_camera_thread_10_Clock->start();
+
+	/**	2点方向Basler线扫	*/
+	m_Pylon_camera_thread_2_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_2_Clock, this);
+	m_Pylon_camera_thread_2_Clock->setSaveImageDirName("Camera4");
+	m_Pylon_camera_thread_2_Clock->setSaveImageNum(50);
+	ReadConfigure("config.ini", "Camera_02_Clock", "Exposure", ExposureValue);
+	m_Pylon_camera_thread_2_Clock->SetExposureTime(ExposureValue.toInt());
+	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
+	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));	//最右视图显示
+	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(finished()), m_Pylon_camera_thread_2_Clock, SLOT(deleteLater()));
+	m_Pylon_camera_thread_2_Clock->start();
+
+	ui.OnLineRun->setEnabled(false);
 }
 
 void hello::OnReadyOk(int num)
@@ -527,7 +567,16 @@ void hello::OnReadyOk(int num)
 	if (total == 4)
 	{
 		QMessageBox::StandardButton reply;
-		reply = QMessageBox::information(this, G2U("信息"), G2U("采集设备已就位,等待检测产品,点击'OK'"));
+		if (m_bIsOnLine)
+		{
+			reply = QMessageBox::information(this, G2U("信息"), G2U("采集设备已就位,等待检测产品,		点击'OK'"));
+		}
+		else
+		{
+			reply = QMessageBox::information(this, G2U("信息"), G2U("手动模式,请手动唤醒相机,		点击'OK'"));
+		}
+		
+		
 		total = 0;
 		/* Button State */
 		ui.OnStop->setEnabled(true);
@@ -603,9 +652,8 @@ void hello::receiveCorrectImage(int value)
 	if (imageNum == 4)  //收到1张图片
 	{
 		m_total++;
-		
-		OnDetectEnd();
-
+		if (m_bIsOnLine)
+			OnDetectEnd();
 		imageNum = 0;
 		qDebug() << "Send M177:				" << m_total;
 
@@ -616,7 +664,23 @@ void hello::receiveCorrectImage(int value)
 
 void hello::OnTest()
 {
-	OnDetectEnd();
+	if (m_bIsOnLine)
+	{
+		OnDetectEnd();
+	}
+	else
+	{
+		if (m_peviousProductDectectEnd)
+		{
+			OnWakeCamera();
+		}
+		else
+		{
+			qDebug() << "m_peviousProductDectectEnd = false.";
+		}
+		
+	}
+	
 }
 
 bool hello::OpenSerial()
@@ -695,6 +759,7 @@ void hello::OnHandleImageThread(HImage& ima, LocationView view)
 		{
 			PicThreadRight* pPicThread = new PicThreadRight(this);
 			pPicThread->m_Image = ima;
+			pPicThread->SetModel(bottomModel());
 			pPicThread->m_WindowHandle = GetViewWindowHandle(view);
 			connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
 			connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
@@ -724,7 +789,9 @@ void hello::handleResults(int singleResult)
 		{
 			Sleep(30);
 			m_good++;
-			Delta_Thread::AddOneQueueInfo(RESULT_GODD);
+			if (m_bIsOnLine)
+				Delta_Thread::AddOneQueueInfo(RESULT_GODD);
+
 			qDebug() << "Send Good!!!	";
 			ui.lcdNumber_good->display(m_good);
 		}
@@ -732,7 +799,9 @@ void hello::handleResults(int singleResult)
 		{
 			Sleep(30);
 			m_bad++;
-			Delta_Thread::AddOneQueueInfo(RESULT_BAD);
+			if (m_bIsOnLine)
+				Delta_Thread::AddOneQueueInfo(RESULT_BAD);
+
 			qDebug() << "Send Bad!!!	";
 			ui.lcdNumber_bad->display(m_bad);
 		}
@@ -746,4 +815,47 @@ void hello::handleResults(int singleResult)
 
 	qDebug() << "Detect is_bad:	" << singleResult;
 	qDebug() << "Detect Result:	" << m_AllResult;
+}
+
+
+void hello::ReadExposure()
+{
+
+	QVariant Value;
+	ReadConfigure("config.ini", "Camera_02_Clock", "Exposure", Value);
+	ui.spinBox_02->setValue(Value.toInt());
+
+	ReadConfigure("config.ini", "Camera_07_Clock", "Exposure", Value);
+	ui.spinBox_07->setValue(Value.toInt());
+
+	ReadConfigure("config.ini", "Camera_10_Clock", "Exposure", Value);
+	ui.spinBox_10->setValue(Value.toInt());
+
+	ReadConfigure("config.ini", "Camera_11_Clock", "Exposure", Value);
+	ui.spinBox_11->setValue(Value.toInt());
+
+}
+
+void hello::OnSetExposure()
+{
+
+	if (m_Pylon_camera_thread_2_Clock
+		&& m_Pylon_camera_thread_10_Clock
+		&& m_camera_thread_11_Clock
+		&& m_camera_thread_11_Clock)
+	{
+		m_Pylon_camera_thread_10_Clock->SetExposureTime(ui.spinBox_10->value());
+		m_Pylon_camera_thread_2_Clock->SetExposureTime(ui.spinBox_02->value());
+		m_camera_thread_11_Clock->SetExposureTime(ui.spinBox_11->value());
+		m_camera_thread_7_Clock->SetExposureTime(ui.spinBox_07->value());
+
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::information(this, G2U("信息"), G2U("曝光实时修改成功"));
+	}
+	else
+	{
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::information(this, G2U("信息"), G2U("相机未正确设置"));
+	}
+	
 }

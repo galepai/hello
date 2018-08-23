@@ -392,7 +392,7 @@ BOOL CHH::PingJie (HObject ho_Image, HObject *ho_TileImage, HTuple hv_MearsureCo
   GetImageSize(ho_Image, &hv_Width, &hv_Height);
 
   hv_TmpCtrl_Row = 800;
-  hv_MearsureColCenter = 900;
+ // hv_MearsureColCenter = 900;
   hv_TmpCtrl_Phi = HTuple(0).TupleRad();
   hv_TmpCtrl_Len1 = 500;
   hv_TmpCtrl_Len2 = 800;
@@ -400,6 +400,7 @@ BOOL CHH::PingJie (HObject ho_Image, HObject *ho_TileImage, HTuple hv_MearsureCo
   GenRectangle2(&ho_Rectangle, hv_TmpCtrl_Row, hv_MearsureColCenter, hv_TmpCtrl_Phi, 
       hv_TmpCtrl_Len1, hv_TmpCtrl_Len2);
   GrayProjections(ho_Rectangle, ho_Image, "simple", &hv_HorProjection, &hv_VertProjection);
+
   //***************
   //HorProjectionGrayVal 传入的参数
   try{
@@ -423,6 +424,7 @@ BOOL CHH::PingJie (HObject ho_Image, HObject *ho_TileImage, HTuple hv_MearsureCo
 			  hv_CutRow=0;
 
 		  CropRectangle1(ho_Image, &ho_ImagePartdown, hv_CutRow, 0, hv_Height-1, hv_Width-1);
+		  int row = hv_CutRow.I();
 		  CropRectangle1(ho_Image, &ho_ImagePartup, 0, 0, (hv_CutRow-1)+hv_Offset, hv_Width-1);
 		  GenEmptyObj(&ho_Images);
 		  ConcatObj(ho_Images, ho_ImagePartdown, &ho_Images);

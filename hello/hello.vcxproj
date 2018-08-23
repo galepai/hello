@@ -140,6 +140,7 @@
     <ClCompile Include="aboutdialog.cpp" />
     <ClCompile Include="CameraThread.cpp" />
     <ClCompile Include="CHH.cpp" />
+    <ClCompile Include="CHH2.cpp" />
     <ClCompile Include="ComDialog.cpp" />
     <ClCompile Include="CommDialog.cpp" />
     <ClCompile Include="ConfigureDialog.cpp" />
@@ -408,6 +409,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB "-I$(PYLON_DEV_DIR)\include" "-I$(HALCONROOT)\include" "-I$(HALCONROOT)\include\halconcpp" "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets"</Command>
     </CustomBuild>
+    <ClInclude Include="CHH2.h" />
     <ClInclude Include="GeneratedFiles\ui_cameraWidget.h" />
     <ClInclude Include="GeneratedFiles\ui_ConfigureDialog.h" />
     <CustomBuild Include="PicThreadLeft.h">
