@@ -39,8 +39,8 @@ void PicThreadRight::run()
 			{
 				emit resultReady(RightBad);
 				CHH::disp_message(m_WindowHandle, HTuple("Bad "), "image", 120, 12, "red", "true");
-				QString saveImagePath = QString(QString("images/badImage/camera4/Camera4_") + "%1").arg(num, 4, 10, QChar('0'));
-				WriteImage(m_Image, "tiff", 0, saveImagePath.toStdString().c_str());
+				//QString saveImagePath = QString(QString("images/badImage/camera4/Camera4_") + "%1").arg(num, 4, 10, QChar('0'));
+				//WriteImage(m_Image, "tiff", 0, saveImagePath.toStdString().c_str());
 			}
 		}
 		catch (HException& e)

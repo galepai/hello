@@ -323,19 +323,24 @@ void CHH2::Gen_features(HObject ho_Image, HTuple *hv_FeatureVector)
 	// Local iconic variables
 	HObject  ho_Zoomed1, ho_Zoomed2;
 
+	// Local control variables
+	HTuple  hv_Width, hv_Height;
+
 	(*hv_FeatureVector) = HTuple();
+	GetImageSize(ho_Image, &hv_Width, &hv_Height);
 	//Compute features.
 	CHH2::Gen_Sobel_features(ho_Image, (*hv_FeatureVector), &(*hv_FeatureVector));
 	//Downscale the image (image pyramid) and compute features.
 	ZoomImageFactor(ho_Image, &ho_Zoomed1, 0.5, 0.5, "constant");
 	CHH2::Gen_Sobel_features(ho_Zoomed1, (*hv_FeatureVector), &(*hv_FeatureVector));
 	//Uncomment lines to use further pyramid levels:
-	//ZoomImageFactor(ho_Zoomed1, &ho_Zoomed2, 0.5, 0.5, "constant");
+	ZoomImageFactor(ho_Zoomed1, &ho_Zoomed2, 0.5, 0.5, "constant");
 	//gen_sobel_features (Zoomed2, FeatureVector, FeatureVector)
 	//zoom_image_factor (Zoomed2, Zoomed3, 0.5, 0.5, 'constant')
 	//gen_sobel_features (Zoomed3, FeatureVector, FeatureVector)
 	//zoom_image_factor (Zoomed3, Zoomed4, 0.5, 0.5, 'constant')
 	//gen_sobel_features (Zoomed4, FeatureVector, FeatureVector)
+	(*hv_FeatureVector) = ((*hv_FeatureVector).TupleConcat(hv_Width)).TupleConcat(hv_Height);
 	(*hv_FeatureVector) = (*hv_FeatureVector).TupleReal();
 	return;
 
@@ -373,6 +378,107 @@ void CHH2::Gen_Sobel_features(HObject ho_Image, HTuple hv_Features, HTuple *hv_F
 	(*hv_FeaturesExtended) = (*hv_FeaturesExtended).TupleConcat(hv_AbsoluteHistoEdgeAmplitude);
 	//FeaturesExtended := [FeaturesExtended,Entropy,Anisotropy]
 	//FeaturesExtended := [FeaturesExtended,AbsoluteHistoImage]
+
+	return;
+}
+
+void CHH2::PengShang2_Camera3(HObject ho_ImageEmphasize, HObject ho_TileImage, HTuple hv_ModelHandle,
+	HTuple hv_WindowHandle, HTuple *hv_IsBad)
+{
+
+	// Local iconic variables
+	HObject  ho_ImageOpening, ho_ImageClosing, ho_Regions;
+	HObject  ho_RegionOpening, ho_ConnectedRegions, ho_SelectedRegions;
+	HObject  ho_RegionClosing, ho_RegionFillUp, ho_Rectangle;
+	HObject  ho_RegionUnion, ho_RegionIntersection, ho_RegionErosion;
+	HObject  ho_ImageReduced, ho_Region, ho_ConnectedRegions1;
+	HObject  ho_BadRegions1, ho_RegionUnion1, ho_RegionFillUp1;
+	HObject  ho_ConnectedRegions2, ho_RegionTrans, ho_BadObjects;
+	HObject  ho_ObjectSelected, ho_CropImage;
+
+	// Local control variables
+	HTuple  hv_WIDTH, hv_SaveImagePath, hv_Number;
+	HTuple  hv_Col2s, hv_Col2, hv_Col1, hv_Index, hv_Value;
+	HTuple  hv_FeatureVector, hv_FoundClassIDs, hv_Confidence;
+	HTuple  hv_Num;
+
+	//****************************
+	//**
+	//****************************
+
+	(*hv_IsBad) = 0;
+	hv_WIDTH = 870;
+	hv_SaveImagePath = "f:/mlp/auto3/";
+
+	GrayOpeningRect(ho_ImageEmphasize, &ho_ImageOpening, 7, 7);
+	GrayClosingRect(ho_ImageOpening, &ho_ImageClosing, 5, 5);
+
+	Threshold(ho_ImageClosing, &ho_Regions, 20, 255);
+	OpeningCircle(ho_Regions, &ho_RegionOpening, 15.5);
+	Connection(ho_RegionOpening, &ho_ConnectedRegions);
+	SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, (HTuple("height").Append("column2")),
+		"and", (HTuple(400).Append(0)), (HTuple(800).Append(1800)));
+
+	CountObj(ho_SelectedRegions, &hv_Number);
+	ClosingCircle(ho_SelectedRegions, &ho_RegionClosing, 10.5);
+	FillUp(ho_RegionClosing, &ho_RegionFillUp);
+	RegionFeatures(ho_RegionFillUp, "column2", &hv_Col2s);
+	TupleMean(hv_Col2s, &hv_Col2);
+	hv_Col1 = hv_Col2 - hv_WIDTH;
+	GenRectangle1(&ho_Rectangle, 0, hv_Col1, 9999, hv_Col2);
+	Union1(ho_RegionFillUp, &ho_RegionUnion);
+	Intersection(ho_Rectangle, ho_RegionUnion, &ho_RegionIntersection);
+
+	ErosionCircle(ho_RegionIntersection, &ho_RegionErosion, 6.5);
+
+	ReduceDomain(ho_ImageClosing, ho_RegionErosion, &ho_ImageReduced);
+	Threshold(ho_ImageReduced, &ho_Region, 0, 200);
+	ClosingCircle(ho_Region, &ho_RegionClosing, 5.5);
+	Connection(ho_RegionClosing, &ho_ConnectedRegions1);
+	SelectShape(ho_ConnectedRegions1, &ho_BadRegions1, "area", "and", 700, 99999);
+	Union1(ho_BadRegions1, &ho_RegionUnion1);
+	FillUp(ho_RegionUnion1, &ho_RegionFillUp1);
+	Connection(ho_RegionFillUp1, &ho_ConnectedRegions2);
+	ShapeTrans(ho_ConnectedRegions2, &ho_RegionTrans, "rectangle1");
+	CountObj(ho_RegionTrans, &hv_Number);
+	GenEmptyObj(&ho_BadObjects);
+	{
+		HTuple end_val39 = hv_Number;
+		HTuple step_val39 = 1;
+		for (hv_Index = 1; hv_Index.Continue(end_val39, step_val39); hv_Index += step_val39)
+		{
+			SelectObj(ho_RegionTrans, &ho_ObjectSelected, hv_Index);
+			RegionFeatures(ho_ObjectSelected, (((HTuple("row1").Append("column1")).Append("width")).Append("height")),
+				&hv_Value);
+
+			CropPart(ho_TileImage, &ho_CropImage, HTuple(hv_Value[0]), HTuple(hv_Value[1]),
+				HTuple(hv_Value[2]), HTuple(hv_Value[3]));
+			//write_image (CropImage, 'tiff', 0, SaveImagePath+Index)
+
+			CHH2::Gen_features(ho_CropImage, &hv_FeatureVector);
+			ClassifyClassMlp(hv_ModelHandle, hv_FeatureVector, 1, &hv_FoundClassIDs, &hv_Confidence);
+			if (0 != (hv_FoundClassIDs == 1))
+			{
+				//WriteImage(ho_CropImage, "tiff", 0, hv_SaveImagePath + hv_Index);
+				ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+			}
+
+		}
+	}
+
+	//if (HDevWindowStack::IsOpen())
+		DispObj(ho_TileImage, hv_WindowHandle);
+	//if (HDevWindowStack::IsOpen())
+		SetDraw(hv_WindowHandle, "margin");
+		SetColor(hv_WindowHandle, "red");
+	//if (HDevWindowStack::IsOpen())
+		DispObj(ho_BadObjects, hv_WindowHandle);
+	CountObj(ho_BadObjects, &hv_Num);
+	if (0 != (hv_Num>0))
+	{
+		(*hv_IsBad) = 1;
+	}
+
 
 	return;
 }

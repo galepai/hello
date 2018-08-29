@@ -16,6 +16,7 @@ static const char* LineCameraId_Basler_2_Clock = "003053255252_Basler_raL204848g
 static const char* LineCameraId_Dalsa_7_Clock = "00010dc2ad7a_TeledyneDALSA_LineaM20487um";	//192.168.4.7
 static const char* LineCameraId_Dalsa_11_Clock = "00010dc2ae11_TeledyneDALSA_LineaM20487um";	//192.168.5.7
 
+
 static const char* LineCameraId_Pylon_Basler_10_Clock = "Basler raL2048-48gm#0030531D42B0#192.168.2.7:3956";	//192.168.2.7
 static const char* LineCameraId_Pylon_Basler_2_Clock = "Basler raL2048-48gm#003053255252#192.168.3.7:3956";	//192.168.3.7
 //m_camera.Attach(CTlFactory::GetInstance().CreateDevice("Basler raL2048-48gm#0030531D42B0#192.168.2.7:3956"));

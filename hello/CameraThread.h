@@ -22,7 +22,7 @@ public:
 	enum ConnectionType
 	{
 		DirectShow,	//USB连接
-		GigEVision,	//网线连接
+		GigEVision2,	//网线连接
 	};
 
 	explicit Camera_Thread(ConnectionType connection_type, QString CameraId, QObject *parent = 0);

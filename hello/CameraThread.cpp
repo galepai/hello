@@ -126,10 +126,10 @@ bool Camera_Thread::OpenCamera()
 			
 			break;
 
-		case Camera_Thread::GigEVision:
+		case Camera_Thread::GigEVision2:
 			qDebug() << "ready Open Cam....";
 			m_mutex.lock();
-			m_pGrabber->OpenFramegrabber("GigEVision", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
+			m_pGrabber->OpenFramegrabber("GigEVision2", 1, 1, 0, 0, 0, 0, "default", 8, "gray", -1, "false", "default", \
 				m_CameraId.toStdString().c_str(), 0, -1);
 			m_mutex.unlock();
 			qDebug() << "Open Cam OK";

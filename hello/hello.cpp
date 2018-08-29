@@ -504,7 +504,7 @@ void hello::OnOpenCameras()
 	QVariant ExposureValue;
 	/*-----Halcon Version------------*/
 	/**	11点方向DALSA线扫	*/
-	m_camera_thread_11_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa_11_Clock, this);
+	m_camera_thread_11_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision2, LineCameraId_Dalsa_11_Clock, this);
 	m_camera_thread_11_Clock->setSaveImageDirName("Camera1");
 	m_camera_thread_11_Clock->setSaveImageNum(50);
 	ReadConfigure("config.ini", "Camera_11_Clock", "Exposure", ExposureValue);
@@ -517,7 +517,7 @@ void hello::OnOpenCameras()
 	m_camera_thread_11_Clock->start();
 
 	/**	7点方向DALSA线扫	*/
-	m_camera_thread_7_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision, LineCameraId_Dalsa_7_Clock, this);
+	m_camera_thread_7_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision2, LineCameraId_Dalsa_7_Clock, this);
 	m_camera_thread_7_Clock->setSaveImageDirName("Camera2");
 	m_camera_thread_7_Clock->setSaveImageNum(50);
 	ReadConfigure("config.ini", "Camera_07_Clock", "Exposure", ExposureValue);
