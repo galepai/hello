@@ -2,6 +2,7 @@
 #include <QTime>
 #include "CHH.h"
 #include "CHH2.h"
+#include <QDebug>
 
 int PicThreadSecondRight::num = 0;
 void PicThreadSecondRight::run()
@@ -19,7 +20,7 @@ void PicThreadSecondRight::run()
 			Emphasize(m_Image, &ImageEmphasize, 7, 101, 1);
 
 			//CHH2::PengShang_Camera3(ImageEmphasize, m_Image, m_WindowHandle, &hv_IsBad);
-			ReadClassMlp("f:/mlp/Model/classify_camera3_tiff.gmc", &hv_MlpHandle);
+			ReadClassMlp("d:/github/CommutatorDetect/code/Model/classify_camera3_tiff.gmc", &hv_MlpHandle);
 			CHH2::PengShang2_Camera3(ImageEmphasize, m_Image, hv_MlpHandle, m_WindowHandle, &hv_IsBad);
 			ClearClassMlp(hv_MlpHandle);
 
@@ -46,6 +47,8 @@ void PicThreadSecondRight::run()
 		catch (HException& e)
 		{
 			QString error = e.ErrorMessage().Text();
+			//DispText(m_WindowHandle, error.toStdString().c_str(), "image", 120, 12, "red", HTuple(), HTuple());
+			qDebug() << "ThreadSecondRight error:  " << error;
 		}	
 	}
 		

@@ -18,6 +18,8 @@ namespace CHH2
 	void Gen_Sobel_features(HObject ho_Image, HTuple hv_Features, HTuple *hv_FeaturesExtended);
 	void PengShang2_Camera3(HObject ho_ImageEmphasize, HObject ho_TileImage, HTuple hv_ModelHandle,
 		HTuple hv_WindowHandle, HTuple *hv_IsBad);
+	void GB_Camera1(HObject ho_ImageEmphasize, HObject ho_TileImage, HTuple hv_MLPHandle,
+		HTuple hv_WindowHandle, HTuple *hv_IsBad);
 }
 
 #endif // CHH2_H

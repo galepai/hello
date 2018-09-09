@@ -27,7 +27,10 @@ public:
 	void OnWakeCamera();
 	void ReadExposure();
 	void setBottomModel(QString path){ m_BottomModel = path; }
-	QString bottomModel(){return m_BottomModel;}
+	const QString& bottomModel(){return m_BottomModel;}
+	void setGbModel(QString path){ m_GBModel = path; }
+	const QString& gbModel(){ return m_GBModel; }
+	void readAllModelFromIni();
 
 	//*********图像处理线程**************/
 	void OnHandleImageThread(HImage& ima, LocationView view);
@@ -59,7 +62,8 @@ public slots:
 	void receiveMiddleImage(void* image);
 	void receiveSecondRightImage(void* image);
 	void receiveRightImage(void* image);
-	void receiveError(QString error);
+	//生成错误对话提示框
+	void genErrorDialog(QString error);
 	void receiveCorrectImage(int value);
 	void OnReadyOk(int num);
 
@@ -86,6 +90,7 @@ private:
 	bool m_peviousProductDectectEnd;
 	bool m_bIsOnLine; //打开相机时,选择是否与PLC联机
 	QString m_BottomModel;
+	QString m_GBModel;
 
 signals:
 	void ReadyLoop();

@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include "Widgets\serialWidget.h"
 #include "Widgets\cameraWidget.h"
+#include "Widgets\modelWidget.h"
 
 ConfigureDialog::ConfigureDialog(QWidget *parent) :
     QDialog(parent),
@@ -35,8 +36,15 @@ ConfigureDialog::ConfigureDialog(QWidget *parent) :
 	configButton2->setTextAlignment(Qt::AlignHCenter);
 	configButton2->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
+	QListWidgetItem *configButton3 = new QListWidgetItem(ui->listWidget);
+	configButton3->setIcon(QIcon(":/icon/Resources/icon/05.ico"));
+	configButton3->setText(G2U("Í¼Ïñ´¦Àí"));
+	configButton3->setTextAlignment(Qt::AlignHCenter);
+	configButton3->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
 	ui->stackedWidget->addWidget(new serialWidget);
 	ui->stackedWidget->addWidget(new cameraWidget);
+	ui->stackedWidget->addWidget(new modelWidget);
 
 	connect(ui->listWidget, SIGNAL(currentRowChanged(int)), this, SLOT(currentRowChanged(int)));
 

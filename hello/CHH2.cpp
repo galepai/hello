@@ -385,100 +385,194 @@ void CHH2::Gen_Sobel_features(HObject ho_Image, HTuple hv_Features, HTuple *hv_F
 void CHH2::PengShang2_Camera3(HObject ho_ImageEmphasize, HObject ho_TileImage, HTuple hv_ModelHandle,
 	HTuple hv_WindowHandle, HTuple *hv_IsBad)
 {
+	try{
+		// Local iconic variables
+		HObject  ho_ImageOpening, ho_ImageClosing, ho_Regions;
+		HObject  ho_RegionOpening, ho_ConnectedRegions, ho_SelectedRegions;
+		HObject  ho_RegionClosing, ho_RegionFillUp, ho_Rectangle;
+		HObject  ho_RegionUnion, ho_RegionIntersection, ho_RegionErosion;
+		HObject  ho_ImageReduced, ho_Region, ho_ConnectedRegions1;
+		HObject  ho_BadRegions1, ho_RegionUnion1, ho_RegionFillUp1;
+		HObject  ho_ConnectedRegions2, ho_RegionTrans, ho_BadObjects;
+		HObject  ho_ObjectSelected, ho_CropImage;
 
-	// Local iconic variables
-	HObject  ho_ImageOpening, ho_ImageClosing, ho_Regions;
-	HObject  ho_RegionOpening, ho_ConnectedRegions, ho_SelectedRegions;
-	HObject  ho_RegionClosing, ho_RegionFillUp, ho_Rectangle;
-	HObject  ho_RegionUnion, ho_RegionIntersection, ho_RegionErosion;
-	HObject  ho_ImageReduced, ho_Region, ho_ConnectedRegions1;
-	HObject  ho_BadRegions1, ho_RegionUnion1, ho_RegionFillUp1;
-	HObject  ho_ConnectedRegions2, ho_RegionTrans, ho_BadObjects;
-	HObject  ho_ObjectSelected, ho_CropImage;
+		// Local control variables
+		HTuple  hv_WIDTH, hv_SaveImagePath, hv_Number;
+		HTuple  hv_Col2s, hv_Col2, hv_Col1, hv_Index, hv_Value;
+		HTuple  hv_FeatureVector, hv_FoundClassIDs, hv_Confidence;
+		HTuple  hv_Num;
 
-	// Local control variables
-	HTuple  hv_WIDTH, hv_SaveImagePath, hv_Number;
-	HTuple  hv_Col2s, hv_Col2, hv_Col1, hv_Index, hv_Value;
-	HTuple  hv_FeatureVector, hv_FoundClassIDs, hv_Confidence;
-	HTuple  hv_Num;
+		//****************************
+		//**
+		//****************************
 
-	//****************************
-	//**
-	//****************************
+		(*hv_IsBad) = 0;
+		hv_WIDTH = 870;
+		hv_SaveImagePath = "f:/mlp/auto3/";
 
-	(*hv_IsBad) = 0;
-	hv_WIDTH = 870;
-	hv_SaveImagePath = "f:/mlp/auto3/";
+		GrayOpeningRect(ho_ImageEmphasize, &ho_ImageOpening, 7, 7);
+		GrayClosingRect(ho_ImageOpening, &ho_ImageClosing, 5, 5);
 
-	GrayOpeningRect(ho_ImageEmphasize, &ho_ImageOpening, 7, 7);
-	GrayClosingRect(ho_ImageOpening, &ho_ImageClosing, 5, 5);
+		Threshold(ho_ImageClosing, &ho_Regions, 20, 255);
+		OpeningCircle(ho_Regions, &ho_RegionOpening, 15.5);
+		Connection(ho_RegionOpening, &ho_ConnectedRegions);
+		SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, (HTuple("height").Append("column2")),
+			"and", (HTuple(400).Append(0)), (HTuple(800).Append(1800)));
 
-	Threshold(ho_ImageClosing, &ho_Regions, 20, 255);
-	OpeningCircle(ho_Regions, &ho_RegionOpening, 15.5);
-	Connection(ho_RegionOpening, &ho_ConnectedRegions);
-	SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, (HTuple("height").Append("column2")),
-		"and", (HTuple(400).Append(0)), (HTuple(800).Append(1800)));
+		CountObj(ho_SelectedRegions, &hv_Number);
+		ClosingCircle(ho_SelectedRegions, &ho_RegionClosing, 10.5);
+		FillUp(ho_RegionClosing, &ho_RegionFillUp);
+		RegionFeatures(ho_RegionFillUp, "column2", &hv_Col2s);
+		TupleMean(hv_Col2s, &hv_Col2);
+		hv_Col1 = hv_Col2 - hv_WIDTH;
+		GenRectangle1(&ho_Rectangle, 0, hv_Col1, 9999, hv_Col2);
+		Union1(ho_RegionFillUp, &ho_RegionUnion);
+		Intersection(ho_Rectangle, ho_RegionUnion, &ho_RegionIntersection);
 
-	CountObj(ho_SelectedRegions, &hv_Number);
-	ClosingCircle(ho_SelectedRegions, &ho_RegionClosing, 10.5);
-	FillUp(ho_RegionClosing, &ho_RegionFillUp);
-	RegionFeatures(ho_RegionFillUp, "column2", &hv_Col2s);
-	TupleMean(hv_Col2s, &hv_Col2);
-	hv_Col1 = hv_Col2 - hv_WIDTH;
-	GenRectangle1(&ho_Rectangle, 0, hv_Col1, 9999, hv_Col2);
-	Union1(ho_RegionFillUp, &ho_RegionUnion);
-	Intersection(ho_Rectangle, ho_RegionUnion, &ho_RegionIntersection);
+		ErosionCircle(ho_RegionIntersection, &ho_RegionErosion, 6.5);
 
-	ErosionCircle(ho_RegionIntersection, &ho_RegionErosion, 6.5);
-
-	ReduceDomain(ho_ImageClosing, ho_RegionErosion, &ho_ImageReduced);
-	Threshold(ho_ImageReduced, &ho_Region, 0, 200);
-	ClosingCircle(ho_Region, &ho_RegionClosing, 5.5);
-	Connection(ho_RegionClosing, &ho_ConnectedRegions1);
-	SelectShape(ho_ConnectedRegions1, &ho_BadRegions1, "area", "and", 700, 99999);
-	Union1(ho_BadRegions1, &ho_RegionUnion1);
-	FillUp(ho_RegionUnion1, &ho_RegionFillUp1);
-	Connection(ho_RegionFillUp1, &ho_ConnectedRegions2);
-	ShapeTrans(ho_ConnectedRegions2, &ho_RegionTrans, "rectangle1");
-	CountObj(ho_RegionTrans, &hv_Number);
-	GenEmptyObj(&ho_BadObjects);
-	{
-		HTuple end_val39 = hv_Number;
-		HTuple step_val39 = 1;
-		for (hv_Index = 1; hv_Index.Continue(end_val39, step_val39); hv_Index += step_val39)
+		ReduceDomain(ho_ImageClosing, ho_RegionErosion, &ho_ImageReduced);
+		Threshold(ho_ImageReduced, &ho_Region, 0, 200);
+		ClosingCircle(ho_Region, &ho_RegionClosing, 5.5);
+		Connection(ho_RegionClosing, &ho_ConnectedRegions1);
+		SelectShape(ho_ConnectedRegions1, &ho_BadRegions1, "area", "and", 700, 99999);
+		Union1(ho_BadRegions1, &ho_RegionUnion1);
+		FillUp(ho_RegionUnion1, &ho_RegionFillUp1);
+		Connection(ho_RegionFillUp1, &ho_ConnectedRegions2);
+		ShapeTrans(ho_ConnectedRegions2, &ho_RegionTrans, "rectangle1");
+		CountObj(ho_RegionTrans, &hv_Number);
+		GenEmptyObj(&ho_BadObjects);
 		{
-			SelectObj(ho_RegionTrans, &ho_ObjectSelected, hv_Index);
-			RegionFeatures(ho_ObjectSelected, (((HTuple("row1").Append("column1")).Append("width")).Append("height")),
-				&hv_Value);
-
-			CropPart(ho_TileImage, &ho_CropImage, HTuple(hv_Value[0]), HTuple(hv_Value[1]),
-				HTuple(hv_Value[2]), HTuple(hv_Value[3]));
-			//write_image (CropImage, 'tiff', 0, SaveImagePath+Index)
-
-			CHH2::Gen_features(ho_CropImage, &hv_FeatureVector);
-			ClassifyClassMlp(hv_ModelHandle, hv_FeatureVector, 1, &hv_FoundClassIDs, &hv_Confidence);
-			if (0 != (hv_FoundClassIDs == 1))
+			HTuple end_val39 = hv_Number;
+			HTuple step_val39 = 1;
+			for (hv_Index = 1; hv_Index.Continue(end_val39, step_val39); hv_Index += step_val39)
 			{
-				//WriteImage(ho_CropImage, "tiff", 0, hv_SaveImagePath + hv_Index);
-				ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+				SelectObj(ho_RegionTrans, &ho_ObjectSelected, hv_Index);
+				RegionFeatures(ho_ObjectSelected, (((HTuple("row1").Append("column1")).Append("width")).Append("height")),
+					&hv_Value);
+
+				CropPart(ho_TileImage, &ho_CropImage, HTuple(hv_Value[0]), HTuple(hv_Value[1]),
+					HTuple(hv_Value[2]), HTuple(hv_Value[3]));
+				//write_image (CropImage, 'tiff', 0, SaveImagePath+Index)
+
+				CHH2::Gen_features(ho_CropImage, &hv_FeatureVector);
+				ClassifyClassMlp(hv_ModelHandle, hv_FeatureVector, 1, &hv_FoundClassIDs, &hv_Confidence);
+				if (0 != (hv_FoundClassIDs == 1))
+				{
+					//WriteImage(ho_CropImage, "tiff", 0, hv_SaveImagePath + hv_Index);
+					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+				}
+
 			}
-
 		}
-	}
 
-	//if (HDevWindowStack::IsOpen())
+		//if (HDevWindowStack::IsOpen())
 		DispObj(ho_TileImage, hv_WindowHandle);
-	//if (HDevWindowStack::IsOpen())
+		//if (HDevWindowStack::IsOpen())
 		SetDraw(hv_WindowHandle, "margin");
 		SetColor(hv_WindowHandle, "red");
-	//if (HDevWindowStack::IsOpen())
+		//if (HDevWindowStack::IsOpen())
 		DispObj(ho_BadObjects, hv_WindowHandle);
-	CountObj(ho_BadObjects, &hv_Num);
-	if (0 != (hv_Num>0))
-	{
-		(*hv_IsBad) = 1;
+		CountObj(ho_BadObjects, &hv_Num);
+		if (0 != (hv_Num>0))
+		{
+			(*hv_IsBad) = 1;
+		}
+
+
+		return;
 	}
-
-
-	return;
+	catch (HException& except)
+	{
+		qDebug() << "error: " << except.ErrorMessage().Text();
+		(*hv_IsBad) = 1;
+		CHH::disp_message(hv_WindowHandle, "PengShang2_Camera3 Code Error.", "image", 400, 200, "red", "true");
+		return;
+	}
+	
 }
+
+void CHH2::GB_Camera1(HObject ho_ImageEmphasize, HObject ho_TileImage, HTuple hv_MLPHandle,
+		HTuple hv_WindowHandle, HTuple *hv_IsBad)
+	{
+		try{
+			// Local iconic variables
+			HObject  ho_Region, ho_RegionOpening, ho_RegionClosing;
+			HObject  ho_ConnectedRegions, ho_SelectedRegions, ho_RegionTrans;
+			HObject  ho_BadObjects, ho_ObjectSelected, ho_ImagePart;
+			HObject  ho_Rectangle;
+
+			// Local control variables
+			HTuple  hv_Index, hv_Value, hv_FeatureVector;
+			HTuple  hv_Class, hv_Confidence, hv_BadNum;
+
+			(*hv_IsBad) = 0;
+			Threshold(ho_ImageEmphasize, &ho_Region, 200, 255);
+			OpeningCircle(ho_Region, &ho_RegionOpening, 25.5);
+			ClosingCircle(ho_RegionOpening, &ho_RegionClosing, 5.5);
+			Connection(ho_RegionClosing, &ho_ConnectedRegions);
+			SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, "height", "and", 350, 1000);
+			CountObj(ho_SelectedRegions, &(*hv_IsBad));
+			ShapeTrans(ho_SelectedRegions, &ho_RegionTrans, "rectangle1");
+
+			GenEmptyObj(&ho_BadObjects);
+			if (0 != ((*hv_IsBad) == 18))
+			{
+				{
+					HTuple end_val11 = (*hv_IsBad);
+					HTuple step_val11 = 1;
+					for (hv_Index = 1; hv_Index.Continue(end_val11, step_val11); hv_Index += step_val11)
+					{
+						SelectObj(ho_RegionTrans, &ho_ObjectSelected, hv_Index);
+						RegionFeatures(ho_ObjectSelected, ((HTuple("row1").Append("column2")).Append("height")),
+							&hv_Value);
+						CropPart(ho_TileImage, &ho_ImagePart, HTuple(hv_Value[0]), HTuple(hv_Value[1]) - 400,
+							800, HTuple(hv_Value[2]));
+						GenRectangle1(&ho_Rectangle, HTuple(hv_Value[0]), HTuple(hv_Value[1]) - 400,
+							HTuple(hv_Value[0]) + HTuple(hv_Value[2]), (HTuple(hv_Value[1]) - 400) + 800);
+						CHH2::Gen_features(ho_ImagePart, &hv_FeatureVector);
+
+						ClassifyClassMlp(hv_MLPHandle, hv_FeatureVector, 1, &hv_Class, &hv_Confidence);
+						if (0 != (hv_Class == 1))
+						{
+							ConcatObj(ho_BadObjects, ho_Rectangle, &ho_BadObjects);
+						}
+					}
+				}
+
+				//**********display BadObject
+
+				SetDraw(hv_WindowHandle, "margin");
+				CountObj(ho_BadObjects, &hv_BadNum);
+				//if (HDevWindowStack::IsOpen())
+				DispObj(ho_TileImage, hv_WindowHandle);
+				if (0 != (hv_BadNum > 0))
+				{
+					(*hv_IsBad) = 1;
+					//if (HDevWindowStack::IsOpen())
+					SetColor(hv_WindowHandle, "red");
+					DispObj(ho_BadObjects, hv_WindowHandle);
+					//if (HDevWindowStack::IsOpen())
+					//	DispText(hv_WindowHandle, "bad", "image", 200, 150, "red", HTuple(),
+					//HTuple());
+				}
+
+			}
+			else
+			{
+				//***********¹³²¿ÇøÓò²»×ã18
+				(*hv_IsBad) = 1;
+				//if (HDevWindowStack::IsOpen())
+				DispText(hv_WindowHandle, "not enough 18 pieces.", "image", 200,
+					150, "black", HTuple(), HTuple());
+			}
+			return;
+		}
+		catch (HException& except)
+		{
+			qDebug() << "error: " << except.ErrorMessage().Text();
+			(*hv_IsBad) = 1;
+			CHH::disp_message(hv_WindowHandle, "GB_Camera1 Code Error.", "image", 400, 200, "red", "true");
+			return;
+		}
+	}

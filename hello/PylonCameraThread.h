@@ -40,6 +40,10 @@ public:
 	{
 		m_exposureTime = exposureTime;
 	}
+	bool ReadyWake()
+	{
+		return m_WaitWake;
+	}
 
 	void stop();
 
@@ -72,7 +76,7 @@ private:
 	bool m_bIsStop;
 	QString m_SaveDatePath, m_SaveImageDirName;
 	int m_image_index, m_MaxNum, m_exposureTime;
-	//bool m_isHardTriger;
+	bool m_WaitWake;
 };
 
 #endif

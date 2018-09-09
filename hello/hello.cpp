@@ -5,7 +5,6 @@
 #include <QThread>
 #include "CHH.h"
 #include "aboutdialog.h"
-#include "configuredlg.h"
 #include "ComDialog.h"
 #include "DeltaThread.h"
 #include "ConstParam.h"
@@ -53,11 +52,6 @@ hello::hello(QWidget *parent)
 
 	m_peviousProductDectectEnd = true;
 	
-
-	QVariant value;
-	ReadConfigure("config.ini", "Model", "BottomModel", value);
-	setBottomModel(value.toString());
-
 	ReadExposure();
 	connect(ui.pushButton_exposure, SIGNAL(clicked()), this, SLOT(OnSetExposure()));
 
@@ -141,9 +135,11 @@ void hello::OnOpen()
 	
 }
 
-//创建线程
+//OffLine处理图像
 void hello::OnOneHandle_AllPic()
 {
+	readAllModelFromIni();
+
 	if (m_LeftImage.Key() != 0)
 	{
 		DispPic(m_LeftImage, LeftView);
@@ -250,25 +246,13 @@ void hello::OnClearCameraThread()
 
 void hello::OnConfigure()
 {
-	/*ConfigureDlg Dlg(this);
-	Dlg.exec();*/
-
 	ConfigureDialog Dlg(this);
 	Dlg.exec();
 }
 
 void hello::OnLineRun()
 {
-	/*QVariant Value;
-	ReadConfigure("config.ini", "Port", "Port", Value);
-	QString port = Value.toString();
-	ReadConfigure("config.ini", "Port", "Baud", Value);
-	int baud = Value.toInt();
-	statusBar()->showMessage(port + "," + Value.toString());*/
-
 	OnTest();
-
-
 }
 
 //对应串口的读取槽函数
@@ -285,25 +269,29 @@ void hello::receiveSerialData(QByteArray str)
 			std::vector<bool> m_Y_States = Parse_Delta_Ascii(str.toStdString());
 			if (m_Y_States.size() == 8)
 			{
-				bool isStartGrab = m_Y_States[1];	//读取Y61的状态
-				if (isStartGrab)
+				bool isStartGrab = m_Y_States[1];	//读取Y61的状态,On表示视觉到位
+				if (isStartGrab 
+					&& m_peviousProductDectectEnd
+					&& m_Pylon_camera_thread_10_Clock->ReadyWake()
+					&& m_Pylon_camera_thread_2_Clock->ReadyWake()
+					&& m_camera_thread_7_Clock->ReadyWake()
+					&& m_camera_thread_11_Clock->ReadyWake())
 				{
-					if (m_peviousProductDectectEnd)
-					{
+					
 						Delta_Thread::AddOneQueueInfo(RESET_Y61);
 						Sleep(10);
+						m_peviousProductDectectEnd = false;
 						OnWakeCamera();
 						qDebug() << "receive Y61: " << ++num;
-					}
 					
 				}		
 			}
 		}
 			
 	}
-
 	
 }
+
 
 void hello::OnWakeCamera()
 {
@@ -311,7 +299,6 @@ void hello::OnWakeCamera()
 	condition_Camera.wakeAll();
 	mutex_Camera.unlock();
 }
-
 
 
 void hello::DispPic(HImage& Image, LocationView location)
@@ -491,11 +478,8 @@ void hello::OnStart()
 		OnOpenCameras();
 	}
 
+	readAllModelFromIni();
 
-	/*if (OpenSerial())
-	{
-		OnOpenCameras();
-	}*/
 
 }
 
@@ -506,10 +490,10 @@ void hello::OnOpenCameras()
 	/**	11点方向DALSA线扫	*/
 	m_camera_thread_11_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision2, LineCameraId_Dalsa_11_Clock, this);
 	m_camera_thread_11_Clock->setSaveImageDirName("Camera1");
-	m_camera_thread_11_Clock->setSaveImageNum(50);
+	m_camera_thread_11_Clock->setSaveImageNum(100);
 	ReadConfigure("config.ini", "Camera_11_Clock", "Exposure", ExposureValue);
 	m_camera_thread_11_Clock->SetExposureTime(ExposureValue.toFloat());
-	connect(m_camera_thread_11_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_camera_thread_11_Clock, SIGNAL(signal_error(QString)), this, SLOT(genErrorDialog(QString)));
 	connect(m_camera_thread_11_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
 	connect(m_camera_thread_11_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
 	connect(m_camera_thread_11_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveLeftImage(void*)));	//左视图显示
@@ -519,10 +503,10 @@ void hello::OnOpenCameras()
 	/**	7点方向DALSA线扫	*/
 	m_camera_thread_7_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision2, LineCameraId_Dalsa_7_Clock, this);
 	m_camera_thread_7_Clock->setSaveImageDirName("Camera2");
-	m_camera_thread_7_Clock->setSaveImageNum(50);
+	m_camera_thread_7_Clock->setSaveImageNum(100);
 	ReadConfigure("config.ini", "Camera_07_Clock", "Exposure", ExposureValue);
 	m_camera_thread_7_Clock->SetExposureTime(ExposureValue.toFloat());
-	connect(m_camera_thread_7_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_camera_thread_7_Clock, SIGNAL(signal_error(QString)), this, SLOT(genErrorDialog(QString)));
 	connect(m_camera_thread_7_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
 	connect(m_camera_thread_7_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
 	connect(m_camera_thread_7_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveMiddleImage(void*)));	//中视图显示
@@ -534,10 +518,10 @@ void hello::OnOpenCameras()
 	/**	10点方向Basler线扫	*/
 	m_Pylon_camera_thread_10_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_10_Clock, this);
 	m_Pylon_camera_thread_10_Clock->setSaveImageDirName("Camera3");
-	m_Pylon_camera_thread_10_Clock->setSaveImageNum(50);
+	m_Pylon_camera_thread_10_Clock->setSaveImageNum(100);
 	ReadConfigure("config.ini", "Camera_10_Clock", "Exposure", ExposureValue);
 	m_Pylon_camera_thread_10_Clock->SetExposureTime(ExposureValue.toInt());
-	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_error(QString)), this, SLOT(genErrorDialog(QString)));
 	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
 	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
 	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveSecondRightImage(void*)));	//右二视图显示
@@ -547,10 +531,10 @@ void hello::OnOpenCameras()
 	/**	2点方向Basler线扫	*/
 	m_Pylon_camera_thread_2_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_2_Clock, this);
 	m_Pylon_camera_thread_2_Clock->setSaveImageDirName("Camera4");
-	m_Pylon_camera_thread_2_Clock->setSaveImageNum(50);
+	m_Pylon_camera_thread_2_Clock->setSaveImageNum(100);
 	ReadConfigure("config.ini", "Camera_02_Clock", "Exposure", ExposureValue);
 	m_Pylon_camera_thread_2_Clock->SetExposureTime(ExposureValue.toInt());
-	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(signal_error(QString)), this, SLOT(receiveError(QString)));
+	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(signal_error(QString)), this, SLOT(genErrorDialog(QString)));
 	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
 	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
 	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveRightImage(void*)));	//最右视图显示
@@ -560,6 +544,7 @@ void hello::OnOpenCameras()
 	ui.OnLineRun->setEnabled(false);
 }
 
+//准备工作完成,可以启动电气设备等待PLC的触发信号或者手动触发
 void hello::OnReadyOk(int num)
 {
 	static int total = 0;
@@ -569,11 +554,11 @@ void hello::OnReadyOk(int num)
 		QMessageBox::StandardButton reply;
 		if (m_bIsOnLine)
 		{
-			reply = QMessageBox::information(this, G2U("信息"), G2U("采集设备已就位,等待检测产品,		点击'OK'"));
+			reply = QMessageBox::information(this, G2U("信息"), G2U("采集设备已就位,等待检测产品...\r\n		点击'OK'"));
 		}
 		else
 		{
-			reply = QMessageBox::information(this, G2U("信息"), G2U("手动模式,请手动唤醒相机,		点击'OK'"));
+			reply = QMessageBox::information(this, G2U("信息"), G2U("手动模式,请手动唤醒相机...\r\n		点击'OK'"));
 		}
 		
 		
@@ -606,7 +591,7 @@ void hello::OnDetectEnd()
 }
 
 
-//******
+//******对应视图显示图片,并处理图片
 void hello::receiveLeftImage(void* image)
 {
 	HImage ima = *(HImage*)image;
@@ -614,12 +599,11 @@ void hello::receiveLeftImage(void* image)
 	OnHandleImageThread(ima, LeftView);
 }
 
-void hello::receiveRightImage(void* image)
+void hello::receiveMiddleImage(void* image)
 {
 	HImage ima = *(HImage*)image;
-	DispPic(ima, RightView);
-	OnHandleImageThread(ima, RightView);
-	
+	DispPic(ima, MiddleView);
+	OnHandleImageThread(ima, MiddleView);
 }
 
 void hello::receiveSecondRightImage(void* image)
@@ -630,18 +614,82 @@ void hello::receiveSecondRightImage(void* image)
 
 }
 
-void hello::receiveMiddleImage(void* image)
+void hello::receiveRightImage(void* image)
 {
 	HImage ima = *(HImage*)image;
-	DispPic(ima, MiddleView);
-	OnHandleImageThread(ima, MiddleView);
+	DispPic(ima, RightView);
+	OnHandleImageThread(ima, RightView);
+
+}
+/********/
+
+//分发至图像处理线程
+void hello::OnHandleImageThread(HImage& ima, LocationView view)
+{
+	switch (view)
+	{
+	case LeftView:
+	{
+		PicThreadLeft* pPicThread = new PicThreadLeft(this);
+		pPicThread->m_Image = ima;
+		pPicThread->m_WindowHandle = GetViewWindowHandle(view);
+		pPicThread->setModel(gbModel());
+		connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
+		connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
+		pPicThread->start();
+	}
+
+	break;
+
+	case MiddleView:
+	{
+		PicThreadMiddle* pPicThread = new PicThreadMiddle(this);
+		pPicThread->m_Image = ima;
+		pPicThread->m_WindowHandle = GetViewWindowHandle(view);
+		connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
+		connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
+		pPicThread->start();
+	}
+	break;
+
+	case SecondRightView:
+	{
+		PicThreadSecondRight* pPicThread = new PicThreadSecondRight(this);
+		pPicThread->m_Image = ima;
+		pPicThread->m_WindowHandle = GetViewWindowHandle(view);
+		connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
+		connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
+		pPicThread->start();
+	}
+	break;
+
+	case RightView:
+	{
+		PicThreadRight* pPicThread = new PicThreadRight(this);
+		pPicThread->m_Image = ima;
+		pPicThread->setModel(bottomModel());
+		pPicThread->m_WindowHandle = GetViewWindowHandle(view);
+		connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
+		connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
+		pPicThread->start();
+	}
+	break;
+
+	/*default:
+	break;*/
+	}
 }
 
-void hello::receiveError(QString error)
+
+//生成错误对话提示框
+void hello::genErrorDialog(QString error)
 {
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::warning(this, G2U("错误"), error);
 }
+
+
+
 
 //收到正确图片数,检测完成
 void hello::receiveCorrectImage(int value)
@@ -661,6 +709,7 @@ void hello::receiveCorrectImage(int value)
 	}
 
 }
+
 
 void hello::OnTest()
 {
@@ -707,7 +756,7 @@ bool hello::OpenSerial()
 		thread->InitSerialPortInfo(PortName.toStdString().c_str(), Baud, QSerialPort::Parity::EvenParity, QSerialPort::DataBits(DataBits));
 		connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 		connect(thread, SIGNAL(sendSerialData(QByteArray)), this, SLOT(receiveSerialData(QByteArray)));
-		connect(thread, SIGNAL(error(QString)), this, SLOT(receiveError(QString)));
+		connect(thread, SIGNAL(error(QString)), this, SLOT(genErrorDialog(QString)));
 		connect(thread, &Delta_Thread::bool_error, [&](bool is){ isRet = is; });
 		thread->start();
 		Sleep(100);  //等待串口如果错误打开,返回isRet;
@@ -717,66 +766,10 @@ bool hello::OpenSerial()
 
 }
 
-void hello::OnHandleImageThread(HImage& ima, LocationView view)
-{
-	switch (view)
-	{
-	case LeftView:
-		{
-			PicThreadLeft* pPicThread = new PicThreadLeft(this);
-			pPicThread->m_Image = ima;
-			pPicThread->m_WindowHandle = GetViewWindowHandle(view);
-			connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
-			connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
-			pPicThread->start();
-		}
-	
-		break;
-
-	case MiddleView:
-		{
-			PicThreadMiddle* pPicThread = new PicThreadMiddle(this);
-			pPicThread->m_Image = ima;
-			pPicThread->m_WindowHandle = GetViewWindowHandle(view);
-			connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
-			connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
-			pPicThread->start();
-		}
-		break;
-
-	case SecondRightView:
-	{
-		PicThreadSecondRight* pPicThread = new PicThreadSecondRight(this);
-		pPicThread->m_Image = ima;
-		pPicThread->m_WindowHandle = GetViewWindowHandle(view);
-		connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
-		connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
-		pPicThread->start();
-	}
-	break;
-
-	case RightView:
-		{
-			PicThreadRight* pPicThread = new PicThreadRight(this);
-			pPicThread->m_Image = ima;
-			pPicThread->SetModel(bottomModel());
-			pPicThread->m_WindowHandle = GetViewWindowHandle(view);
-			connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
-			connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
-			pPicThread->start();
-		}
-		break;
-
-	/*default:
-		break;*/
-	}
-	
-}
-
 //得到线程的信号,并判断检测结果,发送给PLC
 void hello::handleResults(int singleResult)
 {
-	m_peviousProductDectectEnd = false;
+	//m_peviousProductDectectEnd = false;
 
 	m_AllResult += singleResult;
 
@@ -817,7 +810,7 @@ void hello::handleResults(int singleResult)
 	qDebug() << "Detect Result:	" << m_AllResult;
 }
 
-
+//
 void hello::ReadExposure()
 {
 
@@ -836,6 +829,7 @@ void hello::ReadExposure()
 
 }
 
+//实时设置曝光
 void hello::OnSetExposure()
 {
 
@@ -858,4 +852,16 @@ void hello::OnSetExposure()
 		reply = QMessageBox::information(this, G2U("信息"), G2U("相机未正确设置"));
 	}
 	
+}
+
+//read lastest model for picHandle.
+void hello::readAllModelFromIni()
+{
+	QVariant value;
+	ReadConfigure("config.ini", "Model", "BottomModel", value);
+	setBottomModel(value.toString());
+
+	ReadConfigure("config.ini", "Model", "GouModel", value);
+	setGbModel(value.toString());
+
 }

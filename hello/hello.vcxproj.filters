@@ -86,15 +86,6 @@
     <ClCompile Include="Func.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_configuredlg.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_configuredlg.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="configuredlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_DeltaThread.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -215,6 +206,15 @@
     <ClCompile Include="CHH2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_modelWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_modelWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\modelWidget.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="hello.h">
@@ -230,12 +230,6 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="aboutdialog.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="configuredlg.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="configuredlg.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="DeltaThread.h">
@@ -295,6 +289,12 @@
     <CustomBuild Include="Widgets\serialWidget.h">
       <Filter>Header Files\Widgets</Filter>
     </CustomBuild>
+    <CustomBuild Include="Widgets\modelWidget.ui">
+      <Filter>Form Files\Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Widgets\modelWidget.h">
+      <Filter>Header Files\Widgets</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_hello.h">
@@ -308,9 +308,6 @@
     </ClInclude>
     <ClInclude Include="Func.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_configuredlg.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_ComDialog.h">
       <Filter>Generated Files</Filter>
@@ -338,6 +335,9 @@
     </ClInclude>
     <ClInclude Include="CHH2.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_modelWidget.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

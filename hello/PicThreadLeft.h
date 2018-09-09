@@ -24,7 +24,10 @@ public:
 	HTuple m_WindowHandle;
 
 	void OnHandle(HTuple WindowHandle);
-	void SetModel(QString path){ m_ModelPath = path; }
+	//set filePath of mlp_model. 
+	void setModel(QString path){ m_ModelPath = path; } 
+	//get filePath of mlp_model. 
+	const QString& getModel(){ return m_ModelPath; }
 
 protected:
 	virtual void run() Q_DECL_OVERRIDE;

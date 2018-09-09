@@ -69,6 +69,7 @@ PylonCamera_Thread::PylonCamera_Thread(ConnectionType connection_type,QString Ca
 	m_image_index = 1;
 	m_exposureTime = 200;
 	m_CameraIdlist.append(CameraId);
+	m_WaitWake = false;
 }
 
 void PylonCamera_Thread::run()
@@ -89,7 +90,7 @@ void PylonCamera_Thread::run()
 		try{
 			//time.start();
 			qDebug() << endl << m_CameraId << " ready cap.... ";
-
+			
 			CGrabResultPtr ptrGrabResult;
 
 			
@@ -128,11 +129,15 @@ void PylonCamera_Thread::run()
 				emit ReadyOk(1);
 				first = false;
 			}
+			m_WaitWake = true;
 			condition_Camera.wait(&mutex_Camera);
 			mutex_Camera.unlock();
 
+			m_WaitWake = false;
+
 			if (m_bIsStop)
 				break;
+			
 
 			m_camera.ExposureTimeRaw.SetValue(m_exposureTime);
 			

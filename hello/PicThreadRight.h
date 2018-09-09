@@ -19,7 +19,7 @@ public:
 	}
 
 	void OnHandle(HTuple WindowHandle);
-	void SetModel(QString path){ m_ModelPath = path; }
+	void setModel(QString path){ m_ModelPath = path; }
 
 	static int num;
 	HImage m_Image;

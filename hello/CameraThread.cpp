@@ -19,6 +19,7 @@ Camera_Thread::Camera_Thread(ConnectionType connection_type,QString CameraId, QO
 	m_exposureTime = 30.0;
 	m_CameraIdlist.append(CameraId);
 	m_pGrabber = nullptr;
+	m_WaitWake = false;
 }
 
 void Camera_Thread::run()
@@ -46,8 +47,10 @@ void Camera_Thread::run()
 				emit ReadyOk(1);
 				first = false;
 			}
+			m_WaitWake = true;
 			condition_Camera.wait(&mutex_Camera);
 			mutex_Camera.unlock();
+			m_WaitWake = false;
 
 			if (m_bIsStop)
 				break;

@@ -2,6 +2,7 @@
 #include <QTime>
 #include "CHH.h"
 #include "CHH2.h"
+#include <QDebug>
 
 
 int PicThreadRight::num = 0;
@@ -46,6 +47,8 @@ void PicThreadRight::run()
 		catch (HException& e)
 		{
 			QString error = e.ErrorMessage().Text();
+			//DispText(m_WindowHandle, error.toStdString().c_str(), "image", 120, 12, "red", HTuple(), HTuple());
+			qDebug() << "ThreadRight error:  " << error;
 		}	
 	}
 		

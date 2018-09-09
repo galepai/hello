@@ -37,6 +37,7 @@ void PicThreadMiddle::run()
 		catch (HException& e)
 		{
 			QString error = e.ErrorMessage().Text();
+			//DispText(m_WindowHandle, error.toStdString().c_str(), "image", 120, 12, "red", HTuple(), HTuple());
 		}
 	}
 		

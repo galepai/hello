@@ -36,6 +36,10 @@ public:
 	{
 		m_exposureTime = exposureTime;
 	}
+	bool ReadyWake()
+	{
+		return m_WaitWake;
+	}
 
 	void stop();
 
@@ -69,6 +73,7 @@ private:
 	QString m_SaveDatePath, m_SaveImageDirName;
 	int m_image_index, m_MaxNum;
 	float m_exposureTime;
+	bool m_WaitWake;
 };
 
 #endif
