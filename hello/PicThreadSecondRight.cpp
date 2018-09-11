@@ -19,11 +19,10 @@ void PicThreadSecondRight::run()
 			DispObj(m_Image, m_WindowHandle);
 			Emphasize(m_Image, &ImageEmphasize, 7, 101, 1);
 
-			//CHH2::PengShang_Camera3(ImageEmphasize, m_Image, m_WindowHandle, &hv_IsBad);
-			ReadClassMlp("d:/github/CommutatorDetect/code/Model/classify_camera3_tiff.gmc", &hv_MlpHandle);
-			CHH2::PengShang2_Camera3(ImageEmphasize, m_Image, hv_MlpHandle, m_WindowHandle, &hv_IsBad);
-			ClearClassMlp(hv_MlpHandle);
-
+			CHH2::PengShang_Camera3(ImageEmphasize, m_Image, m_WindowHandle, &hv_IsBad);
+			//ReadClassMlp("d:/github/CommutatorDetect/code/Model/classify_camera3_tiff.gmc", &hv_MlpHandle);
+			//CHH2::PengShang2_Camera3(ImageEmphasize, m_Image, hv_MlpHandle, m_WindowHandle, &hv_IsBad);
+			//ClearClassMlp(hv_MlpHandle);
 
 			num++;
 			CHH::disp_message(m_WindowHandle, HTuple("number: ") + num, "image", 12, 12, "black", "true");

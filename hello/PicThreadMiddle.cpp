@@ -30,8 +30,8 @@ void PicThreadMiddle::run()
 			}
 			else
 			{
-				emit resultReady(MiddleBad);
-				CHH::disp_message(m_WindowHandle, HTuple("Bad "), "image", 120, 12, "red", "true");
+				emit resultReady(MiddleGood);
+				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "red", "true");
 			}
 		}
 		catch (HException& e)
