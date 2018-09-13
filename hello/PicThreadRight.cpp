@@ -19,19 +19,20 @@ void PicThreadRight::run()
 			
 			HTuple hv_DownRow, hv_IsBad;
 			HObject TileImage,ImageEmphasize;
-			CHH::PingJie(m_Image, &m_Image, 540, 30, 3, 50, &hv_DownRow);
+			CHH::PingJie(m_Image, &m_Image, 700, 30, 3, 40, &hv_DownRow);
 			DispObj(m_Image, m_WindowHandle);
-			Emphasize(m_Image, &ImageEmphasize, 7, 301, 1);
+			SetDraw(m_WindowHandle, "margin");
+			Emphasize(m_Image, &ImageEmphasize, 7, 101, 1);
 
-			CHH2::BottomAndTop_Camera4(ImageEmphasize, m_Image, m_WindowHandle, m_ModelPath.toStdString().c_str(), &hv_IsBad);
-			
+		//	CHH2::BottomAndTop_Camera4(ImageEmphasize, m_Image, m_WindowHandle, m_ModelPath.toStdString().c_str(), &hv_IsBad);
+			CHH2::PengShang_Camera4(ImageEmphasize, m_Image, m_WindowHandle, &hv_IsBad);
 			num++;
 			CHH::disp_message(m_WindowHandle, HTuple("number: ") + num, "image", 12, 12, "black", "true");
 
 
 			qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-			if (num % 3)
-			//if (!hv_IsBad.I())
+			//if (num % 3)
+			if (!hv_IsBad.I())
 			{
 				emit resultReady(RightGood);
 				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "black", "true");

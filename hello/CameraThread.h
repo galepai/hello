@@ -36,6 +36,14 @@ public:
 	{
 		m_exposureTime = exposureTime;
 	}
+	void SetAcquisitionLineRate(float acquisitionLineRate)
+	{
+		m_acquisitionLineRate = acquisitionLineRate;
+	}
+	void SetHeight(int height)
+	{
+		m_height = height;
+	}
 	bool ReadyWake()
 	{
 		return m_WaitWake;
@@ -73,6 +81,8 @@ private:
 	QString m_SaveDatePath, m_SaveImageDirName;
 	int m_image_index, m_MaxNum;
 	float m_exposureTime;
+	float m_acquisitionLineRate;
+	int m_height;
 	bool m_WaitWake;
 };
 

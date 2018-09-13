@@ -364,7 +364,7 @@ void hello::SetOpenWindowHandle(HImage& Image, HTuple* pWindowHandle, LocationVi
 		break;
 
 	case MiddleView:
-		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 2000, (long)ui.MiddlePicView->winId(), pWindowHandle);
+		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 1000, (long)ui.MiddlePicView->winId(), pWindowHandle);
 		break;
 	}
 }
@@ -373,7 +373,7 @@ void hello::SetOpenWindowHandle(HImage& Image, HTuple* pWindowHandle, LocationVi
 void hello::SetPicViewScroll(int width, int height, LocationView location)
 {
 	float scaleX = width / 1024.0;
-	float scaleY = height / 2000;
+	float scaleY = height / 2000.0;
 	switch (location)
 	{
 	case SecondRightView:
@@ -411,8 +411,8 @@ void hello::SetPicViewScroll(int width, int height, LocationView location)
 	case MiddleView:
 		if (scaleY > scaleX)
 		{
-			HSCROLL_HEIGHT_MiddlePic(2050);
-			VSCROLL_WIDTH_MiddlePic(410);
+			HSCROLL_HEIGHT_MiddlePic(1050);
+			VSCROLL_WIDTH_MiddlePic(310);
 		}
 		else
 		{
@@ -493,6 +493,8 @@ void hello::OnOpenCameras()
 	m_camera_thread_11_Clock->setSaveImageNum(100);
 	ReadConfigure("config.ini", "Camera_11_Clock", "Exposure", ExposureValue);
 	m_camera_thread_11_Clock->SetExposureTime(ExposureValue.toFloat());
+	//m_camera_thread_11_Clock->SetAcquisitionLineRate(10000.0);
+	//m_camera_thread_11_Clock->SetHeight(10000);
 	connect(m_camera_thread_11_Clock, SIGNAL(signal_error(QString)), this, SLOT(genErrorDialog(QString)));
 	connect(m_camera_thread_11_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
 	connect(m_camera_thread_11_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
@@ -506,6 +508,8 @@ void hello::OnOpenCameras()
 	m_camera_thread_7_Clock->setSaveImageNum(100);
 	ReadConfigure("config.ini", "Camera_07_Clock", "Exposure", ExposureValue);
 	m_camera_thread_7_Clock->SetExposureTime(ExposureValue.toFloat());
+	m_camera_thread_7_Clock->SetAcquisitionLineRate(5000.0);
+	m_camera_thread_7_Clock->SetHeight(5000);
 	connect(m_camera_thread_7_Clock, SIGNAL(signal_error(QString)), this, SLOT(genErrorDialog(QString)));
 	connect(m_camera_thread_7_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
 	connect(m_camera_thread_7_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));

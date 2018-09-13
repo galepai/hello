@@ -2,6 +2,393 @@
 #include "CHH2.h"
 #include "qdebug.h"
 
+
+/****************Camera1******************/
+void CHH2::Gen_features_V1(HObject ho_Image, HTuple *hv_FeatureVector)
+{
+
+	// Local iconic variables
+	HObject  ho_Zoomed1, ho_Zoomed2;
+
+	// Local control variables
+	HTuple  hv_Width, hv_Height;
+
+	(*hv_FeatureVector) = HTuple();
+	GetImageSize(ho_Image, &hv_Width, &hv_Height);
+
+	CHH2::Gen_Sobel_features(ho_Image, (*hv_FeatureVector), &(*hv_FeatureVector));
+
+	ZoomImageFactor(ho_Image, &ho_Zoomed1, 0.5, 0.5, "constant");
+	CHH2::Gen_Sobel_features(ho_Zoomed1, (*hv_FeatureVector), &(*hv_FeatureVector));
+
+	ZoomImageFactor(ho_Zoomed1, &ho_Zoomed2, 0.5, 0.5, "constant");
+
+	(*hv_FeatureVector) = ((*hv_FeatureVector).TupleConcat(hv_Width)).TupleConcat(hv_Height);
+	(*hv_FeatureVector) = (*hv_FeatureVector).TupleReal();
+	return;
+
+}
+
+void CHH2::Gen_features_V2(HObject ho_Image, HTuple *hv_FeatureVector)
+{
+
+	// Local iconic variables
+	HObject  ho_Zoomed1, ho_Zoomed2;
+
+	// Local control variables
+	HTuple  hv_Width, hv_Height, hv_HorProjection;
+	HTuple  hv_VertProjection;
+
+	(*hv_FeatureVector) = HTuple();
+	GetImageSize(ho_Image, &hv_Width, &hv_Height);
+	CHH2::Gen_Sobel_features(ho_Image, (*hv_FeatureVector), &(*hv_FeatureVector));
+	ZoomImageFactor(ho_Image, &ho_Zoomed1, 0.5, 0.5, "constant");
+	CHH2::Gen_Sobel_features(ho_Zoomed1, (*hv_FeatureVector), &(*hv_FeatureVector));
+	ZoomImageFactor(ho_Zoomed1, &ho_Zoomed2, 0.5, 0.5, "constant");
+	GrayProjections(ho_Image, ho_Zoomed2, "simple", &hv_HorProjection, &hv_VertProjection);
+
+	(*hv_FeatureVector) = (((*hv_FeatureVector).TupleConcat(hv_Width)).TupleConcat(hv_Height)).TupleConcat(hv_VertProjection);
+	(*hv_FeatureVector) = (*hv_FeatureVector).TupleReal();
+	return;
+
+}
+
+void CHH2::Gen_Sobel_features(HObject ho_Image, HTuple hv_Features, HTuple *hv_FeaturesExtended)
+{
+
+	// Local iconic variables
+	HObject  ho_EdgeAmplitude;
+
+	// Local control variables
+	HTuple  hv_Energy, hv_Correlation, hv_Homogeneity;
+	HTuple  hv_Contrast, hv_AbsoluteHistoEdgeAmplitude;
+
+	//Coocurrence matrix for 0 deg and 90 deg:
+	/*CoocFeatureImage(ho_Image, ho_Image, 6, 0, &hv_Energy, &hv_Correlation, &hv_Homogeneity,
+	&hv_Contrast);*/
+	CoocFeatureImage(ho_Image, ho_Image, 6, 90, &hv_Energy, &hv_Correlation, &hv_Homogeneity,
+		&hv_Contrast);
+	//Absolute histogram of edge amplitudes:
+	SobelAmp(ho_Image, &ho_EdgeAmplitude, "sum_abs", 3);
+	GrayHistoAbs(ho_EdgeAmplitude, ho_EdgeAmplitude, 8, &hv_AbsoluteHistoEdgeAmplitude);
+
+	(*hv_FeaturesExtended).Clear();
+	(*hv_FeaturesExtended).Append(hv_Features);
+	(*hv_FeaturesExtended).Append(hv_Energy);
+	(*hv_FeaturesExtended).Append(hv_Correlation);
+	(*hv_FeaturesExtended).Append(hv_Homogeneity);
+	(*hv_FeaturesExtended).Append(hv_Contrast);
+	(*hv_FeaturesExtended) = (*hv_FeaturesExtended).TupleConcat(hv_AbsoluteHistoEdgeAmplitude);
+
+
+	return;
+}
+
+void CHH2::GB_Camera1(HObject ho_ImageEmphasize, HObject ho_TileImage, HTuple hv_MLPHandle,
+		HTuple hv_WindowHandle, HTuple *hv_IsBad)
+	{
+		try{
+			// Local iconic variables
+			HObject  ho_Region, ho_RegionOpening, ho_RegionClosing;
+			HObject  ho_ConnectedRegions, ho_SelectedRegions, ho_RegionTrans;
+			HObject  ho_BadObjects, ho_ObjectSelected, ho_ImagePart;
+			HObject  ho_Rectangle;
+
+			// Local control variables
+			HTuple  hv_Index, hv_Value, hv_FeatureVector;
+			HTuple  hv_Class, hv_Confidence, hv_BadNum;
+			HTuple  hv_NumInput, hv_NumHidden, hv_NumOutPut, hv_OutputFunction, hv_Preprocessing, hv_NumComponets;
+			GetParamsClassMlp(hv_MLPHandle, &hv_NumInput, &hv_NumHidden, &hv_NumOutPut, &hv_OutputFunction, &hv_Preprocessing, &hv_NumComponets);
+
+
+			(*hv_IsBad) = 0;
+			Threshold(ho_ImageEmphasize, &ho_Region, 200, 255);
+			OpeningCircle(ho_Region, &ho_RegionOpening, 25.5);
+			ClosingCircle(ho_RegionOpening, &ho_RegionClosing, 5.5);
+			Connection(ho_RegionClosing, &ho_ConnectedRegions);
+			SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, "height", "and", 350, 1000);
+			CountObj(ho_SelectedRegions, &(*hv_IsBad));
+			ShapeTrans(ho_SelectedRegions, &ho_RegionTrans, "rectangle1");
+
+			GenEmptyObj(&ho_BadObjects);
+			if (0 != ((*hv_IsBad) == 18))
+			{
+				{
+					HTuple end_val11 = (*hv_IsBad);
+					HTuple step_val11 = 1;
+					for (hv_Index = 1; hv_Index.Continue(end_val11, step_val11); hv_Index += step_val11)
+					{
+						SelectObj(ho_RegionTrans, &ho_ObjectSelected, hv_Index);
+						RegionFeatures(ho_ObjectSelected, ((HTuple("row1").Append("column2")).Append("height")),
+							&hv_Value);
+						CropPart(ho_TileImage, &ho_ImagePart, HTuple(hv_Value[0]), HTuple(hv_Value[1]) - 400,
+							800, HTuple(hv_Value[2]));
+						GenRectangle1(&ho_Rectangle, HTuple(hv_Value[0]), HTuple(hv_Value[1]) - 400,
+							HTuple(hv_Value[0]) + HTuple(hv_Value[2]), (HTuple(hv_Value[1]) - 400) + 800);
+						if (hv_NumInput.I()==274)
+							CHH2::Gen_features_V2(ho_ImagePart, &hv_FeatureVector);
+						else
+							CHH2::Gen_features_V1(ho_ImagePart, &hv_FeatureVector);
+
+						ClassifyClassMlp(hv_MLPHandle, hv_FeatureVector, 1, &hv_Class, &hv_Confidence);
+						if (0 != (hv_Class == 1))
+						{
+							ConcatObj(ho_BadObjects, ho_Rectangle, &ho_BadObjects);
+						}
+					}
+				}
+
+				//**********display BadObject
+
+				SetDraw(hv_WindowHandle, "margin");
+				CountObj(ho_BadObjects, &hv_BadNum);
+				//if (HDevWindowStack::IsOpen())
+				DispObj(ho_TileImage, hv_WindowHandle);
+				if (0 != (hv_BadNum > 0))
+				{
+					(*hv_IsBad) = 1;
+					//if (HDevWindowStack::IsOpen())
+					SetColor(hv_WindowHandle, "red");
+					DispObj(ho_BadObjects, hv_WindowHandle);
+					
+				}
+
+			}
+			else
+			{
+				
+				(*hv_IsBad) = 1;
+				
+				DispText(hv_WindowHandle, "not enough 18 pieces.", "image", 200,
+					150, "black", HTuple(), HTuple());
+			}
+			return;
+		}
+		catch (HException& except)
+		{
+			qDebug() << "error: " << except.ErrorMessage().Text();
+			(*hv_IsBad) = 1;
+			CHH::disp_message(hv_WindowHandle, "GB_Camera1 Code Error.", "image", 400, 200, "red", "true");
+			return;
+		}
+	}
+
+/****************Camera1****************************************************/
+
+
+
+
+
+
+
+/****************Camera2******************/
+void CHH2::PengShang_Camera2(HObject ho_ImageEmphasize, HTuple hv_WindowHandle, HTuple *hv_IsBad)
+{
+	try{
+	
+		
+		HObject  ho_ImageOpening, ho_Region, ho_RegionOpening;
+		HObject  ho_ConnectedRegions, ho_SelectedRegions, ho_RegionTrans;
+		HObject  ho_RegionFillUp, ho_RegionUnion, ho_Rectangle, ho_RoiUnion;
+		HObject  ho_ROI, ho_ImageReduced, ho_Region1, ho_ConnectedRegions1;
+		HObject  ho_MaybeBadRegions, ho_BadObjects, ho_ObjectSelected;
+		HObject  ho_RegionDilation;
+
+		
+		HTuple  hv_WIDTH, hv_Number, hv_Col1, hv_Num;
+		HTuple  hv_index, hv_Value, hv_BadNum;
+
+		(*hv_IsBad) = 0;
+
+		GrayOpeningRect(ho_ImageEmphasize, &ho_ImageOpening, 5, 5);
+		hv_WIDTH = 850;
+		Threshold(ho_ImageEmphasize, &ho_Region, 150, 255);
+		OpeningCircle(ho_Region, &ho_RegionOpening, 8.5);
+		Connection(ho_RegionOpening, &ho_ConnectedRegions);
+		SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, (HTuple("area").Append("height")),
+			"and", (HTuple(15000).Append(200)), (HTuple(9999999).Append(800)));
+		CountObj(ho_SelectedRegions, &hv_Number);
+		if (0 != (hv_Number == 18))
+		{
+			ShapeTrans(ho_SelectedRegions, &ho_RegionTrans, "convex");
+			FillUp(ho_RegionTrans, &ho_RegionFillUp);
+			RegionFeatures(ho_RegionFillUp, "column1", &hv_Col1);
+			TupleMean(hv_Col1, &hv_Col1);
+			Union1(ho_RegionFillUp, &ho_RegionUnion);
+
+
+			GenRectangle1(&ho_Rectangle, 0, hv_Col1 + 20, 4999, hv_Col1 + hv_WIDTH);
+			Intersection(ho_Rectangle, ho_RegionUnion, &ho_RoiUnion);
+			ErosionCircle(ho_RoiUnion, &ho_ROI, 3.5);
+			ReduceDomain(ho_ImageOpening, ho_ROI, &ho_ImageReduced);
+
+			Threshold(ho_ImageReduced, &ho_Region1, 0, 80);
+			Connection(ho_Region1, &ho_ConnectedRegions1);
+			SelectShape(ho_ConnectedRegions1, &ho_MaybeBadRegions, "area", "and", 120, 99999);
+			CountObj(ho_MaybeBadRegions, &hv_Num);
+			GenEmptyObj(&ho_BadObjects);
+			{
+				HTuple end_val27 = hv_Num;
+				HTuple step_val27 = 1;
+				for (hv_index = 1; hv_index.Continue(end_val27, step_val27); hv_index += step_val27)
+				{
+					SelectObj(ho_MaybeBadRegions, &ho_ObjectSelected, hv_index);
+					RegionFeatures(ho_ObjectSelected, (HTuple("ra").Append("rb")), &hv_Value);
+					if (0 != ((HTuple(hv_Value[0]) / HTuple(hv_Value[1]))>7.5))
+					{
+						ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+					}
+
+				}
+			}
+
+			CountObj(ho_BadObjects, &hv_BadNum);
+			if (0 != (hv_BadNum>0))
+			{
+				(*hv_IsBad) = 1;
+				DilationCircle(ho_BadObjects, &ho_RegionDilation, 5.5);
+				if (HDevWindowStack::IsOpen())
+					DispObj(ho_RegionDilation, hv_WindowHandle);
+			}
+			
+		}
+		else
+		{
+			(*hv_IsBad) = 1;
+			if (HDevWindowStack::IsOpen())
+				DispText(hv_WindowHandle, "片不等于18", "window", "top", "left",
+				"black", HTuple(), HTuple());
+		}
+		return;	
+
+	}
+	catch (HException& except)
+	{
+		qDebug() << "error: " << except.ErrorMessage().Text();
+		(*hv_IsBad) = 1;
+		CHH::disp_message(hv_WindowHandle, "PengShang_Camera2 Code Error.", "image", 400, 200, "red", "true");
+		return;
+	}
+}
+/****************Camera2****************************************************/
+
+
+
+
+
+
+
+/****************Camera3******************/
+void CHH2::PengShang2_Camera3(HObject ho_ImageEmphasize, HObject ho_TileImage, HTuple hv_ModelHandle,
+	HTuple hv_WindowHandle, HTuple *hv_IsBad)
+{
+	try{
+		// Local iconic variables
+		HObject  ho_ImageOpening, ho_ImageClosing, ho_Regions;
+		HObject  ho_RegionOpening, ho_ConnectedRegions, ho_SelectedRegions;
+		HObject  ho_RegionClosing, ho_RegionFillUp, ho_Rectangle;
+		HObject  ho_RegionUnion, ho_RegionIntersection, ho_RegionErosion;
+		HObject  ho_ImageReduced, ho_Region, ho_ConnectedRegions1;
+		HObject  ho_BadRegions1, ho_RegionUnion1, ho_RegionFillUp1;
+		HObject  ho_ConnectedRegions2, ho_RegionTrans, ho_BadObjects;
+		HObject  ho_ObjectSelected, ho_CropImage;
+
+		// Local control variables
+		HTuple  hv_WIDTH, hv_SaveImagePath, hv_Number;
+		HTuple  hv_Col2s, hv_Col2, hv_Col1, hv_Index, hv_Value;
+		HTuple  hv_FeatureVector, hv_FoundClassIDs, hv_Confidence;
+		HTuple  hv_Num;
+
+		//****************************
+		//**
+		//****************************
+
+		(*hv_IsBad) = 0;
+		hv_WIDTH = 870;
+		hv_SaveImagePath = "f:/mlp/auto3/";
+
+		GrayOpeningRect(ho_ImageEmphasize, &ho_ImageOpening, 7, 7);
+		GrayClosingRect(ho_ImageOpening, &ho_ImageClosing, 5, 5);
+
+		Threshold(ho_ImageClosing, &ho_Regions, 20, 255);
+		OpeningCircle(ho_Regions, &ho_RegionOpening, 15.5);
+		Connection(ho_RegionOpening, &ho_ConnectedRegions);
+		SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, (HTuple("height").Append("column2")),
+			"and", (HTuple(400).Append(0)), (HTuple(800).Append(1800)));
+
+		CountObj(ho_SelectedRegions, &hv_Number);
+		ClosingCircle(ho_SelectedRegions, &ho_RegionClosing, 10.5);
+		FillUp(ho_RegionClosing, &ho_RegionFillUp);
+		RegionFeatures(ho_RegionFillUp, "column2", &hv_Col2s);
+		TupleMean(hv_Col2s, &hv_Col2);
+		hv_Col1 = hv_Col2 - hv_WIDTH;
+		GenRectangle1(&ho_Rectangle, 0, hv_Col1, 9999, hv_Col2);
+		Union1(ho_RegionFillUp, &ho_RegionUnion);
+		Intersection(ho_Rectangle, ho_RegionUnion, &ho_RegionIntersection);
+
+		ErosionCircle(ho_RegionIntersection, &ho_RegionErosion, 6.5);
+
+		ReduceDomain(ho_ImageClosing, ho_RegionErosion, &ho_ImageReduced);
+		Threshold(ho_ImageReduced, &ho_Region, 0, 200);
+		ClosingCircle(ho_Region, &ho_RegionClosing, 5.5);
+		Connection(ho_RegionClosing, &ho_ConnectedRegions1);
+		SelectShape(ho_ConnectedRegions1, &ho_BadRegions1, "area", "and", 700, 99999);
+		Union1(ho_BadRegions1, &ho_RegionUnion1);
+		FillUp(ho_RegionUnion1, &ho_RegionFillUp1);
+		Connection(ho_RegionFillUp1, &ho_ConnectedRegions2);
+		ShapeTrans(ho_ConnectedRegions2, &ho_RegionTrans, "rectangle1");
+		CountObj(ho_RegionTrans, &hv_Number);
+		GenEmptyObj(&ho_BadObjects);
+		{
+			HTuple end_val39 = hv_Number;
+			HTuple step_val39 = 1;
+			for (hv_Index = 1; hv_Index.Continue(end_val39, step_val39); hv_Index += step_val39)
+			{
+				SelectObj(ho_RegionTrans, &ho_ObjectSelected, hv_Index);
+				RegionFeatures(ho_ObjectSelected, (((HTuple("row1").Append("column1")).Append("width")).Append("height")),
+					&hv_Value);
+
+				CropPart(ho_TileImage, &ho_CropImage, HTuple(hv_Value[0]), HTuple(hv_Value[1]),
+					HTuple(hv_Value[2]), HTuple(hv_Value[3]));
+				//write_image (CropImage, 'tiff', 0, SaveImagePath+Index)
+
+				CHH2::Gen_features_V1(ho_CropImage, &hv_FeatureVector);
+				ClassifyClassMlp(hv_ModelHandle, hv_FeatureVector, 1, &hv_FoundClassIDs, &hv_Confidence);
+				if (0 != (hv_FoundClassIDs == 1))
+				{
+					//WriteImage(ho_CropImage, "tiff", 0, hv_SaveImagePath + hv_Index);
+					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+				}
+
+			}
+		}
+
+		//if (HDevWindowStack::IsOpen())
+		DispObj(ho_TileImage, hv_WindowHandle);
+		//if (HDevWindowStack::IsOpen())
+		SetDraw(hv_WindowHandle, "margin");
+		SetColor(hv_WindowHandle, "red");
+		//if (HDevWindowStack::IsOpen())
+		DispObj(ho_BadObjects, hv_WindowHandle);
+		CountObj(ho_BadObjects, &hv_Num);
+		if (0 != (hv_Num>0))
+		{
+			(*hv_IsBad) = 1;
+		}
+
+
+		return;
+	}
+	catch (HException& except)
+	{
+		qDebug() << "error: " << except.ErrorMessage().Text();
+		(*hv_IsBad) = 1;
+		CHH::disp_message(hv_WindowHandle, "PengShang2_Camera3 Code Error.", "image", 400, 200, "red", "true");
+		return;
+	}
+
+}
+
 void CHH2::PengShang_Camera3(const HObject& ho_ImageEmphasize, const HObject& ho_TileImage, HTuple hv_WindowHandle,
 	HTuple *hv_IsBad)
 {
@@ -11,17 +398,18 @@ void CHH2::PengShang_Camera3(const HObject& ho_ImageEmphasize, const HObject& ho
 		// Local iconic variables
 		HObject  ho_ImageOpening, ho_ImageClosing, ho_Regions;
 		HObject  ho_RegionOpening, ho_ConnectedRegions, ho_SelectedRegions;
-		HObject  ho_Rectangle, ho_RegionUnion, ho_RegionIntersection;
-		HObject  ho_ImageReduced, ho_Bad, ho_RegionOpening1, ho_ConnectedRegions1;
-		HObject  ho_RegionTrans, ho_SelectedRegions1, ho_BadObjects;
-		HObject  ho_ObjectSelected, ho_RegionDilation, ho_RegionUnion1;
-		HObject  ho_RegionClosing, ho_ConnectedRegions2, ho_Bad2Objects;
-		HObject  ho_RegionDilation2;
+		HObject  ho_Rectangle, ho_RegionIntersection, ho_ConnectedRegions4;
+		HObject  ho_RegionFillUp, ho_RegionTran, ho_Roi, ho_RoiUnion;
+		HObject  ho_ImageReduced, ho_Bad, ho_RegionOpening1, ho_RegionClosing1;
+		HObject  ho_ConnectedRegions1, ho_BadRegions1, ho_RegionUnion1;
+		HObject  ho_RegionFillUp1, ho_ConnectedRegions2, ho_BlackRegion;
+		HObject  ho_RegionClosing, ho_ConnectedRegions3, ho_SelectedRegions1;
+		HObject  ho_BadObjects, ho_ObjectSelected, ho_RegionDilation;
 
 		// Local control variables
 		HTuple  hv_WIDTH, hv_Number, hv_Col2s, hv_Col2;
-		HTuple  hv_Col1, hv_Number1, hv_GrayMeans, hv_Sgn, hv_Indices;
-		HTuple  hv_badNum, hv_Index, hv_BadNumber, hv_Number2;
+		HTuple  hv_Col1, hv_Number1, hv_Index, hv_Ra, hv_Rb, hv_Area;
+		HTuple  hv_GrayMean, hv_BadNumber;
 
 		//****************************
 		//**
@@ -31,96 +419,110 @@ void CHH2::PengShang_Camera3(const HObject& ho_ImageEmphasize, const HObject& ho
 		hv_WIDTH = 870;
 
 		GrayOpeningRect(ho_ImageEmphasize, &ho_ImageOpening, 7, 7);
-		GrayClosingRect(ho_ImageOpening, &ho_ImageClosing, 21, 21);
+		SmoothImage(ho_ImageOpening, &ho_ImageOpening, "gauss", 0.5);
+		GrayClosingRect(ho_ImageOpening, &ho_ImageClosing, 7, 7);
 
-		Threshold(ho_ImageClosing, &ho_Regions, 20, 255);
+		Threshold(ho_ImageClosing, &ho_Regions, 40, 255);
 		OpeningCircle(ho_Regions, &ho_RegionOpening, 15.5);
 		Connection(ho_RegionOpening, &ho_ConnectedRegions);
-		SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, (HTuple("height").Append("column2")),
-			"and", (HTuple(400).Append(0)), (HTuple(800).Append(1800)));
+		SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, "height", "and", 400, 800);
 
 		CountObj(ho_SelectedRegions, &hv_Number);
-		RegionFeatures(ho_SelectedRegions, "column2", &hv_Col2s);
-		TupleMean(hv_Col2s, &hv_Col2);
-		hv_Col1 = hv_Col2 - hv_WIDTH;
-		GenRectangle1(&ho_Rectangle, 0, hv_Col1, 9999, hv_Col2);
-		Union1(ho_SelectedRegions, &ho_RegionUnion);
-		Intersection(ho_Rectangle, ho_RegionUnion, &ho_RegionIntersection);
-
-		ReduceDomain(ho_ImageClosing, ho_RegionIntersection, &ho_ImageReduced);
-		Threshold(ho_ImageReduced, &ho_Bad, 20, 200);
-		OpeningCircle(ho_Bad, &ho_RegionOpening1, 8.5);
-		Connection(ho_RegionOpening1, &ho_ConnectedRegions1);
-		ShapeTrans(ho_ConnectedRegions1, &ho_RegionTrans, "convex");
-		SelectShape(ho_RegionTrans, &ho_SelectedRegions1, "area", "and", 800, 999999);
-		CountObj(ho_SelectedRegions1, &hv_Number1);
-		GrayFeatures(ho_SelectedRegions1, ho_TileImage, "mean", &hv_GrayMeans);
-		TupleSgn(hv_GrayMeans - 100, &hv_Sgn);
-		TupleFind(hv_Sgn, -1, &hv_Indices);
-		hv_badNum = hv_Indices.TupleLength();
-		GenEmptyObj(&ho_BadObjects);
-		if (0 != (HTuple(hv_badNum != 0).TupleAnd(hv_Indices != -1)))
+		if (0 != (hv_Number == 18))
 		{
+			RegionFeatures(ho_SelectedRegions, "column2", &hv_Col2s);
+			TupleMean(hv_Col2s, &hv_Col2);
+			hv_Col1 = hv_Col2 - hv_WIDTH;
+			GenRectangle1(&ho_Rectangle, 0, hv_Col1, 9999, hv_Col2);
+			Intersection(ho_Rectangle, ho_SelectedRegions, &ho_RegionIntersection);
+			Connection(ho_RegionIntersection, &ho_ConnectedRegions4);
+			FillUp(ho_ConnectedRegions4, &ho_RegionFillUp);
+			ShapeTrans(ho_RegionFillUp, &ho_RegionTran, "rectangle2");
+			ErosionCircle(ho_RegionTran, &ho_Roi, 10.5);
+			Union1(ho_Roi, &ho_RoiUnion);
+
+			//shape_trans (SelectedRegions, RegionTrans, 'rectangle2')
+			//union1 (RegionTrans, RegionUnion)
+			//fill_up (RegionUnion, RegionFillUp)
+			//erosion_circle (RegionFillUp, RegionErosion, 10.5)
+			//intersection (Rectangle, RegionErosion, RegionIntersection)
+
+			ReduceDomain(ho_ImageOpening, ho_RoiUnion, &ho_ImageReduced);
+			Threshold(ho_ImageReduced, &ho_Bad, 0, 80);
+			OpeningCircle(ho_Bad, &ho_RegionOpening1, 2.5);
+			ClosingCircle(ho_RegionOpening1, &ho_RegionClosing1, 3.5);
+			Connection(ho_RegionClosing1, &ho_ConnectedRegions1);
+			SelectShape(ho_ConnectedRegions1, &ho_BadRegions1, ((HTuple("area").Append("convexity")).Append("column1")),
+				"and", ((HTuple(300).Append(0.5)).Append(0)), (HTuple(99999).Append(1.0)).TupleConcat(hv_Col2 - 50));
+			Union1(ho_BadRegions1, &ho_RegionUnion1);
+			FillUp(ho_RegionUnion1, &ho_RegionFillUp1);
+			Connection(ho_RegionFillUp1, &ho_ConnectedRegions2);
+			//***
+			Threshold(ho_ImageReduced, &ho_BlackRegion, 0, 20);
+			ClosingCircle(ho_BlackRegion, &ho_RegionClosing, 8.5);
+			Connection(ho_RegionClosing, &ho_ConnectedRegions3);
+			SelectShape(ho_ConnectedRegions3, &ho_SelectedRegions1, (HTuple("area").Append("rb")),
+				"and", (HTuple(250).Append(8)), (HTuple(99999).Append(999999)));
+			//*****************
+			ConcatObj(ho_ConnectedRegions2, ho_SelectedRegions1, &ho_ConnectedRegions2);
+			CountObj(ho_ConnectedRegions2, &hv_Number1);
+			GenEmptyObj(&ho_BadObjects);
 			{
-				HTuple end_val36 = hv_badNum - 1;
-				HTuple step_val36 = 1;
-				for (hv_Index = 0; hv_Index.Continue(end_val36, step_val36); hv_Index += step_val36)
+				HTuple end_val53 = hv_Number1;
+				HTuple step_val53 = 1;
+				for (hv_Index = 1; hv_Index.Continue(end_val53, step_val53); hv_Index += step_val53)
 				{
-					SelectObj(ho_SelectedRegions1, &ho_ObjectSelected, HTuple(hv_Indices[hv_Index]) + 1);
-					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+
+					SelectObj(ho_ConnectedRegions2, &ho_ObjectSelected, hv_Index);
+					RegionFeatures(ho_ObjectSelected, "ra", &hv_Ra);
+					RegionFeatures(ho_ObjectSelected, "rb", &hv_Rb);
+					RegionFeatures(ho_ObjectSelected, "area", &hv_Area);
+					GrayFeatures(ho_ObjectSelected, ho_ImageOpening, "mean", &hv_GrayMean);
+					if (0 != ((hv_Ra / hv_Rb)>7.5))
+					{
+						ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+					}
+					else if (0 != (hv_Area>3000))
+					{
+						ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+					}
+					else if (0 != (HTuple(HTuple(hv_GrayMean<40).TupleAnd((hv_Ra / hv_Rb)>4.5)).TupleAnd(hv_Ra>30)))
+					{
+						ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+					}
+					else if (0 != (HTuple(hv_Area>1500).TupleAnd(hv_GrayMean<30)))
+					{
+						ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+					}
 				}
 			}
-		}
-		CountObj(ho_BadObjects, &hv_BadNumber);
-		//if (HDevWindowStack::IsOpen())
-		DispObj(ho_TileImage, hv_WindowHandle);
-		//if (HDevWindowStack::IsOpen())
-			SetDraw(hv_WindowHandle, "margin");
-		//if (HDevWindowStack::IsOpen())
-			SetColor(hv_WindowHandle, "red");
-		//if (HDevWindowStack::IsOpen())
-			SetLineWidth(hv_WindowHandle, 2);
 
-		if (0 != (hv_BadNumber>0))
-		{
-			(*hv_IsBad) = 1;
-			DilationCircle(ho_BadObjects, &ho_RegionDilation, 8.5);
-			//if (HDevWindowStack::IsOpen())
-				DispObj(ho_RegionDilation, hv_WindowHandle);
-		}
+			CountObj(ho_BadObjects, &hv_BadNumber);
+			if (HDevWindowStack::IsOpen())
+				DispObj(ho_TileImage, hv_WindowHandle);
+			if (HDevWindowStack::IsOpen())
+				SetDraw(hv_WindowHandle, "margin");
+			if (HDevWindowStack::IsOpen())
+				SetColor(hv_WindowHandle, "red");
+			if (HDevWindowStack::IsOpen())
+				SetLineWidth(hv_WindowHandle, 2);
 
-		Union1(ho_SelectedRegions1, &ho_RegionUnion1);
-		ClosingCircle(ho_RegionUnion1, &ho_RegionClosing, 5.5);
-		Connection(ho_RegionClosing, &ho_ConnectedRegions2);
-		SelectShape(ho_ConnectedRegions2, &ho_SelectedRegions1, (HTuple("area").Append("column2")),
-			"and", HTuple(1200).TupleConcat(hv_Col2 - 100), HTuple(999999).TupleConcat(hv_Col2 + 50));
-		GrayFeatures(ho_SelectedRegions1, ho_TileImage, "mean", &hv_GrayMeans);
-		TupleSgn(hv_GrayMeans - 130, &hv_Sgn);
-		TupleFind(hv_Sgn, -1, &hv_Indices);
-		hv_badNum = hv_Indices.TupleLength();
-		GenEmptyObj(&ho_Bad2Objects);
-		if (0 != (HTuple(hv_badNum != 0).TupleAnd(hv_Indices != -1)))
-		{
+			if (0 != (hv_BadNumber>0))
 			{
-				HTuple end_val63 = hv_badNum - 1;
-				HTuple step_val63 = 1;
-				for (hv_Index = 0; hv_Index.Continue(end_val63, step_val63); hv_Index += step_val63)
-				{
-					SelectObj(ho_SelectedRegions1, &ho_ObjectSelected, HTuple(hv_Indices[hv_Index]) + 1);
-					ConcatObj(ho_Bad2Objects, ho_ObjectSelected, &ho_Bad2Objects);
-				}
+				(*hv_IsBad) = 1;
+				DilationCircle(ho_BadObjects, &ho_RegionDilation, 8.5);
+				if (HDevWindowStack::IsOpen())
+					DispObj(ho_RegionDilation, hv_WindowHandle);
 			}
-		}
 
-		CountObj(ho_Bad2Objects, &hv_Number2);
-		if (0 != (hv_Number2>0))
+		}
+		else
 		{
 			(*hv_IsBad) = 1;
-			DilationCircle(ho_Bad2Objects, &ho_RegionDilation2, 8.5);
-			//if (HDevWindowStack::IsOpen())
-				DispObj(ho_RegionDilation2, hv_WindowHandle);
+			if (HDevWindowStack::IsOpen())
+				DispText(hv_WindowHandle, "片数不等于18", "image", 300, 220, "red",
+				HTuple(), HTuple());
 		}
-
 		return;
 	}
 	catch (HException& except)
@@ -131,7 +533,15 @@ void CHH2::PengShang_Camera3(const HObject& ho_ImageEmphasize, const HObject& ho
 		return;
 	}
 }
+/****************Camera3****************************************************/
 
+
+
+
+
+
+
+/****************Camera4******************/
 void CHH2::BottomAndTop_Camera4(HObject ho_ImageEmphasize, HObject ho_TileImage,
 	HTuple hv_WindowHandle, HTuple hv_Model, HTuple *hv_IsBad)
 {
@@ -194,7 +604,7 @@ void CHH2::BottomAndTop_Camera4(HObject ho_ImageEmphasize, HObject ho_TileImage,
 			FillUp(ho_PieceRegions, &ho_RegionFillUp);
 			ShapeTrans(ho_RegionFillUp, &ho_RegionTrans, "rectangle2");
 
-			
+
 			DispObj(ho_TileImage, hv_WindowHandle);
 			SetDraw(hv_WindowHandle, "margin");
 			DispObj(ho_RegionTrans, hv_WindowHandle);
@@ -223,7 +633,7 @@ void CHH2::BottomAndTop_Camera4(HObject ho_ImageEmphasize, HObject ho_TileImage,
 					ReduceDomain(ho_TileImage, ho_RegionIntersection, &ho_ImageReduced2);
 					CropDomain(ho_ImageReduced2, &ho_ImagePart);
 
-					CHH2::Gen_features(ho_ImagePart, &hv_FeatureVector);
+					CHH2::Gen_features_V1(ho_ImagePart, &hv_FeatureVector);
 					ClassifyClassMlp(hv_MLPHandle, hv_FeatureVector, 1, &hv_FoundClassIDs, &hv_Confidence);
 					if (0 != (hv_FoundClassIDs == 1))
 					{
@@ -308,7 +718,7 @@ void CHH2::BottomAndTop_Camera4(HObject ho_ImageEmphasize, HObject ho_TileImage,
 		}
 		return;
 	}
-catch (HException& except)
+	catch (HException& except)
 	{
 		qDebug() << "error: " << except.ErrorMessage().Text();
 		(*hv_IsBad) = 1;
@@ -317,89 +727,25 @@ catch (HException& except)
 	}
 }
 
-void CHH2::Gen_features(HObject ho_Image, HTuple *hv_FeatureVector)
-{
-
-	// Local iconic variables
-	HObject  ho_Zoomed1, ho_Zoomed2;
-
-	// Local control variables
-	HTuple  hv_Width, hv_Height;
-
-	(*hv_FeatureVector) = HTuple();
-	GetImageSize(ho_Image, &hv_Width, &hv_Height);
-	//Compute features.
-	CHH2::Gen_Sobel_features(ho_Image, (*hv_FeatureVector), &(*hv_FeatureVector));
-	//Downscale the image (image pyramid) and compute features.
-	ZoomImageFactor(ho_Image, &ho_Zoomed1, 0.5, 0.5, "constant");
-	CHH2::Gen_Sobel_features(ho_Zoomed1, (*hv_FeatureVector), &(*hv_FeatureVector));
-	//Uncomment lines to use further pyramid levels:
-	ZoomImageFactor(ho_Zoomed1, &ho_Zoomed2, 0.5, 0.5, "constant");
-	//gen_sobel_features (Zoomed2, FeatureVector, FeatureVector)
-	//zoom_image_factor (Zoomed2, Zoomed3, 0.5, 0.5, 'constant')
-	//gen_sobel_features (Zoomed3, FeatureVector, FeatureVector)
-	//zoom_image_factor (Zoomed3, Zoomed4, 0.5, 0.5, 'constant')
-	//gen_sobel_features (Zoomed4, FeatureVector, FeatureVector)
-	(*hv_FeatureVector) = ((*hv_FeatureVector).TupleConcat(hv_Width)).TupleConcat(hv_Height);
-	(*hv_FeatureVector) = (*hv_FeatureVector).TupleReal();
-	return;
-
-}
-
-void CHH2::Gen_Sobel_features(HObject ho_Image, HTuple hv_Features, HTuple *hv_FeaturesExtended)
-{
-
-	// Local iconic variables
-	HObject  ho_EdgeAmplitude;
-
-	// Local control variables
-	HTuple  hv_Energy, hv_Correlation, hv_Homogeneity;
-	HTuple  hv_Contrast, hv_AbsoluteHistoEdgeAmplitude;
-
-	//Coocurrence matrix for 0 deg and 90 deg:
-	/*CoocFeatureImage(ho_Image, ho_Image, 6, 0, &hv_Energy, &hv_Correlation, &hv_Homogeneity,
-		&hv_Contrast);*/
-	CoocFeatureImage(ho_Image, ho_Image, 6, 90, &hv_Energy, &hv_Correlation, &hv_Homogeneity,
-		&hv_Contrast);
-	//Absolute histogram of edge amplitudes:
-	SobelAmp(ho_Image, &ho_EdgeAmplitude, "sum_abs", 3);
-	GrayHistoAbs(ho_EdgeAmplitude, ho_EdgeAmplitude, 8, &hv_AbsoluteHistoEdgeAmplitude);
-	//Entropy and anisotropy:
-	//entropy_gray (Image, Image, Entropy, Anisotropy)
-	//Absolute histogram of gray values:
-	//gray_histo_abs (Image, Image, 8, AbsoluteHistoImage)
-	//Add features to feature vector:
-	(*hv_FeaturesExtended).Clear();
-	(*hv_FeaturesExtended).Append(hv_Features);
-	(*hv_FeaturesExtended).Append(hv_Energy);
-	(*hv_FeaturesExtended).Append(hv_Correlation);
-	(*hv_FeaturesExtended).Append(hv_Homogeneity);
-	(*hv_FeaturesExtended).Append(hv_Contrast);
-	(*hv_FeaturesExtended) = (*hv_FeaturesExtended).TupleConcat(hv_AbsoluteHistoEdgeAmplitude);
-	//FeaturesExtended := [FeaturesExtended,Entropy,Anisotropy]
-	//FeaturesExtended := [FeaturesExtended,AbsoluteHistoImage]
-
-	return;
-}
-
-void CHH2::PengShang2_Camera3(HObject ho_ImageEmphasize, HObject ho_TileImage, HTuple hv_ModelHandle,
-	HTuple hv_WindowHandle, HTuple *hv_IsBad)
+void CHH2::PengShang_Camera4(HObject ho_ImageEmphasize, HObject ho_TileImage, HTuple hv_WindowHandle,
+	HTuple *hv_IsBad)
 {
 	try{
 		// Local iconic variables
-		HObject  ho_ImageOpening, ho_ImageClosing, ho_Regions;
-		HObject  ho_RegionOpening, ho_ConnectedRegions, ho_SelectedRegions;
-		HObject  ho_RegionClosing, ho_RegionFillUp, ho_Rectangle;
-		HObject  ho_RegionUnion, ho_RegionIntersection, ho_RegionErosion;
-		HObject  ho_ImageReduced, ho_Region, ho_ConnectedRegions1;
-		HObject  ho_BadRegions1, ho_RegionUnion1, ho_RegionFillUp1;
-		HObject  ho_ConnectedRegions2, ho_RegionTrans, ho_BadObjects;
-		HObject  ho_ObjectSelected, ho_CropImage;
+		HObject  ho_ImageOpening, ho_ImageClosing1, ho_ImageClosing;
+		HObject  ho_Regions, ho_RegionOpening, ho_ConnectedRegions;
+		HObject  ho_SelectedRegions, ho_RegionClosing, ho_RegionFillUp;
+		HObject  ho_Rectangle, ho_RegionUnion, ho_RegionIntersection;
+		HObject  ho_RegionErosion, ho_ConnectedRegions1, ho_RegionTrans2;
+		HObject  ho_RegionUnion2, ho_ImageReduced, ho_Region, ho_BadRegions1;
+		HObject  ho_RegionUnion1, ho_RegionClosing1, ho_RegionFillUp1;
+		HObject  ho_AllBadRegions, ho_BadRegion2, ho_ConnectedRegions3;
+		HObject  ho_SelectedRegions1, ho_BadObjects, ho_ObjectSelected;
+		HObject  ho_BadRegionTrans, ho_RegionDilation;
 
 		// Local control variables
-		HTuple  hv_WIDTH, hv_SaveImagePath, hv_Number;
-		HTuple  hv_Col2s, hv_Col2, hv_Col1, hv_Index, hv_Value;
-		HTuple  hv_FeatureVector, hv_FoundClassIDs, hv_Confidence;
+		HTuple  hv_WIDTH, hv_Number, hv_Col2s, hv_Col2;
+		HTuple  hv_Col1, hv_Index, hv_Ra, hv_Rb, hv_Area, hv_GrayMean;
 		HTuple  hv_Num;
 
 		//****************************
@@ -407,11 +753,12 @@ void CHH2::PengShang2_Camera3(HObject ho_ImageEmphasize, HObject ho_TileImage, H
 		//****************************
 
 		(*hv_IsBad) = 0;
-		hv_WIDTH = 870;
-		hv_SaveImagePath = "f:/mlp/auto3/";
+		hv_WIDTH = 880;
+		//SaveImagePath := 'f:/mlp/Auto_camera4/NewPiece/'
 
 		GrayOpeningRect(ho_ImageEmphasize, &ho_ImageOpening, 7, 7);
-		GrayClosingRect(ho_ImageOpening, &ho_ImageClosing, 5, 5);
+		GrayClosingRect(ho_ImageOpening, &ho_ImageClosing1, 5, 5);
+		MedianImage(ho_ImageClosing1, &ho_ImageClosing, "circle", 7, "mirrored");
 
 		Threshold(ho_ImageClosing, &ho_Regions, 20, 255);
 		OpeningCircle(ho_Regions, &ho_RegionOpening, 15.5);
@@ -428,151 +775,86 @@ void CHH2::PengShang2_Camera3(HObject ho_ImageEmphasize, HObject ho_TileImage, H
 		GenRectangle1(&ho_Rectangle, 0, hv_Col1, 9999, hv_Col2);
 		Union1(ho_RegionFillUp, &ho_RegionUnion);
 		Intersection(ho_Rectangle, ho_RegionUnion, &ho_RegionIntersection);
-
 		ErosionCircle(ho_RegionIntersection, &ho_RegionErosion, 6.5);
 
-		ReduceDomain(ho_ImageClosing, ho_RegionErosion, &ho_ImageReduced);
-		Threshold(ho_ImageReduced, &ho_Region, 0, 200);
-		ClosingCircle(ho_Region, &ho_RegionClosing, 5.5);
+		Connection(ho_RegionErosion, &ho_ConnectedRegions1);
+		ShapeTrans(ho_ConnectedRegions1, &ho_RegionTrans2, "convex");
+		ErosionCircle(ho_RegionTrans2, &ho_RegionTrans2, 5.5);
+
+		Union1(ho_RegionTrans2, &ho_RegionUnion2);
+		ReduceDomain(ho_ImageOpening, ho_RegionUnion2, &ho_ImageReduced);
+
+		Threshold(ho_ImageReduced, &ho_Region, 0, 150);
+		ClosingCircle(ho_Region, &ho_RegionClosing, 3.5);
+		//opening_circle (RegionClosing, RegionClosing, 5.5)
 		Connection(ho_RegionClosing, &ho_ConnectedRegions1);
-		SelectShape(ho_ConnectedRegions1, &ho_BadRegions1, "area", "and", 700, 99999);
+		//select_shape (ConnectedRegions1, BadRegions1, ['area','convexity','column2'], 'and', [300,0.5,0], [99999,1.0,Col2-40])
+		SelectShape(ho_ConnectedRegions1, &ho_BadRegions1, ((HTuple("area").Append("convexity")).Append("column1")),
+			"and", ((HTuple(300).Append(0.4)).Append(0)), (HTuple(99999).Append(1.0)).TupleConcat(hv_Col2 - 50));
 		Union1(ho_BadRegions1, &ho_RegionUnion1);
-		FillUp(ho_RegionUnion1, &ho_RegionFillUp1);
-		Connection(ho_RegionFillUp1, &ho_ConnectedRegions2);
-		ShapeTrans(ho_ConnectedRegions2, &ho_RegionTrans, "rectangle1");
-		CountObj(ho_RegionTrans, &hv_Number);
+		ClosingCircle(ho_RegionUnion1, &ho_RegionClosing1, 5.5);
+		FillUp(ho_RegionClosing1, &ho_RegionFillUp1);
+		Connection(ho_RegionFillUp1, &ho_AllBadRegions);
+		//*****
+		Threshold(ho_ImageReduced, &ho_BadRegion2, 0, 10);
+		Connection(ho_BadRegion2, &ho_ConnectedRegions3);
+		SelectShape(ho_ConnectedRegions3, &ho_SelectedRegions1, "area", "and", 300, 99999);
+		//******
+		ConcatObj(ho_AllBadRegions, ho_SelectedRegions1, &ho_AllBadRegions);
+		CountObj(ho_AllBadRegions, &hv_Number);
 		GenEmptyObj(&ho_BadObjects);
 		{
-			HTuple end_val39 = hv_Number;
-			HTuple step_val39 = 1;
-			for (hv_Index = 1; hv_Index.Continue(end_val39, step_val39); hv_Index += step_val39)
+			HTuple end_val53 = hv_Number;
+			HTuple step_val53 = 1;
+			for (hv_Index = 1; hv_Index.Continue(end_val53, step_val53); hv_Index += step_val53)
 			{
-				SelectObj(ho_RegionTrans, &ho_ObjectSelected, hv_Index);
-				RegionFeatures(ho_ObjectSelected, (((HTuple("row1").Append("column1")).Append("width")).Append("height")),
-					&hv_Value);
 
-				CropPart(ho_TileImage, &ho_CropImage, HTuple(hv_Value[0]), HTuple(hv_Value[1]),
-					HTuple(hv_Value[2]), HTuple(hv_Value[3]));
-				//write_image (CropImage, 'tiff', 0, SaveImagePath+Index)
-
-				CHH2::Gen_features(ho_CropImage, &hv_FeatureVector);
-				ClassifyClassMlp(hv_ModelHandle, hv_FeatureVector, 1, &hv_FoundClassIDs, &hv_Confidence);
-				if (0 != (hv_FoundClassIDs == 1))
+				SelectObj(ho_AllBadRegions, &ho_ObjectSelected, hv_Index);
+				RegionFeatures(ho_ObjectSelected, "ra", &hv_Ra);
+				RegionFeatures(ho_ObjectSelected, "rb", &hv_Rb);
+				RegionFeatures(ho_ObjectSelected, "area", &hv_Area);
+				GrayFeatures(ho_ObjectSelected, ho_ImageOpening, "mean", &hv_GrayMean);
+				if (0 != ((hv_Ra / hv_Rb)>8))
 				{
-					//WriteImage(ho_CropImage, "tiff", 0, hv_SaveImagePath + hv_Index);
+					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+				}
+				else if (0 != (hv_Area>3000))
+				{
+					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+				}
+				else if (0 != (HTuple(HTuple(hv_GrayMean<40).TupleAnd((hv_Ra / hv_Rb)>3)).TupleAnd(hv_Ra>30)))
+				{
+					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+				}
+				else if (0 != (HTuple(hv_Area>1500).TupleAnd(hv_GrayMean<30)))
+				{
 					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
 				}
 
 			}
 		}
 
-		//if (HDevWindowStack::IsOpen())
-		DispObj(ho_TileImage, hv_WindowHandle);
-		//if (HDevWindowStack::IsOpen())
-		SetDraw(hv_WindowHandle, "margin");
-		SetColor(hv_WindowHandle, "red");
-		//if (HDevWindowStack::IsOpen())
-		DispObj(ho_BadObjects, hv_WindowHandle);
 		CountObj(ho_BadObjects, &hv_Num);
 		if (0 != (hv_Num>0))
 		{
+			ShapeTrans(ho_BadObjects, &ho_BadRegionTrans, "convex");
+			DilationCircle(ho_BadRegionTrans, &ho_RegionDilation, 8.5);
+			if (HDevWindowStack::IsOpen())
+				SetColor(hv_WindowHandle, "red");
+			if (HDevWindowStack::IsOpen())
+				DispObj(ho_RegionDilation, hv_WindowHandle);
 			(*hv_IsBad) = 1;
 		}
-
-
 		return;
 	}
 	catch (HException& except)
 	{
 		qDebug() << "error: " << except.ErrorMessage().Text();
 		(*hv_IsBad) = 1;
-		CHH::disp_message(hv_WindowHandle, "PengShang2_Camera3 Code Error.", "image", 400, 200, "red", "true");
+		CHH::disp_message(hv_WindowHandle, "PengShang_Camera4 Code Error.", "image", 400, 200, "red", "true");
 		return;
 	}
-	
+
 }
 
-void CHH2::GB_Camera1(HObject ho_ImageEmphasize, HObject ho_TileImage, HTuple hv_MLPHandle,
-		HTuple hv_WindowHandle, HTuple *hv_IsBad)
-	{
-		try{
-			// Local iconic variables
-			HObject  ho_Region, ho_RegionOpening, ho_RegionClosing;
-			HObject  ho_ConnectedRegions, ho_SelectedRegions, ho_RegionTrans;
-			HObject  ho_BadObjects, ho_ObjectSelected, ho_ImagePart;
-			HObject  ho_Rectangle;
-
-			// Local control variables
-			HTuple  hv_Index, hv_Value, hv_FeatureVector;
-			HTuple  hv_Class, hv_Confidence, hv_BadNum;
-
-			(*hv_IsBad) = 0;
-			Threshold(ho_ImageEmphasize, &ho_Region, 200, 255);
-			OpeningCircle(ho_Region, &ho_RegionOpening, 25.5);
-			ClosingCircle(ho_RegionOpening, &ho_RegionClosing, 5.5);
-			Connection(ho_RegionClosing, &ho_ConnectedRegions);
-			SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, "height", "and", 350, 1000);
-			CountObj(ho_SelectedRegions, &(*hv_IsBad));
-			ShapeTrans(ho_SelectedRegions, &ho_RegionTrans, "rectangle1");
-
-			GenEmptyObj(&ho_BadObjects);
-			if (0 != ((*hv_IsBad) == 18))
-			{
-				{
-					HTuple end_val11 = (*hv_IsBad);
-					HTuple step_val11 = 1;
-					for (hv_Index = 1; hv_Index.Continue(end_val11, step_val11); hv_Index += step_val11)
-					{
-						SelectObj(ho_RegionTrans, &ho_ObjectSelected, hv_Index);
-						RegionFeatures(ho_ObjectSelected, ((HTuple("row1").Append("column2")).Append("height")),
-							&hv_Value);
-						CropPart(ho_TileImage, &ho_ImagePart, HTuple(hv_Value[0]), HTuple(hv_Value[1]) - 400,
-							800, HTuple(hv_Value[2]));
-						GenRectangle1(&ho_Rectangle, HTuple(hv_Value[0]), HTuple(hv_Value[1]) - 400,
-							HTuple(hv_Value[0]) + HTuple(hv_Value[2]), (HTuple(hv_Value[1]) - 400) + 800);
-						CHH2::Gen_features(ho_ImagePart, &hv_FeatureVector);
-
-						ClassifyClassMlp(hv_MLPHandle, hv_FeatureVector, 1, &hv_Class, &hv_Confidence);
-						if (0 != (hv_Class == 1))
-						{
-							ConcatObj(ho_BadObjects, ho_Rectangle, &ho_BadObjects);
-						}
-					}
-				}
-
-				//**********display BadObject
-
-				SetDraw(hv_WindowHandle, "margin");
-				CountObj(ho_BadObjects, &hv_BadNum);
-				//if (HDevWindowStack::IsOpen())
-				DispObj(ho_TileImage, hv_WindowHandle);
-				if (0 != (hv_BadNum > 0))
-				{
-					(*hv_IsBad) = 1;
-					//if (HDevWindowStack::IsOpen())
-					SetColor(hv_WindowHandle, "red");
-					DispObj(ho_BadObjects, hv_WindowHandle);
-					//if (HDevWindowStack::IsOpen())
-					//	DispText(hv_WindowHandle, "bad", "image", 200, 150, "red", HTuple(),
-					//HTuple());
-				}
-
-			}
-			else
-			{
-				//***********钩部区域不足18
-				(*hv_IsBad) = 1;
-				//if (HDevWindowStack::IsOpen())
-				DispText(hv_WindowHandle, "not enough 18 pieces.", "image", 200,
-					150, "black", HTuple(), HTuple());
-			}
-			return;
-		}
-		catch (HException& except)
-		{
-			qDebug() << "error: " << except.ErrorMessage().Text();
-			(*hv_IsBad) = 1;
-			CHH::disp_message(hv_WindowHandle, "GB_Camera1 Code Error.", "image", 400, 200, "red", "true");
-			return;
-		}
-	}
+/****************Camera4****************************************************/

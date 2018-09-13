@@ -17,6 +17,8 @@ Camera_Thread::Camera_Thread(ConnectionType connection_type,QString CameraId, QO
 {
 	m_image_index = 1;
 	m_exposureTime = 30.0;
+	m_acquisitionLineRate = 10000.0;
+	m_height = 10000;
 	m_CameraIdlist.append(CameraId);
 	m_pGrabber = nullptr;
 	m_WaitWake = false;
@@ -176,11 +178,11 @@ bool Camera_Thread::OpenCamera()
 				m_pGrabber->SetFramegrabberParam("Height", 10000);
 				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);*/
 
-				m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", 10000.0);
+				m_pGrabber->SetFramegrabberParam("AcquisitionLineRate", m_acquisitionLineRate);
 				m_pGrabber->SetFramegrabberParam("ExposureTime", m_exposureTime);
 				m_pGrabber->SetFramegrabberParam("TriggerSelector", "FrameStart");
 				m_pGrabber->SetFramegrabberParam("TriggerMode", "Off");
-				m_pGrabber->SetFramegrabberParam("Height", 10000);
+				m_pGrabber->SetFramegrabberParam("Height", m_height);
 				m_pGrabber->SetFramegrabberParam("grab_timeout", 5000);
 			}
 
