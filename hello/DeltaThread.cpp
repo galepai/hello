@@ -185,9 +185,9 @@ void Delta_Thread::run()
 	m_bIsStop = false;
 	while (!m_bIsStop)
 	{
-		static int tt = 0;
+		/*static int tt = 0;
 		QTime time;
-		time.start();
+		time.start();*/
 
 		QMutexLocker locker(&m_mutex);
 		switch (m_QueryMode)
@@ -217,10 +217,16 @@ void Delta_Thread::run()
 				break;
 
 			case OneQueryToDefalutQuene:
-
-				m_write_string = m_Add_Queue.front();
-				qDebug() << " OneQueryToDefalutQuene.:	" << m_write_string._My_val.c_str() << ++tt;
-				m_Add_Queue.pop();	
+				if (m_Add_Queue.size() == 0)
+				{
+					qDebug() << " m_Add_Queue.size == 0" ;
+				}
+				else
+				{
+					m_write_string = m_Add_Queue.front();
+					m_Add_Queue.pop();
+				}
+				
 				break;
 
 			case OneQuery:
@@ -267,6 +273,8 @@ void Delta_Thread::run()
 
 int Delta_Thread::writeData(const char *data, int size)
 {
+	qDebug() << "lastest writeData: " << data;
+	
 	int len = 0;
 	forever
 	{
@@ -307,14 +315,14 @@ bool Delta_Thread::receiveData()
 			
 			if (m_total_data[0] == ':' && m_total_data[m_total_data.size() - 1] == '\n')
 			{
-				//qDebug() << m_total_data;
+				qDebug() << "lastest receiveData: "<<m_total_data;
 				if (m_QueryMode == OneQueryToDefalutQuene)
 				{
 					if (m_Add_Queue.size() > 0)
 						qDebug() << "Add_Queue > 0................";
 					else
 					{
-						qDebug() << "Change DefalutQuene................";
+						//qDebug() << "Change DefalutQuene................";
 						m_QueryMode = DefalutQuene;
 						//qDebug() << m_total_data;
 					}
