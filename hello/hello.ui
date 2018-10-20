@@ -40,7 +40,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>245</width>
+           <width>330</width>
            <height>343</height>
           </rect>
          </property>
@@ -90,7 +90,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>245</width>
+           <width>329</width>
            <height>343</height>
           </rect>
          </property>
@@ -111,59 +111,6 @@
            <widget class="QGraphicsView" name="MiddlePicView">
             <property name="styleSheet">
              <string notr="true">background-color: rgb(0, 0, 0);</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </widget>
-      </item>
-      <item>
-       <widget class="QScrollArea" name="scrollArea_SecondRight">
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <widget class="QWidget" name="scrollAreaWidgetContentsSecondRight">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>246</width>
-           <height>343</height>
-          </rect>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QGraphicsView" name="SecondRightPicView">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(0, 0, 0);</string>
-            </property>
-            <property name="resizeAnchor">
-             <enum>QGraphicsView::NoAnchor</enum>
             </property>
            </widget>
           </item>
@@ -193,7 +140,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>245</width>
+           <width>330</width>
            <height>343</height>
           </rect>
          </property>
@@ -295,26 +242,10 @@
           <number>190</number>
          </property>
         </widget>
-        <widget class="QSpinBox" name="spinBox_10">
-         <property name="geometry">
-          <rect>
-           <x>220</x>
-           <y>20</y>
-           <width>51</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-         <property name="maximum">
-          <number>900</number>
-         </property>
-        </widget>
         <widget class="QSpinBox" name="spinBox_02">
          <property name="geometry">
           <rect>
-           <x>320</x>
+           <x>210</x>
            <y>20</y>
            <width>51</width>
            <height>41</height>

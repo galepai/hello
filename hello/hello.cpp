@@ -91,7 +91,7 @@ void hello::OnOpen()
 
 	if (path.contains("camera1")
 		|| path.contains("camera2")
-		|| path.contains("camera3")
+		//|| path.contains("camera3")
 		|| path.contains("camera4"))
 	{
 		int i = path.lastIndexOf('/');
@@ -112,9 +112,9 @@ void hello::OnOpen()
 		ReadImage(&m_MiddleImage, ImagePath.toLocal8Bit().constData());
 		DispPic(m_MiddleImage, MiddleView);
 
-		ImagePath = upDir + "camera3/Camera3_" + ImageName;
+		/*ImagePath = upDir + "camera3/Camera3_" + ImageName;
 		ReadImage(&m_SecondRightImage, ImagePath.toLocal8Bit().constData());
-		DispPic(m_SecondRightImage, SecondRightView);
+		DispPic(m_SecondRightImage, SecondRightView);*/
 
 		ImagePath = upDir + "camera4/Camera4_" + ImageName;
 		ReadImage(&m_RightImage, ImagePath.toLocal8Bit().constData());
@@ -155,11 +155,11 @@ void hello::OnOneHandle_AllPic()
 	}
 		
 
-	if (m_SecondRightImage.Key() != 0)
+	/*if (m_SecondRightImage.Key() != 0)
 	{
 		DispPic(m_SecondRightImage, SecondRightView);
 		OnHandleImageThread(m_SecondRightImage, SecondRightView);
-	}
+	}*/
 		
 
 	if (m_RightImage.Key() != 0)
@@ -202,8 +202,8 @@ void hello::OnClearCameraThread()
 	if (m_Pylon_camera_thread_2_Clock)
 		m_Pylon_camera_thread_2_Clock->stop();
 
-	if (m_Pylon_camera_thread_10_Clock)
-		m_Pylon_camera_thread_10_Clock->stop();
+	/*if (m_Pylon_camera_thread_10_Clock)
+		m_Pylon_camera_thread_10_Clock->stop();*/
 
 	Sleep(20);
 	condition_Camera.wakeAll();
@@ -235,14 +235,14 @@ void hello::OnClearCameraThread()
 		}
 	}
 
-	if (PylonCamera_Thread::IsExistCameraId(LineCameraId_Pylon_Basler_10_Clock))
+	/*if (PylonCamera_Thread::IsExistCameraId(LineCameraId_Pylon_Basler_10_Clock))
 	{
 		if (m_Pylon_camera_thread_10_Clock->isRunning())
 		{
 			m_Pylon_camera_thread_10_Clock->stop();
 			m_Pylon_camera_thread_10_Clock->wait();
 		}
-	}
+	}*/
 }
 
 void hello::OnConfigure()
@@ -273,7 +273,7 @@ void hello::receiveSerialData(QByteArray str)
 				bool isStartGrab = m_Y_States[1];	//读取Y61的状态,On表示视觉到位
 				if (isStartGrab 
 					&& m_peviousProductDectectEnd
-					&& m_Pylon_camera_thread_10_Clock->ReadyWake()
+					//&& m_Pylon_camera_thread_10_Clock->ReadyWake()
 					&& m_Pylon_camera_thread_2_Clock->ReadyWake()
 					&& m_camera_thread_7_Clock->ReadyWake()
 					&& m_camera_thread_11_Clock->ReadyWake())
@@ -356,9 +356,9 @@ void hello::SetOpenWindowHandle(HImage& Image, HTuple* pWindowHandle, LocationVi
 		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 2000, (long)ui.RightPicView->winId(), pWindowHandle);
 		break;
 
-	case SecondRightView:
+	/*case SecondRightView:
 		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 2000, (long)ui.SecondRightPicView->winId(), pWindowHandle);
-		break;
+		break;*/
 
 	case LeftView:
 		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 2000, (long)ui.LeftPicView->winId(), pWindowHandle);
@@ -377,13 +377,13 @@ void hello::SetPicViewScroll(int width, int height, LocationView location)
 	float scaleY = height / 2000.0;
 	switch (location)
 	{
-	case SecondRightView:
+	/*case SecondRightView:
 		if (scaleY > scaleX)
 		{
 			HSCROLL_HEIGHT_SecondRightPic(2050);
 			VSCROLL_WIDTH_SecondRightPic(410);
 		}
-		break;
+		break;*/
 
 	case RightView:
 		if (scaleY > scaleX)
@@ -508,8 +508,8 @@ void hello::OnOpenCameras()
 	m_camera_thread_7_Clock->setSaveImageNum(100);
 	ReadConfigure("config.ini", "Camera_07_Clock", "Exposure", ExposureValue);
 	m_camera_thread_7_Clock->SetExposureTime(ExposureValue.toFloat());
-	m_camera_thread_7_Clock->SetAcquisitionLineRate(5000.0);
-	m_camera_thread_7_Clock->SetHeight(5000);
+	m_camera_thread_7_Clock->SetAcquisitionLineRate(10000.0);
+	m_camera_thread_7_Clock->SetHeight(10000);
 	connect(m_camera_thread_7_Clock, SIGNAL(signal_error(QString)), this, SLOT(genErrorDialog(QString)));
 	connect(m_camera_thread_7_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
 	connect(m_camera_thread_7_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
@@ -520,17 +520,17 @@ void hello::OnOpenCameras()
 
 	///*-----Pylon Version------------*/
 	/**	10点方向Basler线扫	*/
-	m_Pylon_camera_thread_10_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_10_Clock, this);
-	m_Pylon_camera_thread_10_Clock->setSaveImageDirName("Camera3");
-	m_Pylon_camera_thread_10_Clock->setSaveImageNum(100);
-	ReadConfigure("config.ini", "Camera_10_Clock", "Exposure", ExposureValue);
-	m_Pylon_camera_thread_10_Clock->SetExposureTime(ExposureValue.toInt());
-	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_error(QString)), this, SLOT(genErrorDialog(QString)));
-	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
-	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
-	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveSecondRightImage(void*)));	//右二视图显示
-	connect(m_Pylon_camera_thread_10_Clock, SIGNAL(finished()), m_Pylon_camera_thread_10_Clock, SLOT(deleteLater()));
-	m_Pylon_camera_thread_10_Clock->start();
+	//m_Pylon_camera_thread_10_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_10_Clock, this);
+	//m_Pylon_camera_thread_10_Clock->setSaveImageDirName("Camera3");
+	//m_Pylon_camera_thread_10_Clock->setSaveImageNum(100);
+	//ReadConfigure("config.ini", "Camera_10_Clock", "Exposure", ExposureValue);
+	//m_Pylon_camera_thread_10_Clock->SetExposureTime(ExposureValue.toInt());
+	//connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_error(QString)), this, SLOT(genErrorDialog(QString)));
+	//connect(m_Pylon_camera_thread_10_Clock, SIGNAL(ReadyOk(int)), this, SLOT(OnReadyOk(int)));
+	//connect(m_Pylon_camera_thread_10_Clock, SIGNAL(grab_correct_image(int)), this, SLOT(receiveCorrectImage(int)));
+	//connect(m_Pylon_camera_thread_10_Clock, SIGNAL(signal_image(void*)), this, SLOT(receiveSecondRightImage(void*)));	//右二视图显示
+	//connect(m_Pylon_camera_thread_10_Clock, SIGNAL(finished()), m_Pylon_camera_thread_10_Clock, SLOT(deleteLater()));
+	//m_Pylon_camera_thread_10_Clock->start();
 
 	/**	2点方向Basler线扫	*/
 	m_Pylon_camera_thread_2_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_2_Clock, this);
@@ -553,7 +553,7 @@ void hello::OnReadyOk(int num)
 {
 	static int total = 0;
 	total += num;
-	if (total == 4)
+	if (total == 3)
 	{
 		QMessageBox::StandardButton reply;
 		if (m_bIsOnLine)
@@ -659,16 +659,16 @@ void hello::OnHandleImageThread(HImage& ima, LocationView view)
 	}
 	break;
 
-	case SecondRightView:
-	{
-		PicThreadSecondRight* pPicThread = new PicThreadSecondRight(this);
-		pPicThread->m_Image = ima;
-		pPicThread->m_WindowHandle = GetViewWindowHandle(view);
-		connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
-		connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
-		pPicThread->start();
-	}
-	break;
+	//case SecondRightView:
+	//{
+	//	PicThreadSecondRight* pPicThread = new PicThreadSecondRight(this);
+	//	pPicThread->m_Image = ima;
+	//	pPicThread->m_WindowHandle = GetViewWindowHandle(view);
+	//	connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
+	//	connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
+	//	pPicThread->start();
+	//}
+	//break;
 
 	case RightView:
 	{
@@ -704,7 +704,7 @@ void hello::receiveCorrectImage(int value)
 	static int imageNum = 0;
 	imageNum += value;
 
-	if (imageNum == 4)  //收到1张图片
+	if (imageNum == 3)  //收到1张图片
 	{
 		m_total++;
 		if (m_bIsOnLine)
@@ -781,12 +781,14 @@ void hello::handleResults(int singleResult)
 
 	m_AllResult += singleResult;
 
-	if (m_AllResult >= LeftGood + MiddleGood + SecondRightGood + RightGood)
+	//if (m_AllResult >= LeftGood + MiddleGood + SecondRightGood + RightGood)
+	if (m_AllResult >= LeftGood + MiddleGood + RightGood)
 	{
 		
 		qDebug() << "Image num:				" << m_total;
 
-		if (m_AllResult == LeftGood + MiddleGood + SecondRightGood + RightGood)
+		//if (m_AllResult == LeftGood + MiddleGood + SecondRightGood + RightGood)
+		if (m_AllResult >= LeftGood + MiddleGood + RightGood)
 		{
 			Sleep(30);
 			m_good++;
@@ -860,8 +862,8 @@ void hello::ReadExposure()
 	ReadConfigure("config.ini", "Camera_07_Clock", "Exposure", Value);
 	ui.spinBox_07->setValue(Value.toInt());
 
-	ReadConfigure("config.ini", "Camera_10_Clock", "Exposure", Value);
-	ui.spinBox_10->setValue(Value.toInt());
+	/*ReadConfigure("config.ini", "Camera_10_Clock", "Exposure", Value);
+	ui.spinBox_10->setValue(Value.toInt());*/
 
 	ReadConfigure("config.ini", "Camera_11_Clock", "Exposure", Value);
 	ui.spinBox_11->setValue(Value.toInt());
@@ -873,11 +875,11 @@ void hello::OnSetExposure()
 {
 
 	if (m_Pylon_camera_thread_2_Clock
-		&& m_Pylon_camera_thread_10_Clock
+		//&& m_Pylon_camera_thread_10_Clock
 		&& m_camera_thread_11_Clock
-		&& m_camera_thread_11_Clock)
+		&& m_camera_thread_7_Clock)
 	{
-		m_Pylon_camera_thread_10_Clock->SetExposureTime(ui.spinBox_10->value());
+		//m_Pylon_camera_thread_10_Clock->SetExposureTime(ui.spinBox_10->value());
 		m_Pylon_camera_thread_2_Clock->SetExposureTime(ui.spinBox_02->value());
 		m_camera_thread_11_Clock->SetExposureTime(ui.spinBox_11->value());
 		m_camera_thread_7_Clock->SetExposureTime(ui.spinBox_07->value());
