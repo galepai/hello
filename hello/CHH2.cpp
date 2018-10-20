@@ -234,7 +234,7 @@ void CHH2::PengShang_Camera2(HObject ho_ImageEmphasize, HTuple hv_WindowHandle, 
 				{
 					SelectObj(ho_MaybeBadRegions, &ho_ObjectSelected, hv_index);
 					RegionFeatures(ho_ObjectSelected, (HTuple("ra").Append("rb")), &hv_Value);
-					if (0 != ((HTuple(hv_Value[0]) / HTuple(hv_Value[1]))>7.5))
+					if (0 != (HTuple((HTuple(hv_Value[0]) / HTuple(hv_Value[1]))>7.5).TupleAnd(HTuple(hv_Value[1])>5)))
 					{
 						ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
 					}
@@ -404,12 +404,15 @@ void CHH2::PengShang_Camera3(const HObject& ho_ImageEmphasize, const HObject& ho
 		HObject  ho_ConnectedRegions1, ho_BadRegions1, ho_RegionUnion1;
 		HObject  ho_RegionFillUp1, ho_ConnectedRegions2, ho_BlackRegion;
 		HObject  ho_RegionClosing, ho_ConnectedRegions3, ho_SelectedRegions1;
-		HObject  ho_BadObjects, ho_ObjectSelected, ho_RegionDilation;
+		HObject  ho_BadObjects, ho_ObjectSelected, ho_Up, ho_Down;
+		HObject  ho_RegionDilation;
 
 		// Local control variables
 		HTuple  hv_WIDTH, hv_Number, hv_Col2s, hv_Col2;
 		HTuple  hv_Col1, hv_Number1, hv_Index, hv_Ra, hv_Rb, hv_Area;
-		HTuple  hv_GrayMean, hv_BadNumber;
+		HTuple  hv_GrayMean, hv_BadNumber, hv_paichu, hv_Index1;
+		HTuple  hv_PHI, hv_Row, hv_Column, hv_RowMean, hv_ColumnMean;
+		HTuple  hv_length, hv_UpGrayMean, hv_DownGrayMean;
 
 		//****************************
 		//**
@@ -498,6 +501,43 @@ void CHH2::PengShang_Camera3(const HObject& ho_ImageEmphasize, const HObject& ho
 			}
 
 			CountObj(ho_BadObjects, &hv_BadNumber);
+			hv_paichu = HTuple();
+			{
+				HTuple end_val73 = hv_BadNumber;
+				HTuple step_val73 = 1;
+				for (hv_Index1 = 1; hv_Index1.Continue(end_val73, step_val73); hv_Index1 += step_val73)
+				{
+					SelectObj(ho_BadObjects, &ho_ObjectSelected, hv_Index1);
+					RegionFeatures(ho_ObjectSelected, "phi", &hv_PHI);
+					GrayFeatures(ho_ObjectSelected, ho_ImageOpening, "mean", &hv_GrayMean);
+					if (0 != (hv_PHI<0))
+					{
+						hv_PHI = -hv_PHI;
+					}
+					if (0 != (HTuple(hv_PHI<(HTuple(10).TupleRad())).TupleAnd(hv_GrayMean<20.0)))
+					{
+						RegionFeatures(ho_ObjectSelected, "ra", &hv_Ra);
+						RegionFeatures(ho_ObjectSelected, (HTuple("row1").Append("row2")), &hv_Row);
+						RegionFeatures(ho_ObjectSelected, (HTuple("column1").Append("column2")),
+							&hv_Column);
+						TupleMean(hv_Row, &hv_RowMean);
+						TupleMean(hv_Column, &hv_ColumnMean);
+						hv_length = HTuple(hv_Column[1]) - HTuple(hv_Column[0]);
+						GenRectangle1(&ho_Up, HTuple(hv_Row[0]) - 20, HTuple(hv_Column[0]), HTuple(hv_Row[0]),
+							HTuple(hv_Column[1]));
+						GrayFeatures(ho_Up, ho_ImageOpening, "mean", &hv_UpGrayMean);
+						GenRectangle1(&ho_Down, HTuple(hv_Row[1]), HTuple(hv_Column[0]), HTuple(hv_Row[1]) + 20,
+							HTuple(hv_Column[1]));
+						GrayFeatures(ho_Down, ho_ImageOpening, "mean", &hv_DownGrayMean);
+						if (0 != (HTuple(HTuple(hv_UpGrayMean<1.0).TupleAnd(hv_DownGrayMean>100.0)).TupleOr(HTuple(hv_UpGrayMean>100.0).TupleAnd(hv_DownGrayMean<100.0))))
+						{
+							hv_paichu = hv_paichu.TupleConcat(hv_Index1);
+						}
+					}
+				}
+			}
+			RemoveObj(ho_BadObjects, &ho_BadObjects, hv_paichu);
+			CountObj(ho_BadObjects, &hv_BadNumber);
 			if (HDevWindowStack::IsOpen())
 				DispObj(ho_TileImage, hv_WindowHandle);
 			if (HDevWindowStack::IsOpen())
@@ -515,6 +555,29 @@ void CHH2::PengShang_Camera3(const HObject& ho_ImageEmphasize, const HObject& ho
 					DispObj(ho_RegionDilation, hv_WindowHandle);
 			}
 
+			//****片底
+			//union1 (SelectedRegions1, RegionUnion1)
+			//closing_circle (RegionUnion1, RegionClosing, 5.5)
+			//connection (RegionClosing, ConnectedRegions2)
+			//select_shape (ConnectedRegions2, SelectedRegions1, ['area','column2'], 'and', [1200,Col2-100], [999999,Col2+50])
+			//gray_features (SelectedRegions1, TileImage, 'mean', GrayMeans)
+			//tuple_sgn (GrayMeans-130, Sgn)
+			//tuple_find (Sgn, -1, Indices)
+			//badNum := |Indices|
+			//gen_empty_obj (Bad2Objects)
+			//if (badNum!=0 and Indices!=-1)
+			//for Index := 0 to badNum-1 by 1
+			//select_obj (SelectedRegions1, ObjectSelected, Indices[Index]+1)
+			//concat_obj (Bad2Objects, ObjectSelected, Bad2Objects)
+			//endfor
+			//endif
+
+			//count_obj (Bad2Objects, Number2)
+			//if (Number2>0)
+			//IsBad := true
+			//dilation_circle (Bad2Objects, RegionDilation2, 8.5)
+			//dev_display (RegionDilation2)
+			//endif
 		}
 		else
 		{
@@ -753,7 +816,7 @@ void CHH2::PengShang_Camera4(HObject ho_ImageEmphasize, HObject ho_TileImage, HT
 		//****************************
 
 		(*hv_IsBad) = 0;
-		hv_WIDTH = 880;
+		hv_WIDTH = 890;
 		//SaveImagePath := 'f:/mlp/Auto_camera4/NewPiece/'
 
 		GrayOpeningRect(ho_ImageEmphasize, &ho_ImageOpening, 7, 7);
@@ -767,84 +830,95 @@ void CHH2::PengShang_Camera4(HObject ho_ImageEmphasize, HObject ho_TileImage, HT
 			"and", (HTuple(400).Append(0)), (HTuple(800).Append(1800)));
 
 		CountObj(ho_SelectedRegions, &hv_Number);
-		ClosingCircle(ho_SelectedRegions, &ho_RegionClosing, 10.5);
-		FillUp(ho_RegionClosing, &ho_RegionFillUp);
-		RegionFeatures(ho_RegionFillUp, "column2", &hv_Col2s);
-		TupleMean(hv_Col2s, &hv_Col2);
-		hv_Col1 = hv_Col2 - hv_WIDTH;
-		GenRectangle1(&ho_Rectangle, 0, hv_Col1, 9999, hv_Col2);
-		Union1(ho_RegionFillUp, &ho_RegionUnion);
-		Intersection(ho_Rectangle, ho_RegionUnion, &ho_RegionIntersection);
-		ErosionCircle(ho_RegionIntersection, &ho_RegionErosion, 6.5);
-
-		Connection(ho_RegionErosion, &ho_ConnectedRegions1);
-		ShapeTrans(ho_ConnectedRegions1, &ho_RegionTrans2, "convex");
-		ErosionCircle(ho_RegionTrans2, &ho_RegionTrans2, 5.5);
-
-		Union1(ho_RegionTrans2, &ho_RegionUnion2);
-		ReduceDomain(ho_ImageOpening, ho_RegionUnion2, &ho_ImageReduced);
-
-		Threshold(ho_ImageReduced, &ho_Region, 0, 150);
-		ClosingCircle(ho_Region, &ho_RegionClosing, 3.5);
-		//opening_circle (RegionClosing, RegionClosing, 5.5)
-		Connection(ho_RegionClosing, &ho_ConnectedRegions1);
-		//select_shape (ConnectedRegions1, BadRegions1, ['area','convexity','column2'], 'and', [300,0.5,0], [99999,1.0,Col2-40])
-		SelectShape(ho_ConnectedRegions1, &ho_BadRegions1, ((HTuple("area").Append("convexity")).Append("column1")),
-			"and", ((HTuple(300).Append(0.4)).Append(0)), (HTuple(99999).Append(1.0)).TupleConcat(hv_Col2 - 50));
-		Union1(ho_BadRegions1, &ho_RegionUnion1);
-		ClosingCircle(ho_RegionUnion1, &ho_RegionClosing1, 5.5);
-		FillUp(ho_RegionClosing1, &ho_RegionFillUp1);
-		Connection(ho_RegionFillUp1, &ho_AllBadRegions);
-		//*****
-		Threshold(ho_ImageReduced, &ho_BadRegion2, 0, 10);
-		Connection(ho_BadRegion2, &ho_ConnectedRegions3);
-		SelectShape(ho_ConnectedRegions3, &ho_SelectedRegions1, "area", "and", 300, 99999);
-		//******
-		ConcatObj(ho_AllBadRegions, ho_SelectedRegions1, &ho_AllBadRegions);
-		CountObj(ho_AllBadRegions, &hv_Number);
-		GenEmptyObj(&ho_BadObjects);
+		if (0 != (hv_Number == 18))
 		{
-			HTuple end_val53 = hv_Number;
-			HTuple step_val53 = 1;
-			for (hv_Index = 1; hv_Index.Continue(end_val53, step_val53); hv_Index += step_val53)
+			ClosingCircle(ho_SelectedRegions, &ho_RegionClosing, 10.5);
+			FillUp(ho_RegionClosing, &ho_RegionFillUp);
+			RegionFeatures(ho_RegionFillUp, "column2", &hv_Col2s);
+			TupleMean(hv_Col2s, &hv_Col2);
+			hv_Col1 = hv_Col2 - hv_WIDTH;
+			GenRectangle1(&ho_Rectangle, 0, hv_Col1, 9999, hv_Col2);
+			Union1(ho_RegionFillUp, &ho_RegionUnion);
+			Intersection(ho_Rectangle, ho_RegionUnion, &ho_RegionIntersection);
+			ErosionCircle(ho_RegionIntersection, &ho_RegionErosion, 6.5);
+
+			Connection(ho_RegionErosion, &ho_ConnectedRegions1);
+			ShapeTrans(ho_ConnectedRegions1, &ho_RegionTrans2, "convex");
+			ErosionCircle(ho_RegionTrans2, &ho_RegionTrans2, 5.5);
+
+			Union1(ho_RegionTrans2, &ho_RegionUnion2);
+			ReduceDomain(ho_ImageOpening, ho_RegionUnion2, &ho_ImageReduced);
+
+			Threshold(ho_ImageReduced, &ho_Region, 0, 150);
+			ClosingCircle(ho_Region, &ho_RegionClosing, 3.5);
+			//opening_circle (RegionClosing, RegionClosing, 5.5)
+			Connection(ho_RegionClosing, &ho_ConnectedRegions1);
+			//select_shape (ConnectedRegions1, BadRegions1, ['area','convexity','column2'], 'and', [300,0.5,0], [99999,1.0,Col2-40])
+			SelectShape(ho_ConnectedRegions1, &ho_BadRegions1, ((HTuple("area").Append("convexity")).Append("column1")),
+				"and", ((HTuple(300).Append(0.4)).Append(0)), (HTuple(99999).Append(1.0)).TupleConcat(hv_Col2 - 50));
+			Union1(ho_BadRegions1, &ho_RegionUnion1);
+			ClosingCircle(ho_RegionUnion1, &ho_RegionClosing1, 5.5);
+			FillUp(ho_RegionClosing1, &ho_RegionFillUp1);
+			Connection(ho_RegionFillUp1, &ho_AllBadRegions);
+			//*****
+			Threshold(ho_ImageReduced, &ho_BadRegion2, 0, 10);
+			Connection(ho_BadRegion2, &ho_ConnectedRegions3);
+			SelectShape(ho_ConnectedRegions3, &ho_SelectedRegions1, "area", "and", 300, 99999);
+			//******
+			ConcatObj(ho_AllBadRegions, ho_SelectedRegions1, &ho_AllBadRegions);
+			CountObj(ho_AllBadRegions, &hv_Number);
+			GenEmptyObj(&ho_BadObjects);
 			{
+				HTuple end_val54 = hv_Number;
+				HTuple step_val54 = 1;
+				for (hv_Index = 1; hv_Index.Continue(end_val54, step_val54); hv_Index += step_val54)
+				{
 
-				SelectObj(ho_AllBadRegions, &ho_ObjectSelected, hv_Index);
-				RegionFeatures(ho_ObjectSelected, "ra", &hv_Ra);
-				RegionFeatures(ho_ObjectSelected, "rb", &hv_Rb);
-				RegionFeatures(ho_ObjectSelected, "area", &hv_Area);
-				GrayFeatures(ho_ObjectSelected, ho_ImageOpening, "mean", &hv_GrayMean);
-				if (0 != ((hv_Ra / hv_Rb)>8))
-				{
-					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
-				}
-				else if (0 != (hv_Area>3000))
-				{
-					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
-				}
-				else if (0 != (HTuple(HTuple(hv_GrayMean<40).TupleAnd((hv_Ra / hv_Rb)>3)).TupleAnd(hv_Ra>30)))
-				{
-					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
-				}
-				else if (0 != (HTuple(hv_Area>1500).TupleAnd(hv_GrayMean<30)))
-				{
-					ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
-				}
+					SelectObj(ho_AllBadRegions, &ho_ObjectSelected, hv_Index);
+					RegionFeatures(ho_ObjectSelected, "ra", &hv_Ra);
+					RegionFeatures(ho_ObjectSelected, "rb", &hv_Rb);
+					RegionFeatures(ho_ObjectSelected, "area", &hv_Area);
+					GrayFeatures(ho_ObjectSelected, ho_ImageOpening, "mean", &hv_GrayMean);
+					if (0 != (HTuple((hv_Ra / hv_Rb)>8).TupleAnd(hv_GrayMean<90)))
+					{
+						ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+					}
+					else if (0 != (HTuple(hv_Area>3000).TupleAnd(hv_GrayMean<90)))
+					{
+						ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+					}
+					else if (0 != (HTuple(HTuple(hv_GrayMean<40).TupleAnd((hv_Ra / hv_Rb)>3)).TupleAnd(hv_Ra>30)))
+					{
+						ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+					}
+					else if (0 != (HTuple(hv_Area>1500).TupleAnd(hv_GrayMean<30)))
+					{
+						ConcatObj(ho_BadObjects, ho_ObjectSelected, &ho_BadObjects);
+					}
 
+				}
+			}
+
+			CountObj(ho_BadObjects, &hv_Num);
+			if (0 != (hv_Num>0))
+			{
+				ShapeTrans(ho_BadObjects, &ho_BadRegionTrans, "convex");
+				DilationCircle(ho_BadRegionTrans, &ho_RegionDilation, 8.5);
+				if (HDevWindowStack::IsOpen())
+					SetColor(hv_WindowHandle, "red");
+				if (HDevWindowStack::IsOpen())
+					DispObj(ho_RegionDilation, hv_WindowHandle);
+				(*hv_IsBad) = 1;
 			}
 		}
-
-		CountObj(ho_BadObjects, &hv_Num);
-		if (0 != (hv_Num>0))
+		else
 		{
-			ShapeTrans(ho_BadObjects, &ho_BadRegionTrans, "convex");
-			DilationCircle(ho_BadRegionTrans, &ho_RegionDilation, 8.5);
-			if (HDevWindowStack::IsOpen())
-				SetColor(hv_WindowHandle, "red");
-			if (HDevWindowStack::IsOpen())
-				DispObj(ho_RegionDilation, hv_WindowHandle);
 			(*hv_IsBad) = 1;
+			if (HDevWindowStack::IsOpen())
+				DispText(hv_WindowHandle, "片数不等于18", "image", 300, 220, "red",
+				HTuple(), HTuple());
 		}
+
 		return;
 	}
 	catch (HException& except)

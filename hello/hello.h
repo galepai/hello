@@ -9,6 +9,7 @@
 #include "TestDialog.h"
 #include "CameraThread.h"
 #include "PylonCameraThread.h"
+#include <queue>
 
 
 using namespace HalconCpp;
@@ -31,6 +32,7 @@ public:
 	void setGbModel(QString path){ m_GBModel = path; }
 	const QString& gbModel(){ return m_GBModel; }
 	void readAllModelFromIni();
+	void addResultQueue();
 
 	//*********图像处理线程**************/
 	void OnHandleImageThread(HImage& ima, LocationView view);
@@ -91,6 +93,8 @@ private:
 	bool m_bIsOnLine; //打开相机时,选择是否与PLC联机
 	QString m_BottomModel;
 	QString m_GBModel;
+	std::queue<int> m_Result_Queue;
+	std::queue<int> m_Result_AllQueue;
 
 signals:
 	void ReadyLoop();

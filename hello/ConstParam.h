@@ -172,8 +172,11 @@ static const char* READ_X_INPUT = "010204000048";  //读X00-X87
 static const char* READ_Y_OUTPUT = "010105000038";  //读Y00-Y67  
 static const char* READ_Y61_OUTPUT = "010105300008";  //读Y60-Y67  
 static const char* RESET_Y61 = "010505310000";  //置Y61为0  
-static const char* RESET_Y60 = "010505300000";  //置Y60为0 
+static const char* RESET_Y60 = "010505300000";  //置Y60为0 (触发相机)
 
+// 分料气缸
+static const char* FENGLIAO_BAD = "010508FDFF00";  //置M253为1  
+static const char* FENGLIAO_GOOD = "010508FD0000";  //置M253为0 
 
 //	直线模组前进(自动),自动定时抛光
 static const char* PAOGUANG_ON = "010508A9FF00";  //M169 SET 直线模组前进,自动定时抛光

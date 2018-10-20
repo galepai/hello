@@ -38,6 +38,7 @@ void Camera_Thread::run()
 	HObject Rectangle;
 
 	bool first = true;
+	
 	while (!m_bIsStop)
 	{
 		try{
@@ -48,18 +49,20 @@ void Camera_Thread::run()
 			if (first){
 				emit ReadyOk(1);
 				first = false;
-			}
+			}	
+			
 			m_WaitWake = true;
 			condition_Camera.wait(&mutex_Camera);
 			mutex_Camera.unlock();
 			m_WaitWake = false;
-
+		
 			if (m_bIsStop)
 				break;
 
 			m_pGrabber->SetFramegrabberParam("ExposureTime", m_exposureTime);
 
 			Image = m_pGrabber->GrabImage();
+			
 			//Image = m_pGrabber->GrabImageAsync(-1);
 
 			qDebug() << endl << "Grab Image Info :" << m_CameraId;

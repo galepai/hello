@@ -55,6 +55,7 @@ hello::hello(QWidget *parent)
 	ReadExposure();
 	connect(ui.pushButton_exposure, SIGNAL(clicked()), this, SLOT(OnSetExposure()));
 
+	
 }
 
 //全屏显示
@@ -480,7 +481,6 @@ void hello::OnStart()
 
 	readAllModelFromIni();
 
-
 }
 
 void hello::OnOpenCameras()
@@ -579,8 +579,11 @@ void hello::OnStop()
 
 	OnClearCameraThread();
 
+	m_Result_AllQueue;
 	ui.OnStop->setEnabled(false);
 	ui.OnLineRun->setEnabled(true);
+
+	
 	
 }
 
@@ -705,7 +708,9 @@ void hello::receiveCorrectImage(int value)
 	{
 		m_total++;
 		if (m_bIsOnLine)
-			OnDetectEnd();
+		{
+			//OnDetectEnd();
+		}
 		imageNum = 0;
 		qDebug() << "Send M177:				" << m_total;
 
@@ -773,7 +778,6 @@ bool hello::OpenSerial()
 //得到线程的信号,并判断检测结果,发送给PLC
 void hello::handleResults(int singleResult)
 {
-	//m_peviousProductDectectEnd = false;
 
 	m_AllResult += singleResult;
 
@@ -787,7 +791,13 @@ void hello::handleResults(int singleResult)
 			Sleep(30);
 			m_good++;
 			if (m_bIsOnLine)
-				Delta_Thread::AddOneQueueInfo(RESULT_GODD);
+			{
+				
+				Delta_Thread::AddOneQueueInfo(RESULT_GODD);	
+				OnDetectEnd();
+				m_Result_Queue.push(1);
+				m_Result_AllQueue.push(1);
+			}	
 
 			qDebug() << "Send Good!!!	";
 			ui.lcdNumber_good->display(m_good);
@@ -797,13 +807,38 @@ void hello::handleResults(int singleResult)
 			Sleep(30);
 			m_bad++;
 			if (m_bIsOnLine)
+			{
+				
 				Delta_Thread::AddOneQueueInfo(RESULT_BAD);
+				OnDetectEnd();
+				m_Result_Queue.push(0);
+				m_Result_AllQueue.push(0);
+			}
+				
 
 			qDebug() << "Send Bad!!!	";
 			ui.lcdNumber_bad->display(m_bad);
 		}
 
 		qDebug() << "All Detect Result:	" << m_AllResult;
+		if (m_Result_Queue.size() >= 3)
+		{
+			int result = m_Result_Queue.front();
+			if (result)
+			{
+				Delta_Thread::AddOneQueueInfo(FENGLIAO_GOOD);
+				m_Result_Queue.pop();
+				qDebug() << "POP GOOD ";
+				qDebug() << "m_Result_Queue:  "<<m_Result_Queue.size();
+			}
+			else
+			{
+				Delta_Thread::AddOneQueueInfo(FENGLIAO_BAD);
+				m_Result_Queue.pop();
+				qDebug() << "POP BAD ";
+				qDebug() << "m_Result_Queue:  " << m_Result_Queue.size();
+			}
+		}
 		m_AllResult = 0;
 		m_peviousProductDectectEnd = true;
 
