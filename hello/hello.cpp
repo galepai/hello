@@ -365,7 +365,7 @@ void hello::SetOpenWindowHandle(HImage& Image, HTuple* pWindowHandle, LocationVi
 		break;
 
 	case MiddleView:
-		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 1000, (long)ui.MiddlePicView->winId(), pWindowHandle);
+		CHH::dev_open_window_fit_image(Image, 0, 0, 1024, 2000, (long)ui.MiddlePicView->winId(), pWindowHandle);
 		break;
 	}
 }
@@ -412,8 +412,8 @@ void hello::SetPicViewScroll(int width, int height, LocationView location)
 	case MiddleView:
 		if (scaleY > scaleX)
 		{
-			HSCROLL_HEIGHT_MiddlePic(1050);
-			VSCROLL_WIDTH_MiddlePic(310);
+			HSCROLL_HEIGHT_MiddlePic(2050);
+			VSCROLL_WIDTH_MiddlePic(410);
 		}
 		else
 		{
@@ -674,7 +674,7 @@ void hello::OnHandleImageThread(HImage& ima, LocationView view)
 	{
 		PicThreadRight* pPicThread = new PicThreadRight(this);
 		pPicThread->m_Image = ima;
-		pPicThread->setModel(bottomModel());
+		//pPicThread->setModel(bottomModel());
 		pPicThread->m_WindowHandle = GetViewWindowHandle(view);
 		connect(pPicThread, SIGNAL(resultReady(int)), this, SLOT(handleResults(int)));
 		connect(pPicThread, SIGNAL(finished()), pPicThread, SLOT(deleteLater()));
@@ -788,7 +788,7 @@ void hello::handleResults(int singleResult)
 		qDebug() << "Image num:				" << m_total;
 
 		//if (m_AllResult == LeftGood + MiddleGood + SecondRightGood + RightGood)
-		if (m_AllResult >= LeftGood + MiddleGood + RightGood)
+		if (m_AllResult == LeftGood + MiddleGood + RightGood)
 		{
 			Sleep(30);
 			m_good++;

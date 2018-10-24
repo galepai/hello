@@ -25,14 +25,20 @@ void PicThreadRight::run()
 			Emphasize(m_Image, &ImageEmphasize, 7, 101, 1);
 
 		//	CHH2::BottomAndTop_Camera4(ImageEmphasize, m_Image, m_WindowHandle, m_ModelPath.toStdString().c_str(), &hv_IsBad);
+
+			//QTime ti;
+			//ti.start();
+
 			CHH2::PengShang_Camera4(ImageEmphasize, m_Image, m_WindowHandle, &hv_IsBad);
+
+			//qDebug() << "right: " << ti.elapsed() << "ms";
 			num++;
 			CHH::disp_message(m_WindowHandle, HTuple("number: ") + num, "image", 12, 12, "black", "true");
 
 
-			qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+			//qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
 			//if (num % 3)
-			if (!hv_IsBad.I())
+			if (hv_IsBad.I()==0)
 			{
 				emit resultReady(RightGood);
 				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "black", "true");

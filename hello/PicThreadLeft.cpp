@@ -23,14 +23,14 @@ void PicThreadLeft::run()
 			//OnHandle(m_WindowHandle);
 			ReadClassMlp(getModel().toStdString().c_str(), &hv_ModelHandle);
 			CHH2::GB_Camera1(ImageEmphasize, m_Image, hv_ModelHandle, m_WindowHandle, &hv_IsBad);
-		
+			
 			num++;
 			CHH::disp_message(m_WindowHandle, HTuple("number: ") + num, "image", 12, 12, "black", "true");
 			ClearClassMlp(hv_ModelHandle);
 
 			qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
 			//if (num % 3)
-			if (hv_IsBad.I()!=1)
+			if (hv_IsBad.I()==0)
 			{
 				emit resultReady(LeftGood);
 				CHH::disp_message(m_WindowHandle, HTuple("Good "), "image", 120, 12, "black", "true");
