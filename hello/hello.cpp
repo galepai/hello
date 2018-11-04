@@ -280,7 +280,7 @@ void hello::receiveSerialData(QByteArray str)
 				{
 					
 						Delta_Thread::AddOneQueueInfo(RESET_Y61);
-						Sleep(10);
+						Sleep(20);
 						m_peviousProductDectectEnd = false;
 						OnWakeCamera();
 						qDebug() << "receive Y61: " << ++num;
@@ -296,6 +296,10 @@ void hello::receiveSerialData(QByteArray str)
 
 void hello::OnWakeCamera()
 {
+	mutex_Camera.lock();
+	condition_Camera.wakeAll();
+	mutex_Camera.unlock();
+	Sleep(10);
 	mutex_Camera.lock();
 	condition_Camera.wakeAll();
 	mutex_Camera.unlock();
@@ -490,7 +494,7 @@ void hello::OnOpenCameras()
 	/**	11点方向DALSA线扫	*/
 	m_camera_thread_11_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision2, LineCameraId_Dalsa_11_Clock, this);
 	m_camera_thread_11_Clock->setSaveImageDirName("Camera1");
-	m_camera_thread_11_Clock->setSaveImageNum(100);
+	m_camera_thread_11_Clock->setSaveImageNum(999);
 	ReadConfigure("config.ini", "Camera_11_Clock", "Exposure", ExposureValue);
 	m_camera_thread_11_Clock->SetExposureTime(ExposureValue.toFloat());
 	//m_camera_thread_11_Clock->SetAcquisitionLineRate(10000.0);
@@ -505,7 +509,7 @@ void hello::OnOpenCameras()
 	/**	7点方向DALSA线扫	*/
 	m_camera_thread_7_Clock = new Camera_Thread(Camera_Thread::ConnectionType::GigEVision2, LineCameraId_Dalsa_7_Clock, this);
 	m_camera_thread_7_Clock->setSaveImageDirName("Camera2");
-	m_camera_thread_7_Clock->setSaveImageNum(100);
+	m_camera_thread_7_Clock->setSaveImageNum(999);
 	ReadConfigure("config.ini", "Camera_07_Clock", "Exposure", ExposureValue);
 	m_camera_thread_7_Clock->SetExposureTime(ExposureValue.toFloat());
 	m_camera_thread_7_Clock->SetAcquisitionLineRate(10000.0);
@@ -535,7 +539,7 @@ void hello::OnOpenCameras()
 	/**	2点方向Basler线扫	*/
 	m_Pylon_camera_thread_2_Clock = new PylonCamera_Thread(PylonCamera_Thread::ConnectionType::GigEVision, LineCameraId_Pylon_Basler_2_Clock, this);
 	m_Pylon_camera_thread_2_Clock->setSaveImageDirName("Camera4");
-	m_Pylon_camera_thread_2_Clock->setSaveImageNum(100);
+	m_Pylon_camera_thread_2_Clock->setSaveImageNum(999);
 	ReadConfigure("config.ini", "Camera_02_Clock", "Exposure", ExposureValue);
 	m_Pylon_camera_thread_2_Clock->SetExposureTime(ExposureValue.toInt());
 	connect(m_Pylon_camera_thread_2_Clock, SIGNAL(signal_error(QString)), this, SLOT(genErrorDialog(QString)));
@@ -830,15 +834,15 @@ void hello::handleResults(int singleResult)
 			{
 				Delta_Thread::AddOneQueueInfo(FENGLIAO_GOOD);
 				m_Result_Queue.pop();
-				qDebug() << "POP GOOD ";
-				qDebug() << "m_Result_Queue:  "<<m_Result_Queue.size();
+				//qDebug() << "POP GOOD ";
+				//qDebug() << "m_Result_Queue:  "<<m_Result_Queue.size();
 			}
 			else
 			{
 				Delta_Thread::AddOneQueueInfo(FENGLIAO_BAD);
 				m_Result_Queue.pop();
-				qDebug() << "POP BAD ";
-				qDebug() << "m_Result_Queue:  " << m_Result_Queue.size();
+				//qDebug() << "POP BAD ";
+				//qDebug() << "m_Result_Queue:  " << m_Result_Queue.size();
 			}
 		}
 		m_AllResult = 0;

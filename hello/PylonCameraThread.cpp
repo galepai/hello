@@ -129,6 +129,8 @@ void PylonCamera_Thread::run()
 				emit ReadyOk(1);
 				first = false;
 			}
+
+			Sleep(10);
 			m_WaitWake = true;
 			condition_Camera.wait(&mutex_Camera);
 			mutex_Camera.unlock();
@@ -146,14 +148,14 @@ void PylonCamera_Thread::run()
 				if (ptrGrabResult->GrabSucceeded())
 				{
 					// Access the image data.
-					qDebug() << endl << "Grab Image Info :" << m_CameraId;
+					/*qDebug() << endl << "Grab Image Info :" << m_CameraId;
 					qDebug() << "=========================" ;
 					qDebug() << "SizeX: " << ptrGrabResult->GetWidth();
-					qDebug() << "SizeY: " << ptrGrabResult->GetHeight();
+					qDebug() << "SizeY: " << ptrGrabResult->GetHeight();*/
 					const uint8_t* pImageBuffer = (uint8_t *)ptrGrabResult->GetBuffer();
 					//qDebug() << m_CameraId << "	:	" << pImageBuffer;
 					
-					qDebug() << "========================="  << endl;
+					/*qDebug() << "========================="  << endl;*/
 
 					m_mutex.lock();
 					GenImage1(&Image, "byte", (int)ptrGrabResult->GetWidth(), (int)ptrGrabResult->GetHeight(), (Hlong)pImageBuffer);
@@ -166,7 +168,7 @@ void PylonCamera_Thread::run()
 						emit signal_image(&Image);
 						QueueSaveImage(Image, m_MaxNum);
 
-						Sleep(10);
+						//Sleep(20);
 					//}
 					
 					//qDebug() << m_CameraId << " all time: " << time.elapsed() / 1000.0;

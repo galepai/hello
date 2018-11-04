@@ -51,6 +51,7 @@ void Camera_Thread::run()
 				first = false;
 			}	
 			
+			Sleep(10);
 			m_WaitWake = true;
 			condition_Camera.wait(&mutex_Camera);
 			mutex_Camera.unlock();
@@ -65,11 +66,11 @@ void Camera_Thread::run()
 			
 			//Image = m_pGrabber->GrabImageAsync(-1);
 
-			qDebug() << endl << "Grab Image Info :" << m_CameraId;
+		/*	qDebug() << endl << "Grab Image Info :" << m_CameraId;
 			qDebug() << "=========================";
 			qDebug() << "SizeX: " << (int)Image.Width();
 			qDebug() << "SizeY: " << (int)Image.Height();
-			qDebug() << "=========================" << endl;
+			qDebug() << "=========================" << endl;*/
 
 			//if (isCorrectImage(Image,0))
 			//{
@@ -79,16 +80,30 @@ void Camera_Thread::run()
 				QueueSaveImage(Image, m_MaxNum);
 				//qDebug() << m_CameraId<<" all time: " << time.elapsed() / 1000.0;
 
-				Sleep(10);
+				//Sleep(20);
 			//}
 			//Sleep(500);
 		}
 		catch (HException& e)
 		{
+			//"HALCON error #5307: Image acquisition: wrong resolution chosen"
 			QString error = e.ErrorMessage().Text();
 			if (!m_bIsStop)
 			{
-				qDebug() << m_CameraId << ": " << error <<"\n";
+				qDebug() << m_CameraId << ": " << error << "\n";
+				qDebug() << "Camere enter exception error" << ": " << error << "\n";
+
+				{
+					m_pGrabber->SetFramegrabberParam("ExposureTime", m_exposureTime);
+
+					Image = m_pGrabber->GrabImage();
+
+					emit grab_correct_image(1);
+					emit signal_image(&Image);
+				
+					QueueSaveImage(Image, m_MaxNum);
+				}
+
 				continue;
 
 			}		

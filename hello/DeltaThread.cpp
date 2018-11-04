@@ -273,7 +273,7 @@ void Delta_Thread::run()
 
 int Delta_Thread::writeData(const char *data, int size)
 {
-	qDebug() << "lastest writeData: " << data;
+	//qDebug() << "lastest writeData: " << data;
 	
 	int len = 0;
 	forever
@@ -315,7 +315,7 @@ bool Delta_Thread::receiveData()
 			
 			if (m_total_data[0] == ':' && m_total_data[m_total_data.size() - 1] == '\n')
 			{
-				qDebug() << "lastest receiveData: "<<m_total_data;
+				//qDebug() << "lastest receiveData: "<<m_total_data;
 				if (m_QueryMode == OneQueryToDefalutQuene)
 				{
 					if (m_Add_Queue.size() > 0)
