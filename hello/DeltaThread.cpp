@@ -5,7 +5,8 @@
 #include "ConstParam.h"
 
 QSerialPort* Delta_Thread::m_SerialPort = nullptr;
-std::atomic<std::string> Delta_Thread::m_write_string = "";
+//std::atomic<std::string> Delta_Thread::m_write_string = "";
+std::string Delta_Thread::m_write_string2 = "";
 std::atomic<bool> Delta_Thread::m_bIsStop = false;
 std::queue<std::string> Delta_Thread::m_Add_Queue;
 std::queue<std::string> Delta_Thread::m_Default_Queue;
@@ -38,13 +39,15 @@ void Delta_Thread::InitSerialPortInfo(const char* PortName, int BaudRate, QSeria
 
 void Delta_Thread::setWriteInfo(const char* wirteInfo)
 {
-	m_write_string = Delta_Ascii_CR(wirteInfo);
+	//m_write_string = Delta_Ascii_CR(wirteInfo);
+	m_write_string2 = Delta_Ascii_CR(wirteInfo);
 
 }
 
 void Delta_Thread::setWriteInfo(const std::string& Slave, const std::string& Function_Code, const std::string& Start_Address, const std::string& Other_Info)
 {
-	m_write_string = Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info);
+	//m_write_string = Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info);
+	m_write_string2 = Delta_Ascii_CR(Slave + Function_Code + Start_Address + Other_Info);
 
 }
 
@@ -196,7 +199,8 @@ void Delta_Thread::run()
 
 				if (!m_Add_Queue.empty())
 				{
-					m_write_string = m_Add_Queue.front();
+					//m_write_string = m_Add_Queue.front();
+					m_write_string2 = m_Add_Queue.front();
 					m_Add_Queue.pop();
 				}
 				break;
@@ -210,8 +214,10 @@ void Delta_Thread::run()
 					return;
 				}
 				
-				m_write_string = m_Default_Queue.front();
-				m_Default_Queue.push(m_write_string._My_val);
+				//m_write_string = m_Default_Queue.front();
+				m_write_string2 = m_Default_Queue.front();
+				//m_Default_Queue.push(m_write_string._My_val);
+				m_Default_Queue.push(m_write_string2);
 				m_Default_Queue.pop();
 				
 				break;
@@ -223,7 +229,8 @@ void Delta_Thread::run()
 				}
 				else
 				{
-					m_write_string = m_Add_Queue.front();
+					//m_write_string = m_Add_Queue.front();
+					m_write_string2 = m_Add_Queue.front();
 					m_Add_Queue.pop();
 				}
 				
@@ -232,20 +239,26 @@ void Delta_Thread::run()
 			case OneQuery:
 				if (!m_Add_Queue.empty())
 				{
-					m_write_string = m_Add_Queue.front();
+					//m_write_string = m_Add_Queue.front();
+					m_write_string2 = m_Add_Queue.front();
 					m_Add_Queue.pop();
 				}
 				else
-					m_write_string = "";
+				{
+					//m_write_string = "";
+					m_write_string2 = "";
+				}
 				break;
 
 			default:
 				break;
 		}
 
-		if (!(m_write_string._My_val == ""))
+		//if (!(m_write_string._My_val == ""))
+		if (!(m_write_string2 == ""))
 		{
-			writeData(m_write_string._My_val.c_str(), m_write_string._My_val.length());
+			//writeData(m_write_string._My_val.c_str(), m_write_string._My_val.length());
+			writeData(m_write_string2.c_str(), m_write_string2.length());
 			m_SerialPort->waitForReadyRead(500);
 			receiveData();
 			m_SerialPort->clear();		
@@ -428,7 +441,8 @@ Delta_Thread::~Delta_Thread()
 	std::queue<std::string> empty2;
 	swap(empty, m_Default_Queue);
 
-	m_write_string._My_val.clear();
+	//m_write_string._My_val.clear();
+	m_write_string2.clear();
 	m_bIsOneMode = false;
 
 	qDebug() << "~Delta_Thread";

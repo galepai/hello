@@ -847,7 +847,7 @@ void CHH::DetectDiameter (HObject ho_Image, HObject *ho_InnerTorenceCircle, HObj
 					HTuple(hv_AreaCenterRowsOut[hv_Index-1]), HTuple(hv_AreaCenterColumsOut[hv_Index-1]), 
 					"red", "true");
 				(*hv_IsBadProduce) = 1;
-				(*hv_ErrorNum)++;
+				++(*hv_ErrorNum);
 			}
 			else if (0 != (HTuple((*hv_pcDistanceMaxs)[hv_Index-1])>(hv_StandDiameterMM+hv_TorenceMM)))
 			{
@@ -855,7 +855,7 @@ void CHH::DetectDiameter (HObject ho_Image, HObject *ho_InnerTorenceCircle, HObj
 					HTuple(hv_AreaCenterRowsOut[hv_Index-1]), HTuple(hv_AreaCenterColumsOut[hv_Index-1]), 
 					"blue", "true");
 				(*hv_IsBadProduce) = 1;
-				(*hv_ErrorNum)++;
+				++(*hv_ErrorNum);
 			}
 			else
 			{
